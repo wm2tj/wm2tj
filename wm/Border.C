@@ -685,8 +685,12 @@ void Border::resizeTab(int h)
     }
 
     int prevTabHeight = m_tabHeight;
-    fixTabHeight(h);
-    if (m_tabHeight == prevTabHeight) return;
+    fixTabHeight(h);	// also reloads the label from the client
+    if (m_tabHeight == prevTabHeight) {
+	// same height: X sends no Expose, so paint the new label here
+	drawLabel();
+	return;
+    }
 
     XWindowChanges wc;
     wc.height = m_tabHeight + 2 + m_tabWidth;
@@ -757,6 +761,7 @@ void Border::resizeTab(int h)
 	     ShapeUnion, YXBanded);
     }
     noBorderClip();
+    drawLabel();	// a shrinking tab gets no Expose either
 }
 
 
@@ -1024,6 +1029,7 @@ void Border::configure(int x, int y, int w, int h,
 	    XConfigureWindow(display(), m_tab, mask, &wc);
 	    shapeTab(w, h);
 	}
+	drawLabel();	// fixTabHeight reloaded the label; no Expose if the tab kept its size
 
 	m_prevW = w;
 	m_prevH = h;
