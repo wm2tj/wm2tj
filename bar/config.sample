@@ -1,0 +1,83 @@
+# ~/.config/wm2tj-bar/config — wm2tj-bar の設定 (書式は ~/.wm2rc と同じ「キー 値」)
+# 反映: pkill -HUP -x wm2tj-bar
+#
+# 色・高さ・フォントは ~/.wm2rc (tab_width / tab_gloss / tab_foreground /
+# borders / button_background / font) を自動で読むので、
+# ふつうはここに書かなくてよい。書いた値は ~/.wm2rc より優先される。
+
+# height          28          # 既定は tab_width + 2 (wm2tj のタブと同じ太さ)
+# tab_label       mylaptop     # 左端のタブの文字 (既定はホスト名、none で文字なし)
+# tab_length      120         # 左端のタブの直線部分の長さ (既定は文字に合わせた長さ)
+# font            "Noto Sans CJK JP:style=Bold:pixelsize=13"
+# menu_font       "Noto Sans CJK JP:pixelsize=14"
+# gloss           "#2a7de1"   # none で光沢なしの単色 (background の色)
+# bar_background  black       # タブより右の地の色
+# text            white       # 右側の文字の色
+# 前面のアプリのボタン。既定はグレーの単色に、タブの色の細い線で囲む
+# (タブと同じ青だと左端のタブと続いて見え、タブが目立たなくなるため)
+# task_gloss      "#53575f"   # theme でタブと同じ色
+# task_style      flat        # gloss でタブと同じ光沢 (線は付かない)
+
+# 時計 (strftime の書式)
+# clock_format    "%H:%M"
+# clock_format    "%m/%d(%a) %H:%M"
+
+# セッションメニューのコマンド
+# lock_command      xsecurelock
+# logout_command    "pkill -TERM -x wm2tj"
+# (既定: systemctl があればそれ、無ければ elogind の loginctl。Void/Alpine/Gentoo/Devuan 向け)
+# suspend_command   "systemctl suspend"
+# reboot_command    "systemctl reboot"
+# poweroff_command  "systemctl poweroff"
+
+# Terminal=true のアプリを開く端末 (既定: $TERMINAL、無ければ xfce4-terminal, gnome-terminal,
+#  konsole, ..., xterm の順で入っているもの。-e で開くので -e を受ける端末を書く)
+# terminal        x-terminal-emulator
+
+# yes で ■ メニューのお気に入りを wm2tj の右クリックメニューと共有する
+# (~/.config/wm2tj/favorites を読み書きする。"名前" コマンド の行も出す。
+#  そのファイルがまだ無ければ自分のお気に入りを出し、最初の変更で作る)
+# sync_wm2tj      no
+# 共有中にお気に入りを変えたあと wm2tj のメニューを作り直すコマンド
+# (既定: PATH → ~/.local/bin → /usr/local/bin の wm2-menu-gen を実行して wm2tj に HUP)
+# wm2tj_menu_command  "wm2-menu-gen && pkill -HUP -x wm2tj"
+
+# 電源まわり (xfce4-power-manager などの電源管理ソフトを使わないとき)
+# 明るさキー: 1 回で変える割合 (%)。0 でキーを取らない (別のソフトに任せる)
+# brightness_step 10
+# backlight       intel_backlight   # 既定は /sys/class/backlight の最初のもの
+# 電源をつないだとき / バッテリーのときの power-profiles-daemon のプロファイル
+# (power-saver / balanced / performance)。書かなければ切り替えない
+# profile_on_ac          balanced
+# profile_on_battery     power-saver
+# 画面を消すまでの分 (DPMS)。0 で消さない。書かなければ触らない
+# screen_off_on_ac       15
+# screen_off_on_battery  10
+
+# Wi-Fi メニューの「ネットワークの設定…」で開くもの。空 ("") で項目を出さない
+# wifi_settings_command  nm-connection-editor
+
+# Bluetooth メニューの「Bluetooth の設定…」で開くもの。空 ("") で項目を出さない
+# bluetooth_settings_command  blueman-manager
+
+# 音量キー・スピーカーのホイール: 1 回で変える割合 (%)。0 でキーを取らない
+# (別のソフトに任せる)。100% より上には上げない
+# volume_step     5
+# 音のメニューの「サウンドの設定…」で開くもの。空 ("") で項目を出さない
+# sound_settings_command  pavucontrol
+
+# 入力メソッドの表示。auto (既定) は動いているものを fcitx5 → IBus → XKB の順に探す。
+# fcitx5 / ibus / xkb で決め打ち、none で出さない。
+# xkb は IME を使わずに配列を複数使うとき (setxkbmap -layout us,ru など。1 つだけなら出ない)
+# input_method    auto
+# IBus のメニューの「入力メソッドの設定…」で開くもの。空 ("") で項目を出さない
+# ime_settings_command  ibus-setup
+
+# システムトレイ (XEmbed)。no でトレイにならない (stalonetray など別のトレイを使うとき)。
+# 別のトレイがもう動いていれば、yes でもトレイにはならない
+# tray            yes
+# トレイに来ても出さないアイコン。WM_CLASS の名前 (xprop WM_CLASS で見える、どちらの半分でも可)
+# を空白区切りで。バーと同じものを出すアプリ (nm-applet など) を隠すとき。既定は空 (全部出す)。
+# 入力メソッド自身のアイコン (IBus の ibus-ui-gtk、fcitx5 の fcitx) は、バーが入力メソッドを
+# 出している間は書かなくても隠れる (input_method none のときはトレイに出る)
+# tray_hide       nm-applet blueman-tray

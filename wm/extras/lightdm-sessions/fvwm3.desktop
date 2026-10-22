@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=FVWM3（試験用）
+Name[ja]=FVWM3（試験用）
+Keywords=Fvwm3 Window Manager
+Comment=F? Virtual Window Manager
+Icon=/usr/share/fvwm3/default-config/images/fvwm-logo-small.png
+Type=Application
+DesktopNames=FVWM3;FVWM;
+Exec=/usr/bin/fvwm3

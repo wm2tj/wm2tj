@@ -1,0 +1,16 @@
+/* lightdm-gtk-greeter: make the session chooser stand out (2026-10-02) */
+#session_menuitem {
+  background-color: #FFCB00;
+  color: #000000;
+  border-radius: 4px;
+  padding: 2px 10px;
+  margin: 2px 6px;
+}
+#session_menuitem:hover,
+#session_menuitem:checked {
+  background-color: #FFE066;
+}
+#session_menuitem image {
+  color: #000000;
+  -gtk-icon-transform: scale(1.4);
+}

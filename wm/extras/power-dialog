@@ -1,0 +1,251 @@
+#!/usr/bin/env python3
+# Full-screen dimmed overlay asking what to do with the session.
+# Usage: power-dialog [--halt|--reboot|--suspend|--hibernate|--logout]
+# The given action is preselected. Prints the chosen option (e.g.
+# "--halt") and exits 0; exits 1 on cancel (Esc, click outside).
+# session-logout --ask calls this and falls back to zenity on any
+# other exit status.
+#
+# Needs python3, PyGObject and GTK 3. Text domain "wm2tj".
+import gettext, sys, os, socket, time
+try:
+    import gi
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gtk, Gdk, GLib
+except (ImportError, ValueError) as e:
+    sys.exit(f"{sys.argv[0]}: needs PyGObject with GTK 3 (python3-gi, python-gobject, py3-gobject3): {e}")
+
+TEXTDOMAIN = "wm2tj"
+LOCALEDIR = "@LOCALEDIR@"	# filled in by make install
+if LOCALEDIR.startswith("@"):
+    LOCALEDIR = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                             "..", "share", "locale")
+gettext.bindtextdomain(TEXTDOMAIN, LOCALEDIR)
+gettext.textdomain(TEXTDOMAIN)
+_ = gettext.gettext
+
+# (option, button label, icon, title question)
+ACTIONS = [
+    ("--halt",    _("Shut Down"), "system-shutdown-symbolic",     _("Shut down?")),
+    ("--reboot",  _("Restart"),   "system-reboot-symbolic",       _("Restart?")),
+    ("--suspend", _("Suspend"),   "weather-clear-night-symbolic", _("Suspend?")),
+    ("--logout",  _("Log Out"),   "system-log-out-symbolic",      _("Log out?")),
+]
+HIBERNATE = ("--hibernate", _("Hibernate"), "drive-harddisk-symbolic", _("Hibernate?"))
+
+CSS = b"""
+#overlay { background-color: rgba(8, 10, 16, 0.62); }
+#card {
+    background-color: rgba(30, 33, 42, 0.96);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+#title { color: #f2f3f7; font-size: 17px; font-weight: 600; }
+#sub   { color: rgba(242, 243, 247, 0.55); font-size: 12px; }
+#hint  { color: rgba(242, 243, 247, 0.35); font-size: 11px; }
+.act {
+    background: rgba(255, 255, 255, 0.06);
+    border: none; box-shadow: none; outline: none;
+    border-radius: 999px;
+    min-width: 44px; min-height: 44px; padding: 0;
+    color: #e8e9ee;
+    transition: all 160ms ease-out;
+}
+.act:hover { background: rgba(255, 255, 255, 0.14); }
+.act.sel { background: #3d7eff; color: white;
+           box-shadow: 0 0 0 3px rgba(61, 126, 255, 0.28); }
+.act.sel.danger { background: #e5484d;
+           box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.28); }
+.lbl { color: rgba(242, 243, 247, 0.70); font-size: 12px; }
+.lbl.sel { color: #ffffff; font-weight: 600; }
+#cancel {
+    background: transparent; border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: none; color: rgba(242,243,247,0.8);
+    border-radius: 10px; padding: 4px 16px;
+}
+#cancel:hover { background: rgba(255,255,255,0.08); }
+"""
+
+
+def uptime_text():
+    try:
+        s = int(float(open("/proc/uptime").read().split()[0]))
+    except OSError:
+        return ""
+    h, m = s // 3600, s // 60 % 60
+    if h >= 24:
+        # TRANSLATORS: uptime, days and hours
+        return _("up %dd %dh") % (h // 24, h % 24)
+    # TRANSLATORS: uptime, hours and minutes / minutes
+    return _("up %dh %dm") % (h, m) if h else _("up %dm") % m
+
+
+class Dialog(Gtk.Window):
+    def __init__(self, default):
+        super().__init__(type=Gtk.WindowType.POPUP)
+        self.result = None
+        actions = list(ACTIONS)
+        if default == "--hibernate":
+            actions.insert(3, HIBERNATE)
+        self.actions = actions
+        self.sel = next((i for i, a in enumerate(actions) if a[0] == default), 0)
+
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual and screen.is_composited():
+            self.set_visual(visual)
+        self.set_app_paintable(True)
+        mon = screen.get_display().get_monitor_at_point(0, 0).get_geometry()
+        disp = screen.get_display()
+        # Cover every monitor.
+        x0 = y0 = 0; x1 = y1 = 0
+        for i in range(disp.get_n_monitors()):
+            g = disp.get_monitor(i).get_geometry()
+            x0, y0 = min(x0, g.x), min(y0, g.y)
+            x1, y1 = max(x1, g.x + g.width), max(y1, g.y + g.height)
+        self.move(x0, y0)
+        self.set_default_size(x1 - x0, y1 - y0)
+
+        prov = Gtk.CssProvider(); prov.load_from_data(CSS)
+        Gtk.StyleContext.add_provider_for_screen(
+            screen, prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        # Overlay background; clicks on it cancel.
+        bg = Gtk.EventBox(name="overlay")
+        bg.connect("button-press-event", self.on_bg_click)
+        self.add(bg)
+
+        # Put the card on the monitor containing the pointer.
+        ptr = disp.get_default_seat().get_pointer().get_position()
+        mon = disp.get_monitor_at_point(ptr.x, ptr.y).get_geometry()
+        fixed = Gtk.Fixed()
+        bg.add(fixed)
+
+        card = Gtk.EventBox(name="card")
+        card.connect("button-press-event", lambda *a: True)  # swallow
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
+                      margin_top=20, margin_bottom=16, margin_start=24, margin_end=24)
+        card.add(box)
+
+        self.title = Gtk.Label(name="title")
+        box.pack_start(self.title, False, False, 0)
+        sub = Gtk.Label(name="sub",
+                        label=f"{os.environ.get('USER', '')}@{socket.gethostname()}  ·  {uptime_text()}")
+        box.pack_start(sub, False, False, 0)
+
+        row = Gtk.Box(spacing=14, halign=Gtk.Align.CENTER, margin_top=18, margin_bottom=14)
+        box.pack_start(row, False, False, 0)
+        self.buttons = []
+        for i, (opt, name, icon, question) in enumerate(actions):
+            col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            b = Gtk.Button(can_focus=False, halign=Gtk.Align.CENTER)
+            b.get_style_context().add_class("act")
+            if opt in ("--halt", "--reboot"):
+                b.get_style_context().add_class("danger")
+            img = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.DND)
+            img.set_pixel_size(16)
+            b.add(img)
+            b.connect("clicked", self.on_click, i)
+            b.connect("enter-notify-event", lambda w, e, i=i: self.select(i))
+            lbl = Gtk.Label(label=name)
+            lbl.get_style_context().add_class("lbl")
+            col.pack_start(b, False, False, 0)
+            col.pack_start(lbl, False, False, 0)
+            row.pack_start(col, False, False, 0)
+            self.buttons.append((b, lbl))
+
+        bottom = Gtk.Box(spacing=12)
+        hint = Gtk.Label(name="hint", label=_("← → select   Enter run   Esc cancel"),
+                         halign=Gtk.Align.START, hexpand=True)
+        cancel = Gtk.Button(name="cancel", label=_("Cancel"), can_focus=False)
+        cancel.connect("clicked", lambda *a: self.finish(None))
+        bottom.pack_start(hint, True, True, 0)
+        bottom.pack_end(cancel, False, False, 0)
+        box.pack_start(bottom, False, False, 0)
+
+        fixed.put(card, 0, 0)
+        card.show_all()
+        w = max(card.get_preferred_width()[1], 340)
+        h = card.get_preferred_height()[1]
+        card.set_size_request(w, -1)
+        fixed.move(card, mon.x - x0 + (mon.width - w) // 2,
+                   mon.y - y0 + (mon.height - h) // 2 - mon.height // 20)
+
+        self.connect("key-press-event", self.on_key)
+        self.select(self.sel)
+
+        self.set_opacity(0.0)  # faded in by fade_in()
+        self.t0 = None
+        self.show_all()
+        self.get_window().set_cursor(None)
+        GLib.idle_add(self.grab)
+        self.add_tick_callback(self.fade_in)
+
+    def fade_in(self, widget, clock):
+        t = clock.get_frame_time() / 1e6
+        if self.t0 is None:
+            self.t0 = t
+        p = min(1.0, (t - self.t0) / 0.18)
+        self.set_opacity(1 - (1 - p) ** 3)
+        return p < 1.0
+
+    def grab(self):
+        seat = Gdk.Display.get_default().get_default_seat()
+        for n in range(20):
+            st = seat.grab(self.get_window(), Gdk.SeatCapabilities.ALL,
+                           True, None, None, None)
+            if st == Gdk.GrabStatus.SUCCESS:
+                return False
+            time.sleep(0.05)
+        return False
+
+    def select(self, i):
+        self.sel = i
+        for j, (b, lbl) in enumerate(self.buttons):
+            for w in (b, lbl):
+                ctx = w.get_style_context()
+                (ctx.add_class if j == i else ctx.remove_class)("sel")
+        self.title.set_text(self.actions[i][3])
+        return False
+
+    def on_click(self, btn, i):
+        self.finish(self.actions[i][0])
+
+    def on_bg_click(self, w, ev):
+        self.finish(None)
+        return True
+
+    def on_key(self, w, ev):
+        k = ev.keyval
+        n = len(self.actions)
+        if k == Gdk.KEY_Escape:
+            self.finish(None)
+        elif k in (Gdk.KEY_Return, Gdk.KEY_KP_Enter, Gdk.KEY_space):
+            self.finish(self.actions[self.sel][0])
+        elif k in (Gdk.KEY_Left, Gdk.KEY_h, Gdk.KEY_ISO_Left_Tab):
+            self.select((self.sel - 1) % n)
+        elif k in (Gdk.KEY_Right, Gdk.KEY_l, Gdk.KEY_Tab):
+            self.select((self.sel + 1) % n)
+        return True
+
+    def finish(self, result):
+        self.result = result
+        Gdk.Display.get_default().get_default_seat().ungrab()
+        Gtk.main_quit()
+
+
+def main():
+    default = next((a for a in sys.argv[1:] if a in
+                    ("--halt", "--reboot", "--suspend", "--hibernate", "--logout")),
+                   "--halt")
+    d = Dialog(default)
+    Gtk.main()
+    if d.result is None:
+        sys.exit(1)
+    print(d.result)
+
+
+if __name__ == "__main__":
+    main()

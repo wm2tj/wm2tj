@@ -1,0 +1,758 @@
+#!/usr/bin/env python3
+# wm2tj-bar-settings - a settings window for wm2tj-bar.
+#
+# Edits ~/.config/wm2tj-bar/config. "Apply" rewrites only the values of the
+# keys that changed (comments and the other lines stay as they are), adds the
+# keys that are missing at the end, comments out the keys set back to their
+# default, and sends the bar SIGHUP. Before the first change the file is
+# copied once to config.bak-wm2tj-bar-settings.
+#
+# Needs python3, PyGObject and GTK 3. The bar itself does not need this.
+#
+# Copyright (c) 2026 tetsu. MIT licence, see COPYING.
+import gettext, os, re, shutil, socket, subprocess, sys, time
+
+try:
+    import gi
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gtk, Gdk, GLib, Pango
+except (ImportError, ValueError) as e:
+    sys.exit(f"{sys.argv[0]}: needs PyGObject with GTK 3 (python3-gi, python-gobject, py3-gobject3): {e}")
+
+PROGNAME = "wm2tj-bar"
+LOCALEDIR = "@LOCALEDIR@"	# filled in by make install
+if LOCALEDIR.startswith("@"):
+    LOCALEDIR = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                             "..", "share", "locale")
+gettext.bindtextdomain(PROGNAME, LOCALEDIR)
+gettext.textdomain(PROGNAME)
+_ = gettext.gettext
+
+
+def N_(s):
+    return s
+
+CONFIG_DIR = os.path.join(os.environ.get("XDG_CONFIG_HOME") or
+                          os.path.expanduser("~/.config"), PROGNAME)
+CONFIG = os.path.join(CONFIG_DIR, "config")
+BACKUP = CONFIG + ".bak-wm2tj-bar-settings"
+WM2RC = os.path.expanduser("~/.wm2rc")
+
+# the bar's own defaults (loadConfig in wm2tj-bar.c)
+DEFAULTS = {
+    "font": "Noto Sans CJK JP:style=Bold:pixelsize=13",
+    "menu_font": "Noto Sans CJK JP:pixelsize=14",
+    "gloss": "#2a7de1",
+    "background": "gray80",
+    "foreground": "white",
+    "borders": "white",
+    "button_background": "#1a4f9c",
+    "bar_background": "black",
+    "text": "white",
+    "task_gloss": "#53575f",
+    "task_style": "flat",
+    "clock_format": "%H:%M",
+    "lock_command": "xsecurelock",
+    "logout_command": "pkill -TERM -x wm2tj",
+    # the bar's own defaults: systemd, else elogind's loginctl; terminal "" = $TERMINAL or the first found
+    "suspend_command": ("systemctl" if shutil.which("systemctl") else "loginctl") + " suspend",
+    "reboot_command": ("systemctl" if shutil.which("systemctl") else "loginctl") + " reboot",
+    "poweroff_command": ("systemctl" if shutil.which("systemctl") else "loginctl") + " poweroff",
+    "terminal": "",
+    "brightness_step": "10",
+    "backlight": "",
+    "profile_on_ac": "balanced",
+    "profile_on_battery": "power-saver",
+    "screen_off_on_ac": "15",
+    "screen_off_on_battery": "10",
+    "wifi_settings_command": "nm-connection-editor",
+    "bluetooth_settings_command": "blueman-manager",
+    "volume_step": "5",
+    "sound_settings_command": "pavucontrol",
+    "input_method": "auto",
+    "ime_settings_command": "ibus-setup",
+    "tray": "yes",
+    "tray_hide": "",
+    "sync_wm2tj": "no",
+}
+
+# the bar takes these from ~/.wm2rc when its own config does not set them
+FROM_WM2RC = {
+    "font": "font",
+    "gloss": "tab_gloss",
+    "background": "tab_background",
+    "foreground": "tab_foreground",
+    "borders": "borders",
+    "button_background": "button_background",
+}
+
+# applications that show in the tray what the bar already shows (the input
+# method's own icon needs no entry: the bar hides it while it shows one)
+KNOWN_TRAY = [
+    ("nm-applet", N_("NetworkManager applet (Wi-Fi)")),
+    ("blueman-tray", N_("Blueman (Bluetooth)")),
+]
+
+
+# ---- the config file ------------------------------------------------
+
+def split_line(line):
+    """(key, value, value start, value end) as the bar reads it, or None."""
+    m = re.match(r"\s*([^\s#]\S*)", line)
+    if not m:
+        return None
+    rest = line[m.end():]
+    i = len(rest) - len(rest.lstrip())
+    if i < len(rest) and rest[i] == '"':
+        j = rest.find('"', i + 1)
+        if j < 0:
+            j = len(rest.rstrip("\n"))
+            return m.group(1), rest[i + 1:j], m.end() + i, m.end() + j
+        return m.group(1), rest[i + 1:j], m.end() + i, m.end() + j + 1
+    v = rest[i:].split("#", 1)[0].rstrip()
+    return m.group(1), v, m.end() + i, m.end() + i + len(v)
+
+
+def quote(v):
+    v = v.replace('"', "")
+    if v == "" or re.search(r"[\s#]", v):
+        return '"%s"' % v
+    return v
+
+
+class ConfigFile:
+    def __init__(self, path):
+        self.path = path
+        self.reload()
+
+    def reload(self):
+        try:
+            with open(self.path, encoding="utf-8") as f:
+                self.lines = f.read().splitlines(keepends=True)
+        except FileNotFoundError:
+            self.lines = []
+
+    def entries(self):
+        for n, line in enumerate(self.lines):
+            e = split_line(line)
+            if e:
+                yield (n,) + e
+
+    def get(self, key):
+        val = None
+        for _n, k, v, _s, _e in self.entries():
+            if k == key:
+                val = v		# the last one wins, as in the bar
+        return val
+
+    def set(self, key, value):
+        last = None
+        for n, k, _v, s, e in self.entries():
+            if k == key:
+                last = (n, s, e)
+        if last:
+            n, s, e = last
+            line = self.lines[n]
+            self.lines[n] = line[:s] + quote(value) + line[e:]
+            return
+        if self.lines and not self.lines[-1].endswith("\n"):
+            self.lines[-1] += "\n"
+        self.lines.append("%-15s %s\n" % (key, quote(value)))
+
+    def unset(self, key):
+        for n, k, _v, _s, _e in list(self.entries()):
+            if k == key:
+                self.lines[n] = "# " + self.lines[n]
+
+    def save(self):
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        if os.path.exists(self.path) and not os.path.exists(BACKUP):
+            shutil.copy2(self.path, BACKUP)
+        tmp = self.path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write("".join(self.lines))
+        os.replace(tmp, self.path)
+
+
+def wm2rc_values():
+    vals = {}
+    try:
+        with open(WM2RC, encoding="utf-8") as f:
+            for line in f:
+                e = split_line(line)
+                if e:
+                    vals[e[0]] = e[1]
+    except OSError:
+        pass
+    return vals
+
+
+# ---- colours --------------------------------------------------------
+
+_X_COLOURS = None
+
+
+def x_colours():
+    global _X_COLOURS
+    if _X_COLOURS is None:
+        _X_COLOURS = {}
+        for p in ("/usr/share/X11/rgb.txt", "/etc/X11/rgb.txt"):
+            try:
+                with open(p) as f:
+                    for line in f:
+                        m = re.match(r"\s*(\d+)\s+(\d+)\s+(\d+)\s+(.+?)\s*$", line)
+                        if m:
+                            name = m.group(4).lower().replace(" ", "")
+                            _X_COLOURS[name] = tuple(int(m.group(i)) for i in (1, 2, 3))
+                break
+            except OSError:
+                pass
+    return _X_COLOURS
+
+
+def to_rgba(text):
+    rgba = Gdk.RGBA()
+    rgb = x_colours().get(text.lower().replace(" ", "")) if text else None
+    if rgb:
+        rgba.red, rgba.green, rgba.blue = (c / 255 for c in rgb)
+        rgba.alpha = 1
+    elif not (text and rgba.parse(text)):
+        rgba.parse("gray")
+    return rgba
+
+
+def to_hex(rgba):
+    return "#%02x%02x%02x" % tuple(round(c * 255) for c in (rgba.red, rgba.green, rgba.blue))
+
+
+# ---- fonts (Xft names <-> the font chooser) ------------------------
+
+def parse_xft(name):
+    """'Family:style=Bold:pixelsize=12' / 'Family-10' -> (family, style, size, unit)"""
+    parts = name.split(":")
+    head, props = parts[0], parts[1:]
+    size, unit = None, "pt"
+    m = re.match(r"(.*?)-(\d+(?:\.\d+)?)$", head)
+    if m:
+        head, size = m.group(1), float(m.group(2))
+    style = ""
+    for p in props:
+        k, _sep, v = p.partition("=")
+        if k == "style":
+            style = v
+        elif k == "pixelsize":
+            size, unit = float(v), "px"
+        elif k == "size":
+            size, unit = float(v), "pt"
+    return head.strip(), style, size or 10, unit
+
+
+def make_xft(family, style, size, unit):
+    s = family
+    if style and style.lower() not in ("regular", "normal", "book"):
+        s += ":style=" + style
+    n = int(size) if size == int(size) else size
+    s += (":pixelsize=%s" if unit == "px" else ":size=%s") % n
+    return s
+
+
+# ---- fields: each shows a value as text and gives it back ----------
+
+class TextField(Gtk.Entry):
+    def __init__(self, width=24, tip=None):
+        super().__init__(width_chars=width)
+        if tip:
+            self.set_tooltip_text(tip)
+
+    def set_text(self, text):
+        super().set_text(text)
+
+    def get_value(self):
+        return self.get_text()
+
+
+class NumberField(Gtk.Box):
+    def __init__(self, lo, hi, unit="", tip=None):
+        super().__init__(spacing=6)
+        self.spin = Gtk.SpinButton.new_with_range(lo, hi, 1)
+        self.pack_start(self.spin, False, False, 0)
+        if unit:
+            self.pack_start(Gtk.Label(label=unit), False, False, 0)
+        if tip:
+            self.set_tooltip_text(tip)
+
+    def set_text(self, text):
+        try:
+            self.spin.set_value(int(text))
+        except ValueError:
+            self.spin.set_value(0)
+
+    def get_value(self):
+        return str(self.spin.get_value_as_int())
+
+
+class ChoiceField(Gtk.ComboBoxText):
+    def __init__(self, choices):
+        super().__init__()
+        for value, label in choices:
+            self.append("=" + value, label)	# "=": ids may not be empty
+
+    def set_text(self, text):
+        if not self.set_active_id("=" + text):
+            self.append("=" + text, text)
+            self.set_active_id("=" + text)
+
+    def get_value(self):
+        return (self.get_active_id() or "=")[1:]
+
+
+class ColourField(Gtk.Box):
+    """A colour button and the value as written (white / #2a7de1 ...).
+    Left alone, the value keeps the way it was written."""
+    def __init__(self):
+        super().__init__(spacing=8)
+        self.button = Gtk.ColorButton()
+        self.label = Gtk.Label(xalign=0)
+        self.label.get_style_context().add_class("dim-label")
+        self.button.connect("color-set", self.on_set)
+        self.pack_start(self.button, False, False, 0)
+        self.pack_start(self.label, False, False, 0)
+
+    def set_text(self, text):
+        self.text = text
+        self.button.set_rgba(to_rgba(text))
+        self.label.set_text(text)
+
+    def on_set(self, *a):
+        self.text = to_hex(self.button.get_rgba())
+        self.label.set_text(self.text)
+
+    def get_value(self):
+        return self.text
+
+
+class GlossField(Gtk.Box):
+    """gloss: a colour, or none for a flat tab."""
+    def __init__(self):
+        super().__init__(spacing=12)
+        self.colour = ColourField()
+        self.flat = Gtk.CheckButton(label=_("Flat (no gloss)"))
+        self.flat.connect("toggled", lambda *a: self.colour.set_sensitive(not self.flat.get_active()))
+        self.pack_start(self.colour, False, False, 0)
+        self.pack_start(self.flat, False, False, 0)
+
+    def set_text(self, text):
+        self.flat.set_active(text == "none")
+        self.colour.set_text(DEFAULTS["gloss"] if text == "none" else text)
+
+    def get_value(self):
+        return "none" if self.flat.get_active() else self.colour.get_value()
+
+
+class TaskColourField(Gtk.Box):
+    """task_gloss: a colour, or theme for the tab's own colour."""
+    def __init__(self):
+        super().__init__(spacing=12)
+        self.colour = ColourField()
+        self.theme = Gtk.CheckButton(label=_("Same as the tab"))
+        self.theme.connect("toggled", lambda *a: self.colour.set_sensitive(not self.theme.get_active()))
+        self.pack_start(self.colour, False, False, 0)
+        self.pack_start(self.theme, False, False, 0)
+
+    def set_text(self, text):
+        self.theme.set_active(text == "theme")
+        self.colour.set_text(DEFAULTS["task_gloss"] if text == "theme" else text)
+
+    def get_value(self):
+        return "theme" if self.theme.get_active() else self.colour.get_value()
+
+
+class FontField(Gtk.Box):
+    """Family and style from the font chooser, the size in the unit it was written in."""
+    def __init__(self):
+        super().__init__(spacing=8)
+        self.button = Gtk.FontButton()
+        self.button.set_level(Gtk.FontChooserLevel.FAMILY | Gtk.FontChooserLevel.STYLE)
+        self.button.set_use_font(True)
+        self.size = Gtk.SpinButton.new_with_range(5, 72, 1)
+        self.unit = Gtk.Label()
+        self.pack_start(self.button, True, True, 0)
+        self.pack_start(self.size, False, False, 0)
+        self.pack_start(self.unit, False, False, 0)
+
+    def set_text(self, text):
+        self.original = text
+        family, style, size, self.u = parse_xft(text)
+        self.button.set_font("%s %s %d" % (family, style, size))
+        self.size.set_value(size)
+        self.unit.set_text(self.u)
+        self.start = (family, style, size)
+
+    def get_value(self):
+        fam = self.button.get_font_family()
+        face = self.button.get_font_face()
+        family = fam.get_name() if fam else self.start[0]
+        style = face.get_face_name() if face else self.start[1]
+        new = make_xft(family, style, self.size.get_value(), self.u)
+        if new == make_xft(*self.start, self.u):	# untouched: as it was written
+            return self.original
+        return new
+
+
+class ClockField(Gtk.Box):
+    """strftime format, with a few ready ones and a preview."""
+    FORMATS = ["%H:%M", "%H:%M:%S", "%m/%d %H:%M", "%m/%d(%a) %H:%M",
+               "%a %d %b %H:%M", "%Y-%m-%d %H:%M", "%I:%M %p"]
+
+    def __init__(self):
+        super().__init__(spacing=12)
+        self.combo = Gtk.ComboBoxText.new_with_entry()
+        for f in self.FORMATS:
+            self.combo.append_text(f)
+        self.preview = Gtk.Label(xalign=0)
+        self.preview.get_style_context().add_class("dim-label")
+        self.combo.connect("changed", lambda *a: self.update())
+        self.combo.set_tooltip_text(_("strftime format, see man strftime"))
+        self.pack_start(self.combo, False, False, 0)
+        self.pack_start(self.preview, False, False, 0)
+
+    def update(self):
+        try:
+            self.preview.set_text(time.strftime(self.get_value()))
+        except ValueError:
+            self.preview.set_text("")
+
+    def set_text(self, text):
+        self.combo.get_child().set_text(text)
+        self.update()
+
+    def get_value(self):
+        return self.combo.get_child().get_text()
+
+
+class TrayHideField(Gtk.Box):
+    """tray_hide: ticks for the usual duplicates, the rest as text."""
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self.ticks = []
+        for name, label in KNOWN_TRAY:
+            t = Gtk.CheckButton(label="%s  (%s)" % (_(label), name))
+            self.ticks.append((name, t))
+            self.pack_start(t, False, False, 0)
+        row = Gtk.Box(spacing=8)
+        row.pack_start(Gtk.Label(label=_("Others:")), False, False, 0)
+        self.others = Gtk.Entry(width_chars=24)
+        self.others.set_tooltip_text(
+            _("WM_CLASS names as xprop WM_CLASS shows them, separated by spaces"))
+        row.pack_start(self.others, True, True, 0)
+        self.pack_start(row, False, False, 0)
+
+    def set_text(self, text):
+        names = text.replace(",", " ").split()
+        lower = [n.lower() for n in names]
+        for name, t in self.ticks:
+            t.set_active(name in lower)
+        known = [n for n, _t in self.ticks]
+        self.others.set_text(" ".join(n for n in names if n.lower() not in known))
+
+    def get_value(self):
+        names = [n for n, t in self.ticks if t.get_active()]
+        names += self.others.get_text().replace(",", " ").split()
+        return " ".join(names)
+
+
+# ---- a setting: a field and "use the default" ----------------------
+
+class Setting:
+    def __init__(self, key, field, default_label):
+        self.key = key
+        self.field = field
+        self.default = Gtk.CheckButton(label=default_label)
+        self.default.connect("toggled", self.on_default)
+        self.default_value = ""
+
+    def on_default(self, *a):
+        on = self.default.get_active()
+        self.field.set_sensitive(not on)
+        if on:
+            self.field.set_text(self.default_value)
+
+    def load(self, value, default_value):
+        self.default_value = default_value
+        self.default.set_active(value is None)
+        self.field.set_text(default_value if value is None else value)
+        self.on_default()
+
+    def state(self):
+        """None: leave it to the default."""
+        return None if self.default.get_active() else self.field.get_value()
+
+
+class CheckSetting:
+    """A yes/no key whose default is no: ticked writes yes, unticked
+    leaves the key out."""
+    def __init__(self, key, label):
+        self.key = key
+        self.check = Gtk.CheckButton(label=label)
+
+    def load(self, value, default_value):
+        self.check.set_active((default_value if value is None else value)
+                              in ("yes", "true", "1"))
+
+    def state(self):
+        return "yes" if self.check.get_active() else None
+
+
+# ---- the window -----------------------------------------------------
+
+class SettingsWindow(Gtk.Window):
+    def __init__(self):
+        super().__init__(title=_("Top bar settings"))
+        self.set_default_size(620, -1)
+        self.set_border_width(10)
+        self.set_icon_name("preferences-desktop")
+        self.connect("destroy", Gtk.main_quit)
+        self.conf = ConfigFile(CONFIG)
+        self.settings = []
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.add(box)
+        nb = Gtk.Notebook()
+        nb.append_page(self.appearance_page(), Gtk.Label(label=_("Appearance")))
+        nb.append_page(self.menu_page(), Gtk.Label(label=_("Menu")))
+        nb.append_page(self.power_page(), Gtk.Label(label=_("Power")))
+        nb.append_page(self.devices_page(), Gtk.Label(label=_("Network and sound")))
+        nb.append_page(self.tray_page(), Gtk.Label(label=_("Tray")))
+        box.pack_start(nb, True, True, 0)
+
+        btns = Gtk.Box(spacing=6)
+        revert = Gtk.Button(label=_("Revert"))
+        revert.set_tooltip_text(_("Drop the changes not applied yet and read the file again"))
+        revert.connect("clicked", lambda *a: self.load())
+        apply = Gtk.Button(label=_("Apply"))
+        apply.get_style_context().add_class("suggested-action")
+        apply.connect("clicked", lambda *a: self.apply())
+        self.status = Gtk.Label(xalign=0, ellipsize=Pango.EllipsizeMode.START)
+        self.status.get_style_context().add_class("dim-label")
+        btns.pack_start(revert, False, False, 0)
+        btns.pack_start(self.status, True, True, 0)
+        btns.pack_end(apply, False, False, 0)
+        box.pack_start(btns, False, False, 0)
+
+        self.load()
+
+    # building pages
+    def page(self):
+        self.grid = Gtk.Grid(row_spacing=8, column_spacing=12, border_width=12)
+        self.row = 0
+        return self.grid
+
+    def heading(self, text):
+        lab = Gtk.Label(xalign=0)
+        lab.set_markup("<b>%s</b>" % GLib.markup_escape_text(text))
+        if self.row:
+            lab.set_margin_top(8)
+        self.grid.attach(lab, 0, self.row, 3, 1)
+        self.row += 1
+
+    def note(self, text):
+        lab = Gtk.Label(label=text, xalign=0, wrap=True, max_width_chars=70)
+        lab.get_style_context().add_class("dim-label")
+        self.grid.attach(lab, 0, self.row, 3, 1)
+        self.row += 1
+
+    def add_setting(self, key, field, label, default_label=None):
+        s = Setting(key, field, default_label or _("Default"))
+        self.grid.attach(Gtk.Label(label=label, xalign=1), 0, self.row, 1, 1)
+        field.set_hexpand(True)
+        field.set_halign(Gtk.Align.START if not isinstance(field, (TextField, FontField))
+                         else Gtk.Align.FILL)
+        self.grid.attach(field, 1, self.row, 1, 1)
+        self.grid.attach(s.default, 2, self.row, 1, 1)
+        self.settings.append(s)
+        self.row += 1
+
+    def appearance_page(self):
+        g = self.page()
+        same = _("Same as wm2tj")
+        self.heading(_("Tab at the left end"))
+        self.add_setting("tab_label", TextField(16, _("none: no text")), _("Label"), _("Host name"))
+        self.add_setting("tab_length", NumberField(0, 1000, "px", _("0: fit the label")),
+                 _("Length"), _("Fit the label"))
+        self.add_setting("gloss", GlossField(), _("Gloss"), same)
+        self.add_setting("background", ColourField(), _("Flat colour"), same)
+        self.add_setting("foreground", ColourField(), _("Label colour"), same)
+        self.add_setting("button_background", ColourField(), _("Button"), same)
+        self.add_setting("borders", ColourField(), _("Border"), same)
+        self.heading(_("Bar"))
+        self.add_setting("height", NumberField(8, 64, "px"), _("Height"), same)
+        self.add_setting("bar_background", ColourField(), _("Background"))
+        self.add_setting("text", ColourField(), _("Text colour"))
+        self.add_setting("task_gloss", TaskColourField(), _("Front application"))
+        self.add_setting("task_style", ChoiceField([
+            ("flat", _("One colour, with a thin line of the tab colour")),
+            ("gloss", _("Gloss, like the tab"))]), _("Its look"))
+        self.add_setting("font", FontField(), _("Font"), same)
+        self.add_setting("menu_font", FontField(), _("Menu font"))
+        self.heading(_("Clock"))
+        self.add_setting("clock_format", ClockField(), _("Format"))
+        self.note(_("\"Same as wm2tj\" takes the value from ~/.wm2rc, "
+                    "so the bar follows the window tabs."))
+        return g
+
+    def menu_page(self):
+        g = self.page()
+        self.heading(_("Favourites"))
+        sync = CheckSetting("sync_wm2tj", _("Sync the menu with wm2tj"))
+        self.grid.attach(sync.check, 0, self.row, 3, 1)
+        self.settings.append(sync)
+        self.row += 1
+        self.note(_("Ticked: the favourites at the top of the menu are the ones of the "
+                    "wm2tj right-click menu (~/.config/wm2tj/favorites), so a favourite "
+                    "added or removed in the bar or in wm2tj shows in both. Unticked: "
+                    "the bar keeps its own (~/.config/wm2tj-bar/favorites)."))
+        self.heading(_("Session menu"))
+        self.add_setting("lock_command", TextField(), _("Lock"))
+        self.add_setting("logout_command", TextField(), _("Log out"))
+        self.add_setting("suspend_command", TextField(), _("Suspend"))
+        self.add_setting("reboot_command", TextField(), _("Restart"))
+        self.add_setting("poweroff_command", TextField(), _("Shut down"))
+        self.heading(_("Applications"))
+        self.add_setting("terminal", TextField(), _("Terminal"))
+        self.note(_("The terminal opens applications marked Terminal=true."))
+        return g
+
+    def power_page(self):
+        g = self.page()
+        leave = _("Leave alone")
+        self.heading(_("Brightness keys"))
+        self.add_setting("brightness_step", NumberField(0, 50, "%", _("0: leave the keys to another program")),
+                 _("Step"))
+        lights = [("", _("The first one"))]
+        try:
+            lights += [(n, n) for n in sorted(os.listdir("/sys/class/backlight"))]
+        except OSError:
+            pass
+        self.add_setting("backlight", ChoiceField(lights), _("Backlight"))
+        self.heading(_("Power profile (power-profiles-daemon)"))
+        profiles = [("power-saver", _("Power saver")), ("balanced", _("Balanced")),
+                    ("performance", _("Performance"))]
+        self.add_setting("profile_on_ac", ChoiceField(profiles), _("On AC"), leave)
+        self.add_setting("profile_on_battery", ChoiceField(profiles), _("On battery"), leave)
+        self.heading(_("Turn the screen off after"))
+        tip = _("0: never")
+        self.add_setting("screen_off_on_ac", NumberField(0, 240, _("min"), tip), _("On AC"), leave)
+        self.add_setting("screen_off_on_battery", NumberField(0, 240, _("min"), tip),
+                 _("On battery"), leave)
+        self.note(_("\"Leave alone\" lets another power manager or the system decide."))
+        return g
+
+    def devices_page(self):
+        g = self.page()
+        empty = _("Empty: no such item in the menu")
+        self.heading(_("Wi-Fi"))
+        self.add_setting("wifi_settings_command", TextField(tip=empty), _("Settings program"))
+        self.heading(_("Bluetooth"))
+        self.add_setting("bluetooth_settings_command", TextField(tip=empty), _("Settings program"))
+        self.heading(_("Sound"))
+        self.add_setting("volume_step", NumberField(0, 50, "%", _("0: leave the keys to another program")),
+                 _("Volume step"))
+        self.add_setting("sound_settings_command", TextField(tip=empty), _("Settings program"))
+        self.heading(_("Input method"))
+        self.add_setting("input_method", ChoiceField([
+            ("auto", _("Automatic (the one running)")), ("fcitx5", "Fcitx 5"), ("ibus", "IBus"),
+            ("xkb", _("Keyboard layouts (XKB)")), ("none", _("Do not show"))]), _("Indicator"))
+        self.add_setting("ime_settings_command", TextField(tip=empty), _("Settings program (IBus)"))
+        self.note(_("The settings program opens from the last item of each menu."))
+        return g
+
+    def tray_page(self):
+        g = self.page()
+        self.heading(_("System tray"))
+        self.add_setting("tray", ChoiceField([("yes", _("On")), ("no", _("Off"))]), _("Tray"))
+        self.add_setting("tray_hide", TrayHideField(), _("Hide these icons"))
+        self.note(_("Hidden icons stay docked, so the applications keep running. "
+                    "Use it for icons that repeat what the bar already shows. "
+                    "Off: for another tray such as stalonetray."))
+        return g
+
+    # values
+    def default_for(self, key, rc):
+        if key in FROM_WM2RC and FROM_WM2RC[key] in rc:
+            return rc[FROM_WM2RC[key]]
+        if key == "height":		# as the bar works it out, roughly
+            try:
+                tw = int(rc.get("tab_width", "32"))
+            except ValueError:
+                tw = 32
+            _f, _s, size, unit = parse_xft(rc.get("font", DEFAULTS["font"]))
+            px = size if unit == "px" else size * 96 / 72
+            return str(max(tw, round(px * 1.45) + 4) + 2)
+        if key == "tab_label":
+            return socket.gethostname()
+        if key == "tab_length":
+            return "0"
+        return DEFAULTS.get(key, "")
+
+    def load(self):
+        self.conf.reload()
+        rc = wm2rc_values()
+        self.loaded = {}
+        for s in self.settings:
+            v = self.conf.get(s.key)
+            s.load(v, self.default_for(s.key, rc))
+            self.loaded[s.key] = s.state()
+        self.status.set_text(CONFIG)
+
+    def apply(self):
+        self.conf.reload()		# build on what is in the file now
+        changed = [s for s in self.settings if s.state() != self.loaded[s.key]]
+        if not changed:
+            # reload anyway: the "Same as wm2tj" values come from ~/.wm2rc,
+            # which may have changed since the bar started
+            if subprocess.run(["pkill", "-HUP", "-x", PROGNAME]).returncode == 0:
+                self.status.set_text(_("No changes; the bar has reloaded"))
+            else:
+                self.status.set_text(_("No changes"))
+            return
+        for s in changed:
+            v = s.state()
+            if v is None:
+                self.conf.unset(s.key)
+            else:
+                self.conf.set(s.key, v)
+        try:
+            self.conf.save()
+        except OSError as e:
+            self.status.set_text(_("Cannot save: %s") % e)
+            return
+        running = subprocess.run(["pkill", "-HUP", "-x", PROGNAME]).returncode == 0
+        if any(s.key == "sync_wm2tj" and s.state() == "yes" for s in changed):
+            regen_wm2tj_menu()
+        n = len(changed)
+        self.load()
+        if running:
+            self.status.set_text(gettext.ngettext("Saved %d setting; the bar has reloaded",
+                                                  "Saved %d settings; the bar has reloaded", n) % n)
+        else:
+            self.status.set_text(gettext.ngettext("Saved %d setting",
+                                                  "Saved %d settings", n) % n)
+
+
+def regen_wm2tj_menu():
+    """Sync just switched on: have wm2tj's menu take the shared favourites
+    (wm2-menu-gen starts ~/.config/wm2tj/favorites from ours if it is missing)."""
+    gen = shutil.which("wm2-menu-gen")
+    for d in (os.path.expanduser("~/.local/bin"), "/usr/local/bin"):
+        if gen:
+            break
+        if os.access(os.path.join(d, "wm2-menu-gen"), os.X_OK):
+            gen = os.path.join(d, "wm2-menu-gen")
+    if gen:
+        subprocess.Popen(["sh", "-c", '"$0" >/dev/null 2>&1; pkill -HUP -x "wm2tj|wm2"', gen])
+
+
+if __name__ == "__main__":
+    SettingsWindow().show_all()
+    Gtk.main()

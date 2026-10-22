@@ -1,0 +1,60 @@
+wm2tj
+wm2 をもとにした改造版のウィンドウマネージャー。2026-10 から数台のノート PC (Xubuntu 系) で日常使用しながら改造している。
+
+変更点
+- 移動/リサイズ時の 50ms ポーリングを廃止、-O2 ビルド
+- xfce4-panel 対応（DOCK 窓は枠なし最前面、タスクリスト/ページャー用 EWMH、strut）
+- タブ文字を Xft + UTF-8（日本語タイトル）
+- タブ長固定 tab_length（既定 300px、0 で伸縮）
+- Whisker Menu 対応（TYPE_MENU を枠なし・フォーカス付きで表示）
+- `pkill -HUP -x wm2tj` で同じ PID のまま再起動（設定再読込、窓のデスクトップ維持）。ルートメニューにも項目あり
+- タブの光沢グラデーション tab_gloss、ARGB 窓の透過（picom）
+- 最大化: タブのダブルクリックで最大化⇔復元（間隔 double_click_time、既定 1300ms）。
+  アプリからの _NET_WM_STATE（最大化・全画面）にも従う。全画面はパネルより前面
+- 最小化: タブの中クリック（タッチパッドは3本指タップ）。戻すのはタスクリストか、背景の右クリックで出るメニュー
+- タッチパッドのダブルタップが背景クリックに化けてカーソルが飛ぶ問題を修正
+- 窓の中をクリックすると前面に出る（フォーカスはポインタ追従のまま。ホイールでは出ない）
+- 既定の見た目＝青い光沢タブ＋白い細枠（tab_gloss none で元の灰色）。タブの太さ tab_width（既定32px）
+- 別デスクトップの窓へフォーカスを戻そうとしてキーボードが効かなくなる不具合を修正
+- Whisker Menu を閉じた後にフォーカスが外れ、IME（fcitx5）が切り替わらなくなる不具合を修正
+
+操作
+  タブ左ドラッグ=移動 / タブWクリック=最大化 / タブ中クリック=最小化
+  タブの四角=閉じる / 枠の右下=リサイズ
+  背景の左クリック=窓の切替 / 背景の右クリック=メニュー
+  別のデスクトップへ移す=パネルのタスクリストでボタンを右クリック→「別のワークスペースへ移動」
+
+ビルドと導入
+  sudo apt install g++ make pkg-config libx11-dev libxext-dev libxft-dev picom   # Debian/Ubuntu
+    Fedora: gcc-c++ make pkgconf libX11-devel libXext-devel libXft-devel picom
+    Arch: base-devel libx11 libxext libxft picom   Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev picom
+    （ヘッダとライブラリは pkg-config で探す。g++ でも clang++ でもビルドできる。CXX/CXXFLAGS/LDFLAGS/DESTDIR/PREFIX に従う）
+  make && sudo make install              # /usr/local/bin/wm2tj
+  sudo make install-session              # wm2-session → /usr/local/bin、wm2tj.desktop → /usr/share/xsessions
+  ※ wm2-session は入っているものだけを起動する: fcitx5（無ければ ibus）・picom・xfsettingsd（無ければ xsettingsd）・
+    polkit エージェント（mate/gnome/xfce/lxpolkit/kde のどれか。WM2TJ_POLKIT_AGENT= で指定可）・通知デーモン・
+    wm2tj-bar（無ければ xfce4-panel）・nm-applet・blueman-applet・xfce4-power-manager。
+    XDG_DATA_DIRS/XDG_CONFIG_DIRS はログインマネージャーの値を残し、Xfce/Xubuntu・Flatpak・snap のディレクトリがあれば足す。
+    XDG_CURRENT_DESKTOP=wm2tj:XFCE（Xfce の設定ツールをメニューに出すため）
+  ※ .desktop の Exec に sh -c '...' を書くと Xsession が引用符を無視して起動しない。起動処理は wm2-session に書く。
+  ※ 通知（org.freedesktop.Notifications）は wm2tj も wm2tj-bar も出さない。通知デーモンが要る。
+    wm2-session は、通知デーモンが動いていなければ dunst → xfce4-notifyd → mate-notification-daemon →
+    notification-daemon → lxqt-notificationd の順に、入っているものを起動する（WM2TJ_NOTIFYD=コマンド で指定も可）。
+    どれも無ければ通知は出ない。素の Ubuntu（GNOME）は通知を gnome-shell が出すので、wm2tj では何か入れる:
+      sudo apt install dunst      # 軽い（数 MB）。見た目は ~/.config/dunst/dunstrc
+    Chrome・Firefox は通知デーモンが無いと自前の通知に切り替わるが、notify-send・更新通知・メール等は何も出ない。
+
+docs/
+  開発記録.md               改造の経緯・原因・テスト方法（作業記録からの抜粋）
+
+extras/
+  wm2rc.sample              -> ~/.wm2rc（メニューは wm2-menu-gen で追記）
+  wm2-menu-gen              -> ~/.local/bin/  Whisker Menu と同じメニュー（お気に入り→カテゴリ）を ~/.wm2rc に生成
+                               末尾の「ログアウト」等は session-logout（PATH、無ければ ~/.local/bin）を呼ぶ
+  session-logout            -> ~/.local/bin/  Xfce なら xfce4-session-logout、wm2tj なら wm2tj を終了。
+                               --halt/--reboot/--suspend/--hibernate は systemctl へ。Whisker の電源ボタンもこれに向ける:
+                               xfconf の /plugins/plugin-<id>/command-shutdown 等（パネル停止中に書く）
+  wm2_badge-symbolic.svg    -> /usr/share/icons/hicolor/scalable/places/ (ログイン画面のバッジ)
+  lightdm-greeter-gtk.css   -> /var/lib/lightdm/.config/gtk-3.0/gtk.css (セッション選択ボタンを黄色に)
+  lightdm-sessions/*.desktop -> /usr/share/lightdm/sessions/ (ログイン画面のセッション名を日本語化・重複を隠す)
+  autostart-picom-disable.desktop -> ~/.config/autostart/picom.desktop (Xfce セッションで picom を起動させない)

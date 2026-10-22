@@ -1,0 +1,19 @@
+# Optional: keeps the wm2tj root menu up to date when applications are installed
+# or removed (favourites changes are handled by wm2tj-favorites and wm2tj-bar
+# themselves). Enable with: systemctl --user enable --now wm2-menu-sync.path
+[Unit]
+Description=Watch the wm2tj favourites and installed apps for the root menu
+
+[Path]
+PathModified=%h/.config/wm2tj/favorites
+PathChanged=%h/.local/share/applications
+PathChanged=/usr/local/share/applications
+PathChanged=/usr/share/applications
+PathChanged=/var/lib/snapd/desktop/applications
+PathChanged=/var/lib/flatpak/exports/share/applications
+PathChanged=%h/.local/share/flatpak/exports/share/applications
+TriggerLimitIntervalSec=10
+TriggerLimitBurst=5
+
+[Install]
+WantedBy=default.target

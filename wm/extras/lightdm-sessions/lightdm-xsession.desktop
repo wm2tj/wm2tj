@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Default Xsession
+Name[ja]=Default Xsession
+NoDisplay=true
+Version=1.0
+Exec=default
+Icon=
+Type=Application

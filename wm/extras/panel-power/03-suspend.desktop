@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=サスペンド
+Exec=session-logout --ask --suspend
+Icon=system-suspend

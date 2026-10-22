@@ -1,0 +1,71 @@
+#!/bin/sh
+# Wallpaper for the wm2tj session.
+#   wm2-wallpaper           apply the saved wallpaper (run it from wm2-session)
+#   wm2-wallpaper --choose  pick an image, save it, apply it
+# The choice is kept in ~/.config/wm2tj/wallpaper and, when the GNOME schema is
+# installed, mirrored to org.gnome.desktop.background (shared with a GNOME
+# session on the same machine; its picture-options "zoom" = fill and crop).
+# Setter: feh, xwallpaper, hsetroot or xsetroot, whichever is installed.
+# Chooser: zenity, yad or a GTK dialog through PyGObject. The texts are
+# translated with gettext (text domain "wm2tj") when the gettext command is there.
+schema=org.gnome.desktop.background
+saved="${XDG_CONFIG_HOME:-$HOME/.config}/wm2tj/wallpaper"
+
+TEXTDOMAIN=wm2tj
+TEXTDOMAINDIR="@LOCALEDIR@"	# filled in by make install
+case $TEXTDOMAINDIR in @*) TEXTDOMAINDIR="$(dirname "$0")/../share/locale" ;; esac
+export TEXTDOMAIN TEXTDOMAINDIR
+have() { command -v "$1" >/dev/null 2>&1; }
+have gettext || gettext() { printf '%s' "$1"; }
+have_schema() { have gsettings && gsettings list-schemas 2>/dev/null | grep -qx "$schema"; }
+
+if [ "$1" = "--choose" ]; then
+    title=$(gettext "Choose a Wallpaper"); filter=$(gettext "Images")
+    start="$( (have xdg-user-dir && xdg-user-dir PICTURES) || echo "$HOME")/"
+    if have zenity; then
+	file=$(zenity --file-selection --title="$title" --filename="$start" \
+	    --file-filter="$filter | *.jpg *.jpeg *.png *.webp *.JPG *.JPEG *.PNG") || exit 0
+    elif have yad; then
+	file=$(yad --file --title="$title" --filename="$start" \
+	    --file-filter="$filter | *.jpg *.jpeg *.png *.webp *.JPG *.JPEG *.PNG") || exit 0
+    else
+	file=$(python3 - "$title" "$filter" "$start" <<'PY'
+import sys, gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+d = Gtk.FileChooserDialog(title=sys.argv[1], action=Gtk.FileChooserAction.OPEN)
+d.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+f = Gtk.FileFilter(); f.set_name(sys.argv[2])
+for p in ("*.jpg", "*.jpeg", "*.png", "*.webp", "*.JPG", "*.JPEG", "*.PNG"): f.add_pattern(p)
+d.add_filter(f); d.set_current_folder(sys.argv[3])
+r = d.run()
+if r == Gtk.ResponseType.OK: print(d.get_filename())
+sys.exit(0 if r == Gtk.ResponseType.OK else 1)
+PY
+) || exit 0
+    fi
+    [ -n "$file" ] || exit 0
+    mkdir -p "$(dirname "$saved")" && printf '%s\n' "$file" > "$saved"
+    if have_schema; then
+	gsettings set $schema picture-uri "file://$file"
+	gsettings set $schema picture-uri-dark "file://$file" 2>/dev/null
+    fi
+fi
+
+path=
+[ -s "$saved" ] && path=$(cat "$saved")
+if [ ! -f "$path" ] && have_schema; then
+    key=picture-uri
+    [ "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)" = "'prefer-dark'" ] && key=picture-uri-dark
+    uri=$(gsettings get $schema $key | sed "s/^'//; s/'\$//")
+    path=$(python3 -Ic 'import sys, urllib.parse as u; print(u.unquote(u.urlparse(sys.argv[1]).path))' "$uri")
+fi
+if [ -f "$path" ]; then
+    if have feh; then exec feh --no-fehbg --bg-fill "$path"
+    elif have xwallpaper; then exec xwallpaper --zoom "$path"
+    elif have hsetroot; then exec hsetroot -fill "$path"
+    else echo "wm2-wallpaper: needs feh, xwallpaper or hsetroot" >&2; exit 1
+    fi
+fi
+echo "wm2-wallpaper: no wallpaper chosen (run with --choose), or not found: $path" >&2
+exit 1

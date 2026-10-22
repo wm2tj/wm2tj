@@ -1,0 +1,61 @@
+#!/bin/sh
+# Log out / shut down from whichever session is running. Xfce has
+# xfce4-session; the wm2tj session ends when wm2tj (exec'd by wm2-session)
+# exits and power actions go straight to logind. Takes the same options
+# as xfce4-session-logout, so Whisker Menu's buttons can call it.
+# --ask (ours) asks with power-dialog (zenity if that fails) first; the wm2tj menu and the
+# panel's power button use it. The zenity texts are translated with gettext
+# (text domain "wm2tj") when the gettext command is there.
+TEXTDOMAIN=wm2tj
+TEXTDOMAINDIR="@LOCALEDIR@"	# filled in by make install
+case $TEXTDOMAINDIR in @*) TEXTDOMAINDIR="$(dirname "$0")/../share/locale" ;; esac
+export TEXTDOMAIN TEXTDOMAINDIR
+command -v gettext >/dev/null 2>&1 || gettext() { printf '%s' "$1"; }
+
+ask=
+for a in "$@"; do
+    case "$a" in
+	--ask) ask=1 ;;
+	--halt)      what=$(gettext "Shut Down"); question=$(gettext "Shut down?") ;;
+	--reboot)    what=$(gettext "Restart");   question=$(gettext "Restart?") ;;
+	--suspend)   what=$(gettext "Suspend");   question=$(gettext "Suspend?") ;;
+	--hibernate) what=$(gettext "Hibernate"); question=$(gettext "Hibernate?") ;;
+    esac
+done
+if [ -n "$ask" ]; then
+    # Fancy overlay first (next to this script, else on $PATH); it may switch
+    # to another action.
+    dialog="$(dirname "$0")/power-dialog"
+    [ -x "$dialog" ] || dialog=power-dialog
+    choice=$("$dialog" "$@" 2>/dev/null)
+    case $? in
+	0) exec "$0" "$choice" ;;
+	1) exit 0 ;;
+    esac
+    [ -n "$what" ] || { what=$(gettext "Log Out"); question=$(gettext "Log out?"); }
+    zenity --question --title="$what" --icon=system-shutdown \
+	--text="$question" --ok-label="$what" \
+	--cancel-label="$(gettext "Cancel")" --default-cancel 2>/dev/null || exit 0
+    for a in "$@"; do shift; [ "$a" = --ask ] || set -- "$@" "$a"; done
+fi
+if pgrep -x xfce4-session >/dev/null; then   # no -u: BusyBox pgrep lacks it
+    exec xfce4-session-logout "$@"
+fi
+# systemd, else elogind's loginctl (Void, Alpine, Gentoo/OpenRC, Devuan, Artix),
+# else login1 over D-Bus (any logind implementation)
+power() {
+    if command -v systemctl >/dev/null 2>&1; then exec systemctl "$1"; fi
+    if command -v loginctl >/dev/null 2>&1; then exec loginctl "$1"; fi
+    case $1 in poweroff) m=PowerOff ;; reboot) m=Reboot ;; suspend) m=Suspend ;; hibernate) m=Hibernate ;; esac
+    exec dbus-send --system --print-reply --dest=org.freedesktop.login1 \
+	/org/freedesktop/login1 "org.freedesktop.login1.Manager.$m" boolean:true
+}
+for a in "$@"; do
+    case "$a" in
+	--halt)      power poweroff ;;
+	--reboot)    power reboot ;;
+	--suspend)   power suspend ;;
+	--hibernate) power hibernate ;;
+    esac
+done
+exec pkill -x 'wm2tj|wm2'   # wm2: builds from before the rename (no -u: BusyBox pkill lacks it)

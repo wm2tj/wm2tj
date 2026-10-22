@@ -1,0 +1,23 @@
+#!/bin/sh
+# Session launcher for "wm2tj" on a GDM-based Ubuntu 26.04 (Surface Laptop Go).
+# GDM's Xsession splits Exec on whitespace without honouring quotes, so the
+# startup chain lives here. Differences from wm2-session (the Xubuntu version):
+#  - no Xubuntu menu dirs (xubuntu-default-settings is not installed)
+#  - IME env is set here, so the GNOME session keeps using ibus
+#  - no libinput-gestures (not packaged)
+export XDG_CONFIG_DIRS=/etc/xdg
+export XDG_DATA_DIRS=/usr/share/xfce4:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx SDL_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
+# Not pushed to the systemd --user environment: it can outlive this session
+# and would leak fcitx settings into a later GNOME login.
+
+setxkbmap jp
+fcitx5 -r -d &   # -r: replace a stale instance left by the previous session
+picom --backend glx -b   # no --vsync: lower latency, may tear
+xfsettingsd &
+/usr/libexec/polkit-mate-authentication-agent-1 &   # GUI password prompt (pkexec)
+xfce4-panel &
+nm-applet &
+blueman-applet &
+xfce4-power-manager &
+exec /usr/local/bin/wm2tj

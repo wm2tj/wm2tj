@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Top bar settings
+Name[ja]=トップバーの設定
+Comment=Change how wm2tj-bar looks and behaves
+Comment[ja]=wm2tj-bar の見た目と動きを変える
+Exec=wm2tj-bar-settings
+TryExec=wm2tj-bar-settings
+Icon=preferences-desktop
+Terminal=false
+Categories=Settings;DesktopSettings;GTK;

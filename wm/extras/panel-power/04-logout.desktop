@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=ログアウト
+Exec=session-logout --ask --logout
+Icon=system-log-out

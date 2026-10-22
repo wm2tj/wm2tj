@@ -1,0 +1,76 @@
+#!/bin/sh
+# Session launcher for "wm2tj" (Exec= of the xsession .desktop). Display
+# managers split Exec on whitespace without honouring quotes, so the startup
+# chain lives here. Everything optional is started only when installed, so the
+# same file works on Xubuntu, Fedora, Arch, Alpine, Void, NixOS...
+#   WM2TJ=<path>               the window manager binary (default: wm2tj on PATH)
+#   WM2TJ_POLKIT_AGENT=<path>  the polkit agent to start
+#   WM2TJ_NOTIFYD=<command>    the notification daemon to start
+have() { command -v "$1" >/dev/null 2>&1; }
+# wm2tj and the helpers are installed next to this script
+case $0 in */*) PATH="${0%/*}:$PATH"; export PATH ;; esac
+
+# Menu/.desktop dirs: keep what the display manager gave us and add the Xfce
+# and Xubuntu ones (so the menu matches an Xfce session), Flatpak and snap.
+XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+for d in /usr/share/xfce4 /usr/share/xubuntu; do
+    [ -d "$d" ] && XDG_DATA_DIRS="$d:$XDG_DATA_DIRS"
+done
+for d in /var/lib/flatpak/exports/share "$HOME/.local/share/flatpak/exports/share" /var/lib/snapd/desktop; do
+    [ -d "$d" ] && case ":$XDG_DATA_DIRS:" in *":$d:"*) ;; *) XDG_DATA_DIRS="$XDG_DATA_DIRS:$d" ;; esac
+done
+XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
+[ -d /etc/xdg/xdg-xubuntu ] && XDG_CONFIG_DIRS="/etc/xdg/xdg-xubuntu:$XDG_CONFIG_DIRS"
+# OnlyShowIn=XFCE entries (the Xfce settings tools) stay visible in the menus
+XDG_CURRENT_DESKTOP=wm2tj:XFCE
+export XDG_DATA_DIRS XDG_CONFIG_DIRS XDG_CURRENT_DESKTOP
+have dbus-update-activation-environment && dbus-update-activation-environment --systemd \
+    XDG_CONFIG_DIRS XDG_DATA_DIRS XDG_CURRENT_DESKTOP LANG LANGUAGE LC_ALL LC_MESSAGES PATH 2>/dev/null
+
+# input method: fcitx5 (-r: replace a stale instance of the previous session), else IBus
+if have fcitx5; then fcitx5 -r -d &
+elif have ibus-daemon; then ibus-daemon -drx
+fi
+have libinput-gestures && libinput-gestures &
+# compositor: wm2tj draws ARGB tabs, which need one. glx first, then the default backend
+if have picom; then picom --backend glx -b || picom -b; fi   # no --vsync: lower latency, may tear
+# xsettings daemon (GTK theme, fonts, DPI)
+if have xfsettingsd; then xfsettingsd &
+elif have xsettingsd; then xsettingsd &
+fi
+# polkit agent: the GUI password prompt for pkexec
+for p in $WM2TJ_POLKIT_AGENT \
+	/usr/libexec/polkit-mate-authentication-agent-1 /usr/lib/polkit-mate/polkit-mate-authentication-agent-1 \
+	/usr/lib/*/polkit-mate/polkit-mate-authentication-agent-1 \
+	/usr/libexec/polkit-gnome-authentication-agent-1 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 \
+	/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 \
+	/usr/libexec/xfce-polkit/xfce-polkit /usr/lib/xfce-polkit/xfce-polkit lxpolkit \
+	/usr/libexec/polkit-kde-authentication-agent-1 /usr/lib/polkit-kde-authentication-agent-1
+do
+    command -v "$p" >/dev/null 2>&1 && { "$p" & break; }
+done
+# Desktop notifications (org.freedesktop.Notifications): neither wm2tj nor
+# wm2tj-bar shows them, and GNOME draws them inside gnome-shell, so start a
+# daemon unless one already owns the name.
+if ! dbus-send --session --print-reply --dest=org.freedesktop.DBus \
+	/org/freedesktop/DBus org.freedesktop.DBus.NameHasOwner \
+	string:org.freedesktop.Notifications 2>/dev/null | grep -q 'boolean true'
+then
+    for n in $WM2TJ_NOTIFYD dunst \
+	    /usr/lib/*/xfce4/notifyd/xfce4-notifyd /usr/lib*/xfce4/notifyd/xfce4-notifyd \
+	    /usr/libexec/xfce4/notifyd/xfce4-notifyd \
+	    /usr/libexec/mate-notification-daemon/mate-notification-daemon \
+	    /usr/lib/mate-notification-daemon/mate-notification-daemon \
+	    /usr/lib/notification-daemon/notification-daemon lxqt-notificationd
+    do
+	command -v "$n" >/dev/null 2>&1 && { "$n" & break; }
+    done
+fi
+# top bar: wm2tj-bar, else the Xfce panel
+if have wm2tj-bar; then wm2tj-bar &
+elif have xfce4-panel; then xfce4-panel &
+fi
+for a in nm-applet blueman-applet xfce4-power-manager; do
+    have "$a" && "$a" &
+done
+exec "${WM2TJ:-wm2tj}"

@@ -1,0 +1,370 @@
+#!/usr/bin/env python3
+# wm2tj-favorites - edit the wm2tj favourites.
+#
+# Saved to ~/.config/wm2tj/favorites (shown in the menu top to bottom),
+# one per line:
+#   firefox.desktop          a .desktop id (icon and localized name from it)
+#   "Notes" mousepad         "name" command (for things without a .desktop)
+#   lines starting with # and empty lines are ignored
+# wm2tj (the root menu) and wm2tj-bar (its menu) read the same file.
+# Every change is saved at once; the file is reread if changed elsewhere.
+# After each change wm2-menu-gen rebuilds ~/.wm2rc and wm2tj gets SIGHUP,
+# so the root menu follows without any watcher.
+#
+# Needs python3, PyGObject and GTK 3. Text domain "wm2tj".
+import gettext, os, shlex, shutil, subprocess, sys
+try:
+    import gi
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gtk, Gdk, Gio, GLib, Pango
+except (ImportError, ValueError) as e:
+    sys.exit(f"{sys.argv[0]}: needs PyGObject with GTK 3 (python3-gi, python-gobject, py3-gobject3): {e}")
+try:
+    gi.require_version("GioUnix", "2.0")
+    from gi.repository import GioUnix
+    DesktopAppInfo = GioUnix.DesktopAppInfo
+except (ValueError, ImportError):
+    DesktopAppInfo = Gio.DesktopAppInfo
+
+TEXTDOMAIN = "wm2tj"
+LOCALEDIR = "@LOCALEDIR@"	# filled in by make install
+if LOCALEDIR.startswith("@"):
+    LOCALEDIR = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                             "..", "share", "locale")
+gettext.bindtextdomain(TEXTDOMAIN, LOCALEDIR)
+gettext.textdomain(TEXTDOMAIN)
+_ = gettext.gettext
+
+CONFIG_DIR = os.path.join(GLib.get_user_config_dir(), "wm2tj")
+FAV_PATH = os.path.join(CONFIG_DIR, "favorites")
+HEADER = ("# wm2tj favourites (edited with wm2tj-favorites; shown top to bottom)\n"
+          "# format: foo.desktop  or  \"name\" command\n")
+# wm2-menu-gen sits next to us when installed; else on $PATH. wm2 = old name.
+MENU_GEN = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "wm2-menu-gen")
+if not os.access(MENU_GEN, os.X_OK):
+    MENU_GEN = shutil.which("wm2-menu-gen")
+REGEN_CMD = '"$0" >/dev/null 2>&1; pkill -HUP -x "wm2tj|wm2"'
+ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+
+
+class Fav:
+    """One favourite: a desktop_id, or a (name, command) pair."""
+    def __init__(self, desktop_id=None, name=None, command=None):
+        self.desktop_id = desktop_id
+        self.name = name
+        self.command = command
+        self.info = None
+        if desktop_id:
+            try:
+                self.info = DesktopAppInfo.new(desktop_id)
+            except TypeError:   # not found (uninstalled, ...)
+                pass
+
+    def label(self):
+        if self.info:
+            return self.info.get_display_name()
+        if self.desktop_id:
+            return _("%s (not found)") % self.desktop_id
+        return self.name
+
+    def icon(self):
+        if self.info and self.info.get_icon():
+            return self.info.get_icon()
+        return Gio.ThemedIcon.new("application-x-executable")
+
+    def tooltip(self):
+        if self.info:
+            return self.info.get_commandline() or self.desktop_id
+        if self.desktop_id:
+            return self.desktop_id
+        return self.command
+
+    def line(self):
+        if self.desktop_id:
+            return self.desktop_id
+        return '"%s" %s' % (self.name.replace('"', "'"), self.command)
+
+
+def parse_line(line):
+    line = line.strip()
+    if not line or line.startswith("#"):
+        return None
+    if line.startswith('"'):
+        end = line.find('"', 1)
+        if end > 0 and line[end + 1:].strip():
+            return Fav(name=line[1:end], command=line[end + 1:].strip())
+        return None
+    return Fav(desktop_id=line)
+
+
+def read_text():
+    try:
+        with open(FAV_PATH, encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
+
+
+def load_favorites(text):
+    return [x for x in map(parse_line, text.splitlines()) if x]
+
+
+def save_favorites(favs):
+    text = HEADER + "".join(fav.line() + "\n" for fav in favs)
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    tmp = FAV_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, FAV_PATH)
+    return text
+
+
+def all_apps():
+    apps = [a for a in Gio.AppInfo.get_all()
+            if isinstance(a, DesktopAppInfo) and a.should_show()]
+    apps.sort(key=lambda a: a.get_display_name().casefold())
+    return apps
+
+
+def make_row(icon, text, tooltip, dim=False):
+    box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    box.set_border_width(4)
+    box.pack_start(Gtk.Image.new_from_gicon(icon, ICON_SIZE), False, False, 0)
+    lab = Gtk.Label(label=text, xalign=0)
+    lab.set_ellipsize(Pango.EllipsizeMode.END)
+    box.pack_start(lab, True, True, 0)
+    row = Gtk.ListBoxRow()
+    row.add(box)
+    row.set_tooltip_text(tooltip)
+    if dim:
+        row.set_sensitive(False)
+    return row
+
+
+class FavoritesWindow(Gtk.Window):
+    def __init__(self):
+        super().__init__(title=_("Edit Favourites — wm2tj"))
+        self.regen = None
+        self.regen_again = False
+        self.set_default_size(760, 520)
+        self.set_border_width(10)
+        self.connect("destroy", Gtk.main_quit)
+        self.connect("key-press-event", self.on_key)
+
+        self.text = read_text()
+        self.favs = load_favorites(self.text)
+        self.apps = all_apps()
+
+        paned = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.add(paned)
+
+        # left: the favourites
+        left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        left.pack_start(self.heading(_("Favourites")), False, False, 0)
+        self.fav_list = Gtk.ListBox()
+        self.fav_list.connect("row-selected", lambda *a: self.update_buttons())
+        left.pack_start(self.scrolled(self.fav_list), True, True, 0)
+        btns = Gtk.Box(spacing=6)
+        self.up_btn = self.button("go-up-symbolic", _("Move up"), lambda *a: self.move(-1))
+        self.down_btn = self.button("go-down-symbolic", _("Move down"), lambda *a: self.move(1))
+        for b in (self.up_btn, self.down_btn):
+            btns.pack_start(b, False, False, 0)
+        left.pack_start(btns, False, False, 0)
+        paned.pack_start(left, True, True, 0)
+
+        # middle: <- add / -> remove (a click in a list does neither)
+        mid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6,
+                      valign=Gtk.Align.CENTER)
+        self.add_btn = self.button("go-previous-symbolic", _("Add to favourites"),
+                                   lambda *a: self.add_selected())
+        self.del_btn = self.button("go-next-symbolic", _("Remove from favourites"),
+                                   lambda *a: self.remove_selected())
+        mid.pack_start(self.add_btn, False, False, 0)
+        mid.pack_start(self.del_btn, False, False, 0)
+        paned.pack_start(mid, False, False, 0)
+
+        # right: all applications
+        right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        right.pack_start(self.heading(_("Applications")), False, False, 0)
+        self.search = Gtk.SearchEntry(placeholder_text=_("Search"))
+        self.search.connect("search-changed", lambda *a: self.app_list.invalidate_filter())
+        right.pack_start(self.search, False, False, 0)
+        self.app_list = Gtk.ListBox()
+        self.app_list.set_filter_func(self.app_filter)
+        self.app_list.connect("row-selected", lambda *a: self.update_buttons())
+        right.pack_start(self.scrolled(self.app_list), True, True, 0)
+        btns = Gtk.Box(spacing=6)
+        cmd_btn = Gtk.Button(label=_("Add Command…"))
+        cmd_btn.connect("clicked", lambda *a: self.add_command())
+        btns.pack_start(cmd_btn, False, False, 0)
+        right.pack_start(btns, False, False, 0)
+        paned.pack_start(right, True, True, 0)
+
+        os.makedirs(CONFIG_DIR, exist_ok=True)   # needed to watch the file
+        self.monitor = Gio.File.new_for_path(FAV_PATH).monitor_file(
+            Gio.FileMonitorFlags.WATCH_MOVES, None)
+        self.monitor.connect("changed", self.on_file_changed)
+
+        self.refresh()
+        self.search.grab_focus()
+
+    def heading(self, text):
+        lab = Gtk.Label(xalign=0)
+        lab.set_markup("<b>%s</b>" % GLib.markup_escape_text(text))
+        return lab
+
+    def scrolled(self, child):
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sw.set_shadow_type(Gtk.ShadowType.IN)
+        sw.add(child)
+        return sw
+
+    def button(self, icon, tip, cb):
+        b = Gtk.Button.new_from_icon_name(icon, Gtk.IconSize.BUTTON)
+        b.set_tooltip_text(tip)
+        b.connect("clicked", cb)
+        return b
+
+    def fav_ids(self):
+        return {f.desktop_id for f in self.favs if f.desktop_id}
+
+    def refresh(self, select=None):
+        for child in self.fav_list.get_children():
+            self.fav_list.remove(child)
+        for fav in self.favs:
+            self.fav_list.add(make_row(fav.icon(), fav.label(), fav.tooltip()))
+        for child in self.app_list.get_children():
+            self.app_list.remove(child)
+        ids = self.fav_ids()
+        for app in self.apps:
+            on = app.get_id() in ids
+            text = app.get_display_name() + (" ✓" if on else "")
+            row = make_row(app.get_icon() or Gio.ThemedIcon.new("application-x-executable"),
+                           text, app.get_description() or app.get_id(), dim=on)
+            row.app = app
+            self.app_list.add(row)
+        self.fav_list.show_all()
+        self.app_list.show_all()
+        if select is not None and 0 <= select < len(self.favs):
+            self.fav_list.select_row(self.fav_list.get_row_at_index(select))
+        self.update_buttons()
+
+    def app_filter(self, row):
+        q = self.search.get_text().strip().casefold()
+        if not q:
+            return True
+        app = row.app
+        hay = " ".join(filter(None, [app.get_display_name(), app.get_name(),
+                                     app.get_generic_name(), app.get_id(),
+                                     " ".join(app.get_keywords() or [])]))
+        return q in hay.casefold()
+
+    def selected_fav(self):
+        row = self.fav_list.get_selected_row()
+        return row.get_index() if row else -1
+
+    def update_buttons(self):
+        i = self.selected_fav()
+        self.up_btn.set_sensitive(i > 0)
+        self.down_btn.set_sensitive(0 <= i < len(self.favs) - 1)
+        self.del_btn.set_sensitive(i >= 0)
+        row = self.app_list.get_selected_row()
+        self.add_btn.set_sensitive(bool(row and row.get_sensitive()))
+
+    def commit(self, select=None):
+        self.text = save_favorites(self.favs)
+        self.refresh(select)
+        self.regen_menu()
+
+    def regen_menu(self):
+        """Rebuild the wm2tj root menu, one run at a time (another after it
+        if changes came while it ran)."""
+        if not MENU_GEN:
+            return
+        if self.regen and self.regen.poll() is None:
+            self.regen_again = True
+            return
+        self.regen_again = False
+        self.regen = subprocess.Popen(["sh", "-c", REGEN_CMD, MENU_GEN])
+        GLib.timeout_add(300, self.regen_poll)
+
+    def regen_poll(self):
+        if self.regen.poll() is None:
+            return True
+        if self.regen_again:
+            self.regen_menu()
+        return False
+
+    def add_selected(self):
+        row = self.app_list.get_selected_row()
+        if not row or not row.get_sensitive():
+            return
+        self.favs.append(Fav(desktop_id=row.app.get_id()))
+        self.commit(len(self.favs) - 1)
+
+    def remove_selected(self):
+        i = self.selected_fav()
+        if i < 0:
+            return
+        del self.favs[i]
+        self.commit(min(i, len(self.favs) - 1))
+
+    def move(self, d):
+        i = self.selected_fav()
+        j = i + d
+        if i < 0 or not 0 <= j < len(self.favs):
+            return
+        self.favs[i], self.favs[j] = self.favs[j], self.favs[i]
+        self.commit(j)
+
+    def add_command(self):
+        dlg = Gtk.Dialog(title=_("Add Command"), transient_for=self, modal=True)
+        dlg.add_buttons(_("Cancel"), Gtk.ResponseType.CANCEL,
+                        _("Add"), Gtk.ResponseType.OK)
+        dlg.set_default_response(Gtk.ResponseType.OK)
+        grid = Gtk.Grid(row_spacing=6, column_spacing=8, border_width=10)
+        name = Gtk.Entry(activates_default=True, hexpand=True)
+        cmd = Gtk.Entry(activates_default=True, hexpand=True)
+        cmd.set_placeholder_text(_("e.g. mousepad ~/notes.txt"))
+        grid.attach(Gtk.Label(label=_("Name"), xalign=1), 0, 0, 1, 1)
+        grid.attach(name, 1, 0, 1, 1)
+        grid.attach(Gtk.Label(label=_("Command"), xalign=1), 0, 1, 1, 1)
+        grid.attach(cmd, 1, 1, 1, 1)
+        dlg.get_content_area().add(grid)
+        dlg.set_default_size(420, -1)
+        dlg.show_all()
+        while dlg.run() == Gtk.ResponseType.OK:
+            n, c = name.get_text().strip(), cmd.get_text().strip()
+            try:
+                ok = bool(n and c and shlex.split(c))
+            except ValueError:
+                ok = False
+            if ok:
+                self.favs.append(Fav(name=n, command=c))
+                self.commit(len(self.favs) - 1)
+                break
+        dlg.destroy()
+
+    def on_file_changed(self, *args):
+        text = read_text()
+        if text == self.text:   # our own write
+            return
+        self.text = text
+        self.favs = load_favorites(text)
+        self.refresh()
+
+    def on_key(self, w, ev):
+        if ev.keyval == Gdk.KEY_Escape:
+            self.destroy()
+            return True
+        if ev.keyval == Gdk.KEY_Delete and self.fav_list.get_focus_child():
+            self.remove_selected()
+            return True
+        return False
+
+
+if __name__ == "__main__":
+    FavoritesWindow().show_all()
+    Gtk.main()

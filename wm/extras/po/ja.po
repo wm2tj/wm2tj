@@ -1,0 +1,325 @@
+# Japanese translation of wm2tj.
+# Copyright (c) 2026 tetsu.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wm2tj\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 19:32+0900\n"
+"PO-Revision-Date: 2026-10-21 20:00+0900\n"
+"Last-Translator: tetsu\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: wm2-menu-gen:75
+msgid "Settings…"
+msgstr "設定…"
+
+#: wm2-menu-gen:76
+msgid "Edit Favourites…"
+msgstr "お気に入りの編集…"
+
+#: wm2-menu-gen:78
+msgid "Change Wallpaper…"
+msgstr "壁紙を変更"
+
+#: wm2-menu-gen:80
+msgid "Restart wm2tj (reload settings)"
+msgstr "wm2tj を再起動（設定の再読込）"
+
+#: wm2-menu-gen:81 power-dialog:30 session-logout:35
+msgid "Log Out"
+msgstr "ログアウト"
+
+#: wm2-menu-gen:83 power-dialog:28 session-logout:20
+msgid "Restart"
+msgstr "再起動"
+
+#: wm2-menu-gen:84 power-dialog:27 session-logout:19
+msgid "Shut Down"
+msgstr "シャットダウン"
+
+#: wm2tj-settings:278
+msgid "wm2tj Settings"
+msgstr "wm2tj の設定"
+
+#: wm2tj-settings:288
+msgid "Appearance"
+msgstr "見た目"
+
+#: wm2tj-settings:292
+msgid "Revert"
+msgstr "元に戻す"
+
+#: wm2tj-settings:293
+msgid "Discard the changes not applied yet and reread ~/.wm2rc"
+msgstr "適用していない変更を捨てて ~/.wm2rc を読み直す"
+
+#: wm2tj-settings:295
+msgid "Apply"
+msgstr "適用"
+
+#: wm2tj-settings:332
+msgid "Window tab"
+msgstr "ウィンドウのタブ"
+
+#: wm2tj-settings:335
+msgid "No gloss (flat)"
+msgstr "光沢なし（単色）"
+
+#: wm2tj-settings:339
+msgid "Gloss colour"
+msgstr "光沢の色"
+
+#: wm2tj-settings:341
+msgid "Flat colour"
+msgstr "単色のときの色"
+
+#: wm2tj-settings:342 wm2tj-settings:362
+msgid "Text colour"
+msgstr "文字の色"
+
+#: wm2tj-settings:343
+msgid "Close button"
+msgstr "閉じるボタン"
+
+#: wm2tj-settings:344 wm2tj-settings:370
+msgid "Font"
+msgstr "フォント"
+
+#: wm2tj-settings:346
+msgid "Frame"
+msgstr "枠"
+
+#: wm2tj-settings:347
+msgid "Frame colour"
+msgstr "枠の色"
+
+#: wm2tj-settings:348 wm2tj-settings:369
+msgid "Border colour"
+msgstr "枠線の色"
+
+#: wm2tj-settings:350
+msgid "Same as the top line"
+msgstr "上の線と同じ"
+
+#: wm2tj-settings:351
+msgid "None"
+msgstr "なし"
+
+#: wm2tj-settings:352
+msgid "Colour:"
+msgstr "色:"
+
+#: wm2tj-settings:358
+msgid "Left line"
+msgstr "左の細線"
+
+#: wm2tj-settings:360
+msgid "Root menu"
+msgstr "右クリックメニュー"
+
+#: wm2tj-settings:361
+msgid "Background colour"
+msgstr "背景の色"
+
+#: wm2tj-settings:365
+msgid "Same as the tab colour"
+msgstr "タブの色と同じ"
+
+#: wm2tj-settings:372
+msgid "Mark put before folder names (e.g. ▶ ). If empty, a > follows the name"
+msgstr "フォルダ名の前に付ける印（例: ▶ ）。空にすると後ろに > が付く"
+
+#: wm2tj-settings:373
+msgid "Folder mark"
+msgstr "フォルダの印"
+
+#: wm2tj-settings:427
+msgid "Nothing changed"
+msgstr "変更はありません"
+
+#: wm2tj-settings:435
+#, python-format
+msgid "Cannot save: %s"
+msgstr "保存できません: %s"
+
+#: wm2tj-settings:440
+#, python-format
+msgid "Saved %d setting; wm2tj has reloaded"
+msgid_plural "Saved %d settings; wm2tj has reloaded"
+msgstr[0] "%d 項目を保存して wm2tj に反映しました"
+
+#: wm2tj-favorites:58
+#, python-format
+msgid "%s (not found)"
+msgstr "%s（見つかりません）"
+
+#: wm2tj-favorites:137
+msgid "Edit Favourites — wm2tj"
+msgstr "お気に入りの編集 — wm2tj"
+
+#: wm2tj-favorites:152
+msgid "Favourites"
+msgstr "お気に入り"
+
+#: wm2tj-favorites:157
+msgid "Move up"
+msgstr "上へ"
+
+#: wm2tj-favorites:158
+msgid "Move down"
+msgstr "下へ"
+
+#: wm2tj-favorites:167
+msgid "Add to favourites"
+msgstr "お気に入りに追加"
+
+#: wm2tj-favorites:169
+msgid "Remove from favourites"
+msgstr "お気に入りから削除"
+
+#: wm2tj-favorites:177
+msgid "Applications"
+msgstr "アプリケーション"
+
+#: wm2tj-favorites:178
+msgid "Search"
+msgstr "検索"
+
+#: wm2tj-favorites:186
+msgid "Add Command…"
+msgstr "コマンドを追加…"
+
+#: wm2tj-favorites:291
+msgid "Add Command"
+msgstr "コマンドを追加"
+
+#: wm2tj-favorites:292 power-dialog:159 session-logout:38
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: wm2tj-favorites:293
+msgid "Add"
+msgstr "追加"
+
+#: wm2tj-favorites:298
+msgid "e.g. mousepad ~/notes.txt"
+msgstr "例: mousepad ~/メモ.txt"
+
+#: wm2tj-favorites:299
+msgid "Name"
+msgstr "名前"
+
+#: wm2tj-favorites:301
+msgid "Command"
+msgstr "コマンド"
+
+#: power-dialog:27 session-logout:19
+msgid "Shut down?"
+msgstr "シャットダウンしますか？"
+
+#: power-dialog:28 session-logout:20
+msgid "Restart?"
+msgstr "再起動しますか？"
+
+#: power-dialog:29 session-logout:21
+msgid "Suspend"
+msgstr "サスペンド"
+
+#: power-dialog:29 session-logout:21
+msgid "Suspend?"
+msgstr "サスペンドしますか？"
+
+#: power-dialog:30 session-logout:35
+msgid "Log out?"
+msgstr "ログアウトしますか？"
+
+#: power-dialog:32 session-logout:22
+msgid "Hibernate"
+msgstr "ハイバネート"
+
+#: power-dialog:32 session-logout:22
+msgid "Hibernate?"
+msgstr "ハイバネートしますか？"
+
+#. TRANSLATORS: uptime, days and hours
+#: power-dialog:77
+#, python-format
+msgid "up %dd %dh"
+msgstr "起動から %d日 %d時間"
+
+#. TRANSLATORS: uptime, hours and minutes / minutes
+#: power-dialog:79
+#, python-format
+msgid "up %dh %dm"
+msgstr "起動から %d時間 %d分"
+
+#: power-dialog:79
+#, python-format
+msgid "up %dm"
+msgstr "起動から %d分"
+
+#: power-dialog:157
+msgid "← → select   Enter run   Esc cancel"
+msgstr "← → で選択   Enter で実行   Esc でキャンセル"
+
+#: wm2-wallpaper:17
+msgid "Choose a Wallpaper"
+msgstr "壁紙を選ぶ"
+
+#: wm2-wallpaper:19
+msgid "Images"
+msgstr "画像"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Accessories"
+msgstr "アクセサリー"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Development"
+msgstr "開発"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Education"
+msgstr "教育"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Games"
+msgstr "ゲーム"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Graphics"
+msgstr "グラフィックス"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Internet"
+msgstr "インターネット"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Multimedia"
+msgstr "マルチメディア"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Office"
+msgstr "オフィス"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Science"
+msgstr "科学"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Settings"
+msgstr "設定"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "System"
+msgstr "システム"
+
+#: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
+msgid "Other"
+msgstr "その他"

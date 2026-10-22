@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=wm2tj
+Comment=Minimal X11 window manager with BeOS-style tabs, .wm2rc menu and virtual desktops
+Exec=wm2-session
+TryExec=wm2tj
+Type=XSession
+DesktopNames=wm2tj

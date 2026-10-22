@@ -1,0 +1,4 @@
+*.o
+wm2tj
+wm2.old
+__pycache__/

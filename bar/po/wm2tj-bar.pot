@@ -1,0 +1,693 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the wm2tj-bar package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: wm2tj-bar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 21:06+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: wm2tj-bar.c:757
+msgid "Accessories"
+msgstr ""
+
+#: wm2tj-bar.c:758
+msgid "Internet"
+msgstr ""
+
+#: wm2tj-bar.c:759
+msgid "Office"
+msgstr ""
+
+#: wm2tj-bar.c:760
+msgid "Graphics"
+msgstr ""
+
+#: wm2tj-bar.c:761
+msgid "Multimedia"
+msgstr ""
+
+#: wm2tj-bar.c:762
+msgid "Development"
+msgstr ""
+
+#: wm2tj-bar.c:763
+msgid "Education"
+msgstr ""
+
+#: wm2tj-bar.c:764
+msgid "Science"
+msgstr ""
+
+#: wm2tj-bar.c:765
+msgid "Games"
+msgstr ""
+
+#: wm2tj-bar.c:766
+msgid "System"
+msgstr ""
+
+#: wm2tj-bar.c:767
+msgid "Settings"
+msgstr ""
+
+#: wm2tj-bar.c:768
+msgid "Other"
+msgstr ""
+
+#: wm2tj-bar.c:2108
+#, c-format
+msgid "Memory %.1f / %.1f GB (%ld%%)"
+msgstr ""
+
+#: wm2tj-bar.c:2116
+#, c-format
+msgid "Wired (%s)"
+msgstr ""
+
+#: wm2tj-bar.c:2117
+msgid "Not connected"
+msgstr ""
+
+#: wm2tj-bar.c:2120
+msgid "Bluetooth off"
+msgstr ""
+
+#: wm2tj-bar.c:2121
+msgid "Bluetooth on"
+msgstr ""
+
+#: wm2tj-bar.c:2122
+#, c-format
+msgid "Bluetooth: %d device connected"
+msgid_plural "Bluetooth: %d devices connected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: wm2tj-bar.c:2126 wm2tj-bar.c:3268
+#, c-format
+msgid "Battery %d%% %s"
+msgstr ""
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "charging"
+msgstr ""
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "plugged in"
+msgstr ""
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "on battery"
+msgstr ""
+
+#. TRANSLATORS: strftime(3) format of the date shown over the clock
+#: wm2tj-bar.c:2132
+#, no-c-format
+msgid "%a %d %b %Y %H:%M"
+msgstr ""
+
+#: wm2tj-bar.c:2139
+msgid "Microphone muted"
+msgstr ""
+
+#: wm2tj-bar.c:2139
+msgid "Microphone on"
+msgstr ""
+
+#: wm2tj-bar.c:2141
+#, c-format
+msgid "Volume %d%% (muted)"
+msgstr ""
+
+#: wm2tj-bar.c:2141
+#, c-format
+msgid "Volume %d%%"
+msgstr ""
+
+#: wm2tj-bar.c:2145
+#, c-format
+msgid "Input method: %s"
+msgstr ""
+
+#: wm2tj-bar.c:2145
+#, c-format
+msgid "Keyboard: %s"
+msgstr ""
+
+#: wm2tj-bar.c:2225
+msgid "(untitled)"
+msgstr ""
+
+#: wm2tj-bar.c:3122 wm2tj-bar-settings:635
+msgid "Power saver"
+msgstr ""
+
+#: wm2tj-bar.c:3123 wm2tj-bar-settings:635
+msgid "Balanced"
+msgstr ""
+
+#: wm2tj-bar.c:3124 wm2tj-bar-settings:636
+msgid "Performance"
+msgstr ""
+
+#: wm2tj-bar.c:3167
+msgid "Favourites: right-click an app to add it"
+msgstr ""
+
+#: wm2tj-bar.c:3169 wm2tj-bar-settings:617
+msgid "Applications"
+msgstr ""
+
+#: wm2tj-bar.c:3170
+msgid "Session"
+msgstr ""
+
+#: wm2tj-bar.c:3173
+msgid "Bar settings…"
+msgstr ""
+
+#: wm2tj-bar.c:3182
+msgid "No applications found"
+msgstr ""
+
+#: wm2tj-bar.c:3188 wm2tj-bar-settings:612
+msgid "Lock"
+msgstr ""
+
+#: wm2tj-bar.c:3189 wm2tj-bar-settings:613
+msgid "Log out"
+msgstr ""
+
+#: wm2tj-bar.c:3190 wm2tj-bar-settings:614
+msgid "Suspend"
+msgstr ""
+
+#: wm2tj-bar.c:3192
+msgid "Restart…"
+msgstr ""
+
+#: wm2tj-bar.c:3193
+msgid "Shut down…"
+msgstr ""
+
+#: wm2tj-bar.c:3196
+msgid "Remove from favourites"
+msgstr ""
+
+#: wm2tj-bar.c:3196
+msgid "Add to favourites"
+msgstr ""
+
+#: wm2tj-bar.c:3201
+msgid "Restart now?"
+msgstr ""
+
+#: wm2tj-bar.c:3202
+msgid "Shut down now?"
+msgstr ""
+
+#: wm2tj-bar.c:3203 wm2tj-bar-settings:615
+msgid "Restart"
+msgstr ""
+
+#: wm2tj-bar.c:3203 wm2tj-bar-settings:616
+msgid "Shut down"
+msgstr ""
+
+#: wm2tj-bar.c:3204 wm2tj-bar.c:3296
+msgid "Cancel"
+msgstr ""
+
+#: wm2tj-bar.c:3208
+msgid "nmcli (NetworkManager) not found"
+msgstr ""
+
+#: wm2tj-bar.c:3212
+msgid "Turn Wi-Fi on"
+msgstr ""
+
+#: wm2tj-bar.c:3219
+msgid "Searching…"
+msgstr ""
+
+#: wm2tj-bar.c:3221
+msgid "Disconnect"
+msgstr ""
+
+#: wm2tj-bar.c:3222
+msgid "Turn Wi-Fi off"
+msgstr ""
+
+#: wm2tj-bar.c:3224
+msgid "Network settings…"
+msgstr ""
+
+#: wm2tj-bar.c:3228
+msgid "bluetoothctl (BlueZ) not found"
+msgstr ""
+
+#: wm2tj-bar.c:3230
+msgid "Turn Bluetooth on"
+msgstr ""
+
+#: wm2tj-bar.c:3236
+msgid "No paired devices"
+msgstr ""
+
+#: wm2tj-bar.c:3238
+msgid "Turn Bluetooth off"
+msgstr ""
+
+#: wm2tj-bar.c:3240
+msgid "Bluetooth settings…"
+msgstr ""
+
+#: wm2tj-bar.c:3243
+msgid "Volume"
+msgstr ""
+
+#: wm2tj-bar.c:3251
+msgid "Unmute"
+msgstr ""
+
+#: wm2tj-bar.c:3251
+msgid "Mute"
+msgstr ""
+
+#: wm2tj-bar.c:3252
+msgid "Sound settings…"
+msgstr ""
+
+#: wm2tj-bar.c:3262
+msgid "Input method settings…"
+msgstr ""
+
+#: wm2tj-bar.c:3274
+msgid "Brightness"
+msgstr ""
+
+#: wm2tj-bar.c:3279
+msgid "Power mode"
+msgstr ""
+
+#: wm2tj-bar.c:3289
+msgid "Wrong password, or the network did not answer."
+msgstr ""
+
+#: wm2tj-bar.c:3290
+#, c-format
+msgid "Password for “%s”"
+msgstr ""
+
+#: wm2tj-bar.c:3293
+msgid "Hide password"
+msgstr ""
+
+#: wm2tj-bar.c:3293
+msgid "Show password"
+msgstr ""
+
+#: wm2tj-bar.c:3295
+msgid "Connect"
+msgstr ""
+
+#: wm2tj-bar.c:3301
+#, c-format
+msgid "Could not connect to “%s”."
+msgstr ""
+
+#: wm2tj-bar.c:3303
+msgid "OK"
+msgstr ""
+
+#: wm2tj-bar-settings:89
+msgid "NetworkManager applet (Wi-Fi)"
+msgstr ""
+
+#: wm2tj-bar-settings:90
+msgid "Blueman (Bluetooth)"
+msgstr ""
+
+#: wm2tj-bar-settings:336
+msgid "Flat (no gloss)"
+msgstr ""
+
+#: wm2tj-bar-settings:354
+msgid "Same as the tab"
+msgstr ""
+
+#: wm2tj-bar-settings:412
+msgid "strftime format, see man strftime"
+msgstr ""
+
+#: wm2tj-bar-settings:440
+msgid "Others:"
+msgstr ""
+
+#: wm2tj-bar-settings:443
+msgid "WM_CLASS names as xprop WM_CLASS shows them, separated by spaces"
+msgstr ""
+
+#: wm2tj-bar-settings:507
+msgid "Top bar settings"
+msgstr ""
+
+#: wm2tj-bar-settings:518
+msgid "Appearance"
+msgstr ""
+
+#: wm2tj-bar-settings:519
+msgid "Menu"
+msgstr ""
+
+#: wm2tj-bar-settings:520
+msgid "Power"
+msgstr ""
+
+#: wm2tj-bar-settings:521
+msgid "Network and sound"
+msgstr ""
+
+#: wm2tj-bar-settings:522 wm2tj-bar-settings:669
+msgid "Tray"
+msgstr ""
+
+#: wm2tj-bar-settings:526
+msgid "Revert"
+msgstr ""
+
+#: wm2tj-bar-settings:527
+msgid "Drop the changes not applied yet and read the file again"
+msgstr ""
+
+#: wm2tj-bar-settings:529
+msgid "Apply"
+msgstr ""
+
+#: wm2tj-bar-settings:562
+msgid "Default"
+msgstr ""
+
+#: wm2tj-bar-settings:574
+msgid "Same as wm2tj"
+msgstr ""
+
+#: wm2tj-bar-settings:575
+msgid "Tab at the left end"
+msgstr ""
+
+#: wm2tj-bar-settings:576
+msgid "none: no text"
+msgstr ""
+
+#: wm2tj-bar-settings:576
+msgid "Label"
+msgstr ""
+
+#: wm2tj-bar-settings:576
+msgid "Host name"
+msgstr ""
+
+#: wm2tj-bar-settings:577
+msgid "0: fit the label"
+msgstr ""
+
+#: wm2tj-bar-settings:578
+msgid "Length"
+msgstr ""
+
+#: wm2tj-bar-settings:578
+msgid "Fit the label"
+msgstr ""
+
+#: wm2tj-bar-settings:579
+msgid "Gloss"
+msgstr ""
+
+#: wm2tj-bar-settings:580
+msgid "Flat colour"
+msgstr ""
+
+#: wm2tj-bar-settings:581
+msgid "Label colour"
+msgstr ""
+
+#: wm2tj-bar-settings:582
+msgid "Button"
+msgstr ""
+
+#: wm2tj-bar-settings:583
+msgid "Border"
+msgstr ""
+
+#: wm2tj-bar-settings:584
+msgid "Bar"
+msgstr ""
+
+#: wm2tj-bar-settings:585
+msgid "Height"
+msgstr ""
+
+#: wm2tj-bar-settings:586
+msgid "Background"
+msgstr ""
+
+#: wm2tj-bar-settings:587
+msgid "Text colour"
+msgstr ""
+
+#: wm2tj-bar-settings:588
+msgid "Front application"
+msgstr ""
+
+#: wm2tj-bar-settings:590
+msgid "One colour, with a thin line of the tab colour"
+msgstr ""
+
+#: wm2tj-bar-settings:591
+msgid "Gloss, like the tab"
+msgstr ""
+
+#: wm2tj-bar-settings:591
+msgid "Its look"
+msgstr ""
+
+#: wm2tj-bar-settings:592
+msgid "Font"
+msgstr ""
+
+#: wm2tj-bar-settings:593
+msgid "Menu font"
+msgstr ""
+
+#: wm2tj-bar-settings:594
+msgid "Clock"
+msgstr ""
+
+#: wm2tj-bar-settings:595
+msgid "Format"
+msgstr ""
+
+#: wm2tj-bar-settings:596
+msgid ""
+"\"Same as wm2tj\" takes the value from ~/.wm2rc, so the bar follows the "
+"window tabs."
+msgstr ""
+
+#: wm2tj-bar-settings:602
+msgid "Favourites"
+msgstr ""
+
+#: wm2tj-bar-settings:603
+msgid "Sync the menu with wm2tj"
+msgstr ""
+
+#: wm2tj-bar-settings:607
+msgid ""
+"Ticked: the favourites at the top of the menu are the ones of the wm2tj "
+"right-click menu (~/.config/wm2tj/favorites), so a favourite added or "
+"removed in the bar or in wm2tj shows in both. Unticked: the bar keeps its "
+"own (~/.config/wm2tj-bar/favorites)."
+msgstr ""
+
+#: wm2tj-bar-settings:611
+msgid "Session menu"
+msgstr ""
+
+#: wm2tj-bar-settings:618
+msgid "Terminal"
+msgstr ""
+
+#: wm2tj-bar-settings:619
+msgid "The terminal opens applications marked Terminal=true."
+msgstr ""
+
+#: wm2tj-bar-settings:624
+msgid "Leave alone"
+msgstr ""
+
+#: wm2tj-bar-settings:625
+msgid "Brightness keys"
+msgstr ""
+
+#: wm2tj-bar-settings:626 wm2tj-bar-settings:655
+msgid "0: leave the keys to another program"
+msgstr ""
+
+#: wm2tj-bar-settings:627
+msgid "Step"
+msgstr ""
+
+#: wm2tj-bar-settings:628
+msgid "The first one"
+msgstr ""
+
+#: wm2tj-bar-settings:633
+msgid "Backlight"
+msgstr ""
+
+#: wm2tj-bar-settings:634
+msgid "Power profile (power-profiles-daemon)"
+msgstr ""
+
+#: wm2tj-bar-settings:637 wm2tj-bar-settings:641
+msgid "On AC"
+msgstr ""
+
+#: wm2tj-bar-settings:638 wm2tj-bar-settings:643
+msgid "On battery"
+msgstr ""
+
+#: wm2tj-bar-settings:639
+msgid "Turn the screen off after"
+msgstr ""
+
+#: wm2tj-bar-settings:640
+msgid "0: never"
+msgstr ""
+
+#: wm2tj-bar-settings:641 wm2tj-bar-settings:642
+msgid "min"
+msgstr ""
+
+#: wm2tj-bar-settings:644
+msgid "\"Leave alone\" lets another power manager or the system decide."
+msgstr ""
+
+#: wm2tj-bar-settings:649
+msgid "Empty: no such item in the menu"
+msgstr ""
+
+#: wm2tj-bar-settings:650
+msgid "Wi-Fi"
+msgstr ""
+
+#: wm2tj-bar-settings:651 wm2tj-bar-settings:653 wm2tj-bar-settings:657
+msgid "Settings program"
+msgstr ""
+
+#: wm2tj-bar-settings:652
+msgid "Bluetooth"
+msgstr ""
+
+#: wm2tj-bar-settings:654
+msgid "Sound"
+msgstr ""
+
+#: wm2tj-bar-settings:656
+msgid "Volume step"
+msgstr ""
+
+#: wm2tj-bar-settings:658
+msgid "Input method"
+msgstr ""
+
+#: wm2tj-bar-settings:660
+msgid "Automatic (the one running)"
+msgstr ""
+
+#: wm2tj-bar-settings:661
+msgid "Keyboard layouts (XKB)"
+msgstr ""
+
+#: wm2tj-bar-settings:661
+msgid "Do not show"
+msgstr ""
+
+#: wm2tj-bar-settings:661
+msgid "Indicator"
+msgstr ""
+
+#: wm2tj-bar-settings:662
+msgid "Settings program (IBus)"
+msgstr ""
+
+#: wm2tj-bar-settings:663
+msgid "The settings program opens from the last item of each menu."
+msgstr ""
+
+#: wm2tj-bar-settings:668
+msgid "System tray"
+msgstr ""
+
+#: wm2tj-bar-settings:669
+msgid "On"
+msgstr ""
+
+#: wm2tj-bar-settings:669
+msgid "Off"
+msgstr ""
+
+#: wm2tj-bar-settings:670
+msgid "Hide these icons"
+msgstr ""
+
+#: wm2tj-bar-settings:671
+msgid ""
+"Hidden icons stay docked, so the applications keep running. Use it for icons "
+"that repeat what the bar already shows. Off: for another tray such as "
+"stalonetray."
+msgstr ""
+
+#: wm2tj-bar-settings:711
+msgid "No changes; the bar has reloaded"
+msgstr ""
+
+#: wm2tj-bar-settings:713
+msgid "No changes"
+msgstr ""
+
+#: wm2tj-bar-settings:724
+#, python-format
+msgid "Cannot save: %s"
+msgstr ""
+
+#: wm2tj-bar-settings:730
+#, python-format
+msgid "Saved %d setting; the bar has reloaded"
+msgid_plural "Saved %d settings; the bar has reloaded"
+msgstr[0] ""
+msgstr[1] ""
+
+#: wm2tj-bar-settings:733
+#, python-format
+msgid "Saved %d setting"
+msgid_plural "Saved %d settings"
+msgstr[0] ""
+msgstr[1] ""
+
+#: wm2tj-bar.c
+msgid "NetworkManager is not running"
+msgstr ""

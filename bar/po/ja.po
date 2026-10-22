@@ -1,0 +1,701 @@
+# Japanese translation of wm2tj-bar.
+# Copyright (c) 2026 tetsu. MIT licence, see COPYING.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wm2tj-bar 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 21:06+0900\n"
+"PO-Revision-Date: 2026-10-21 17:30+0900\n"
+"Last-Translator: tetsu\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: wm2tj-bar.c:757
+msgid "Accessories"
+msgstr "アクセサリ"
+
+#: wm2tj-bar.c:758
+msgid "Internet"
+msgstr "インターネット"
+
+#: wm2tj-bar.c:759
+msgid "Office"
+msgstr "オフィス"
+
+#: wm2tj-bar.c:760
+msgid "Graphics"
+msgstr "グラフィックス"
+
+#: wm2tj-bar.c:761
+msgid "Multimedia"
+msgstr "マルチメディア"
+
+#: wm2tj-bar.c:762
+msgid "Development"
+msgstr "開発"
+
+#: wm2tj-bar.c:763
+msgid "Education"
+msgstr "教育"
+
+#: wm2tj-bar.c:764
+msgid "Science"
+msgstr "科学"
+
+#: wm2tj-bar.c:765
+msgid "Games"
+msgstr "ゲーム"
+
+#: wm2tj-bar.c:766
+msgid "System"
+msgstr "システム"
+
+#: wm2tj-bar.c:767
+msgid "Settings"
+msgstr "設定"
+
+#: wm2tj-bar.c:768
+msgid "Other"
+msgstr "その他"
+
+#: wm2tj-bar.c:2108
+#, c-format
+msgid "Memory %.1f / %.1f GB (%ld%%)"
+msgstr "メモリ %.1f / %.1f GB (%ld%%)"
+
+#: wm2tj-bar.c:2116
+#, c-format
+msgid "Wired (%s)"
+msgstr "有線 LAN (%s)"
+
+#: wm2tj-bar.c:2117
+msgid "Not connected"
+msgstr "ネットワーク未接続"
+
+#: wm2tj-bar.c:2120
+msgid "Bluetooth off"
+msgstr "Bluetooth オフ"
+
+#: wm2tj-bar.c:2121
+msgid "Bluetooth on"
+msgstr "Bluetooth オン"
+
+#: wm2tj-bar.c:2122
+#, c-format
+msgid "Bluetooth: %d device connected"
+msgid_plural "Bluetooth: %d devices connected"
+msgstr[0] "Bluetooth: %d 台接続中"
+
+#: wm2tj-bar.c:2126 wm2tj-bar.c:3268
+#, c-format
+msgid "Battery %d%% %s"
+msgstr "バッテリー %d%% %s"
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "charging"
+msgstr "充電中"
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "plugged in"
+msgstr "接続中"
+
+#: wm2tj-bar.c:2127 wm2tj-bar.c:3269
+msgid "on battery"
+msgstr "放電中"
+
+#. TRANSLATORS: strftime(3) format of the date shown over the clock
+#: wm2tj-bar.c:2132
+#, no-c-format
+msgid "%a %d %b %Y %H:%M"
+msgstr "%Y年%m月%d日(%a) %H:%M"
+
+#: wm2tj-bar.c:2139
+msgid "Microphone muted"
+msgstr "マイク ミュート"
+
+#: wm2tj-bar.c:2139
+msgid "Microphone on"
+msgstr "マイク オン"
+
+#: wm2tj-bar.c:2141
+#, c-format
+msgid "Volume %d%% (muted)"
+msgstr "音量 %d%%（ミュート）"
+
+#: wm2tj-bar.c:2141
+#, c-format
+msgid "Volume %d%%"
+msgstr "音量 %d%%"
+
+#: wm2tj-bar.c:2145
+#, c-format
+msgid "Input method: %s"
+msgstr "入力メソッド: %s"
+
+#: wm2tj-bar.c:2145
+#, c-format
+msgid "Keyboard: %s"
+msgstr "キーボード: %s"
+
+#: wm2tj-bar.c:2225
+msgid "(untitled)"
+msgstr "(無題)"
+
+#: wm2tj-bar.c:3122 wm2tj-bar-settings:635
+msgid "Power saver"
+msgstr "省電力"
+
+#: wm2tj-bar.c:3123 wm2tj-bar-settings:635
+msgid "Balanced"
+msgstr "バランス"
+
+#: wm2tj-bar.c:3124 wm2tj-bar-settings:636
+msgid "Performance"
+msgstr "パフォーマンス"
+
+#: wm2tj-bar.c:3167
+msgid "Favourites: right-click an app to add it"
+msgstr "お気に入り: アプリを右クリックで追加"
+
+#: wm2tj-bar.c:3169 wm2tj-bar-settings:617
+msgid "Applications"
+msgstr "アプリケーション"
+
+#: wm2tj-bar.c:3170
+msgid "Session"
+msgstr "セッション"
+
+#: wm2tj-bar.c:3173
+msgid "Bar settings…"
+msgstr "バーの設定…"
+
+#: wm2tj-bar.c:3182
+msgid "No applications found"
+msgstr "アプリが見つかりません"
+
+#: wm2tj-bar.c:3188 wm2tj-bar-settings:612
+msgid "Lock"
+msgstr "ロック"
+
+#: wm2tj-bar.c:3189 wm2tj-bar-settings:613
+msgid "Log out"
+msgstr "ログアウト"
+
+#: wm2tj-bar.c:3190 wm2tj-bar-settings:614
+msgid "Suspend"
+msgstr "サスペンド"
+
+#: wm2tj-bar.c:3192
+msgid "Restart…"
+msgstr "再起動…"
+
+#: wm2tj-bar.c:3193
+msgid "Shut down…"
+msgstr "シャットダウン…"
+
+#: wm2tj-bar.c:3196
+msgid "Remove from favourites"
+msgstr "お気に入りから削除"
+
+#: wm2tj-bar.c:3196
+msgid "Add to favourites"
+msgstr "お気に入りに追加"
+
+#: wm2tj-bar.c:3201
+msgid "Restart now?"
+msgstr "再起動しますか？"
+
+#: wm2tj-bar.c:3202
+msgid "Shut down now?"
+msgstr "シャットダウンしますか？"
+
+#: wm2tj-bar.c:3203 wm2tj-bar-settings:615
+msgid "Restart"
+msgstr "再起動する"
+
+#: wm2tj-bar.c:3203 wm2tj-bar-settings:616
+msgid "Shut down"
+msgstr "シャットダウンする"
+
+#: wm2tj-bar.c:3204 wm2tj-bar.c:3296
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: wm2tj-bar.c:3208
+msgid "nmcli (NetworkManager) not found"
+msgstr "nmcli (NetworkManager) がありません"
+
+#: wm2tj-bar.c:3212
+msgid "Turn Wi-Fi on"
+msgstr "Wi-Fi をオンにする"
+
+#: wm2tj-bar.c:3219
+msgid "Searching…"
+msgstr "探しています…"
+
+#: wm2tj-bar.c:3221
+msgid "Disconnect"
+msgstr "切断"
+
+#: wm2tj-bar.c:3222
+msgid "Turn Wi-Fi off"
+msgstr "Wi-Fi をオフにする"
+
+#: wm2tj-bar.c:3224
+msgid "Network settings…"
+msgstr "ネットワークの設定…"
+
+#: wm2tj-bar.c:3228
+msgid "bluetoothctl (BlueZ) not found"
+msgstr "bluetoothctl (BlueZ) がありません"
+
+#: wm2tj-bar.c:3230
+msgid "Turn Bluetooth on"
+msgstr "Bluetooth をオンにする"
+
+#: wm2tj-bar.c:3236
+msgid "No paired devices"
+msgstr "ペアリング済みの機器はありません"
+
+#: wm2tj-bar.c:3238
+msgid "Turn Bluetooth off"
+msgstr "Bluetooth をオフにする"
+
+#: wm2tj-bar.c:3240
+msgid "Bluetooth settings…"
+msgstr "Bluetooth の設定…"
+
+#: wm2tj-bar.c:3243
+msgid "Volume"
+msgstr "音量"
+
+#: wm2tj-bar.c:3251
+msgid "Unmute"
+msgstr "ミュートを解除"
+
+#: wm2tj-bar.c:3251
+msgid "Mute"
+msgstr "ミュート"
+
+#: wm2tj-bar.c:3252
+msgid "Sound settings…"
+msgstr "サウンドの設定…"
+
+#: wm2tj-bar.c:3262
+msgid "Input method settings…"
+msgstr "入力メソッドの設定…"
+
+#: wm2tj-bar.c:3274
+msgid "Brightness"
+msgstr "明るさ"
+
+#: wm2tj-bar.c:3279
+msgid "Power mode"
+msgstr "電源モード"
+
+#: wm2tj-bar.c:3289
+msgid "Wrong password, or the network did not answer."
+msgstr "パスワードが違うか、ネットワークが応答しませんでした。"
+
+#: wm2tj-bar.c:3290
+#, c-format
+msgid "Password for “%s”"
+msgstr "「%s」のパスワード"
+
+#: wm2tj-bar.c:3293
+msgid "Hide password"
+msgstr "パスワードを隠す"
+
+#: wm2tj-bar.c:3293
+msgid "Show password"
+msgstr "パスワードを表示"
+
+#: wm2tj-bar.c:3295
+msgid "Connect"
+msgstr "接続"
+
+#: wm2tj-bar.c:3301
+#, c-format
+msgid "Could not connect to “%s”."
+msgstr "「%s」に接続できませんでした。"
+
+#: wm2tj-bar.c:3303
+msgid "OK"
+msgstr "OK"
+
+#: wm2tj-bar-settings:89
+msgid "NetworkManager applet (Wi-Fi)"
+msgstr "NetworkManager アプレット（Wi-Fi）"
+
+#: wm2tj-bar-settings:90
+msgid "Blueman (Bluetooth)"
+msgstr "Blueman（Bluetooth）"
+
+#: wm2tj-bar-settings:336
+msgid "Flat (no gloss)"
+msgstr "単色（光沢なし）"
+
+#: wm2tj-bar-settings:354
+msgid "Same as the tab"
+msgstr "タブと同じ"
+
+#: wm2tj-bar-settings:412
+msgid "strftime format, see man strftime"
+msgstr "strftime の書式（man strftime を参照）"
+
+#: wm2tj-bar-settings:440
+msgid "Others:"
+msgstr "ほか:"
+
+#: wm2tj-bar-settings:443
+msgid "WM_CLASS names as xprop WM_CLASS shows them, separated by spaces"
+msgstr "xprop WM_CLASS で見える WM_CLASS の名前を空白区切りで"
+
+#: wm2tj-bar-settings:507
+msgid "Top bar settings"
+msgstr "トップバーの設定"
+
+#: wm2tj-bar-settings:518
+msgid "Appearance"
+msgstr "見た目"
+
+#: wm2tj-bar-settings:519
+msgid "Menu"
+msgstr "メニュー"
+
+#: wm2tj-bar-settings:520
+msgid "Power"
+msgstr "電源"
+
+#: wm2tj-bar-settings:521
+msgid "Network and sound"
+msgstr "ネットワークと音"
+
+#: wm2tj-bar-settings:522 wm2tj-bar-settings:669
+msgid "Tray"
+msgstr "トレイ"
+
+#: wm2tj-bar-settings:526
+msgid "Revert"
+msgstr "元に戻す"
+
+#: wm2tj-bar-settings:527
+msgid "Drop the changes not applied yet and read the file again"
+msgstr "適用していない変更を捨てて、ファイルを読み直す"
+
+#: wm2tj-bar-settings:529
+msgid "Apply"
+msgstr "適用"
+
+#: wm2tj-bar-settings:562
+msgid "Default"
+msgstr "既定"
+
+#: wm2tj-bar-settings:574
+msgid "Same as wm2tj"
+msgstr "wm2tj と同じ"
+
+#: wm2tj-bar-settings:575
+msgid "Tab at the left end"
+msgstr "左端のタブ"
+
+#: wm2tj-bar-settings:576
+msgid "none: no text"
+msgstr "none で文字なし"
+
+#: wm2tj-bar-settings:576
+msgid "Label"
+msgstr "文字"
+
+#: wm2tj-bar-settings:576
+msgid "Host name"
+msgstr "ホスト名"
+
+#: wm2tj-bar-settings:577
+msgid "0: fit the label"
+msgstr "0 で文字に合わせる"
+
+#: wm2tj-bar-settings:578
+msgid "Length"
+msgstr "長さ"
+
+#: wm2tj-bar-settings:578
+msgid "Fit the label"
+msgstr "文字に合わせる"
+
+#: wm2tj-bar-settings:579
+msgid "Gloss"
+msgstr "光沢"
+
+#: wm2tj-bar-settings:580
+msgid "Flat colour"
+msgstr "単色のときの色"
+
+#: wm2tj-bar-settings:581
+msgid "Label colour"
+msgstr "文字の色"
+
+#: wm2tj-bar-settings:582
+msgid "Button"
+msgstr "ボタン"
+
+#: wm2tj-bar-settings:583
+msgid "Border"
+msgstr "縁取り"
+
+#: wm2tj-bar-settings:584
+msgid "Bar"
+msgstr "バー"
+
+#: wm2tj-bar-settings:585
+msgid "Height"
+msgstr "高さ"
+
+#: wm2tj-bar-settings:586
+msgid "Background"
+msgstr "地の色"
+
+#: wm2tj-bar-settings:587
+msgid "Text colour"
+msgstr "文字の色"
+
+#: wm2tj-bar-settings:588
+msgid "Front application"
+msgstr "前面のアプリ"
+
+#: wm2tj-bar-settings:590
+msgid "One colour, with a thin line of the tab colour"
+msgstr "単色 + タブの色の細い線"
+
+#: wm2tj-bar-settings:591
+msgid "Gloss, like the tab"
+msgstr "タブと同じ光沢"
+
+#: wm2tj-bar-settings:591
+msgid "Its look"
+msgstr "その見た目"
+
+#: wm2tj-bar-settings:592
+msgid "Font"
+msgstr "フォント"
+
+#: wm2tj-bar-settings:593
+msgid "Menu font"
+msgstr "メニューのフォント"
+
+#: wm2tj-bar-settings:594
+msgid "Clock"
+msgstr "時計"
+
+#: wm2tj-bar-settings:595
+msgid "Format"
+msgstr "書式"
+
+#: wm2tj-bar-settings:596
+msgid ""
+"\"Same as wm2tj\" takes the value from ~/.wm2rc, so the bar follows the "
+"window tabs."
+msgstr ""
+"「wm2tj と同じ」は ~/.wm2rc の値を使うので、バーがウィンドウのタブに合わせて"
+"変わる。"
+
+#: wm2tj-bar-settings:602
+msgid "Favourites"
+msgstr "お気に入り"
+
+#: wm2tj-bar-settings:603
+msgid "Sync the menu with wm2tj"
+msgstr "wm2tj とメニューを同期する"
+
+#: wm2tj-bar-settings:607
+msgid ""
+"Ticked: the favourites at the top of the menu are the ones of the wm2tj "
+"right-click menu (~/.config/wm2tj/favorites), so a favourite added or "
+"removed in the bar or in wm2tj shows in both. Unticked: the bar keeps its "
+"own (~/.config/wm2tj-bar/favorites)."
+msgstr ""
+"チェックすると、メニューの上に出るお気に入りが wm2tj の右クリックメニューと同"
+"じもの（~/.config/wm2tj/favorites）になり、バーと wm2tj のどちらで足したり外"
+"したりしても両方に出る。チェックしないと、バーだけのお気に入り（~/.config/"
+"wm2tj-bar/favorites）を使う。"
+
+#: wm2tj-bar-settings:611
+msgid "Session menu"
+msgstr "セッションのメニュー"
+
+#: wm2tj-bar-settings:618
+msgid "Terminal"
+msgstr "端末"
+
+#: wm2tj-bar-settings:619
+msgid "The terminal opens applications marked Terminal=true."
+msgstr "Terminal=true のアプリはこの端末で開く。"
+
+#: wm2tj-bar-settings:624
+msgid "Leave alone"
+msgstr "触らない"
+
+#: wm2tj-bar-settings:625
+msgid "Brightness keys"
+msgstr "明るさキー"
+
+#: wm2tj-bar-settings:626 wm2tj-bar-settings:655
+msgid "0: leave the keys to another program"
+msgstr "0 でキーを取らない（別のソフトに任せる）"
+
+#: wm2tj-bar-settings:627
+msgid "Step"
+msgstr "1 回の変化"
+
+#: wm2tj-bar-settings:628
+msgid "The first one"
+msgstr "最初のもの"
+
+#: wm2tj-bar-settings:633
+msgid "Backlight"
+msgstr "バックライト"
+
+#: wm2tj-bar-settings:634
+msgid "Power profile (power-profiles-daemon)"
+msgstr "省電力モード（power-profiles-daemon）"
+
+#: wm2tj-bar-settings:637 wm2tj-bar-settings:641
+msgid "On AC"
+msgstr "電源につないだとき"
+
+#: wm2tj-bar-settings:638 wm2tj-bar-settings:643
+msgid "On battery"
+msgstr "バッテリーのとき"
+
+#: wm2tj-bar-settings:639
+msgid "Turn the screen off after"
+msgstr "画面を消すまで"
+
+#: wm2tj-bar-settings:640
+msgid "0: never"
+msgstr "0 で消さない"
+
+#: wm2tj-bar-settings:641 wm2tj-bar-settings:642
+msgid "min"
+msgstr "分"
+
+#: wm2tj-bar-settings:644
+msgid "\"Leave alone\" lets another power manager or the system decide."
+msgstr "「触らない」にすると、別の電源管理ソフトやシステムに任せる。"
+
+#: wm2tj-bar-settings:649
+msgid "Empty: no such item in the menu"
+msgstr "空にするとメニューに項目を出さない"
+
+#: wm2tj-bar-settings:650
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+#: wm2tj-bar-settings:651 wm2tj-bar-settings:653 wm2tj-bar-settings:657
+msgid "Settings program"
+msgstr "設定のプログラム"
+
+#: wm2tj-bar-settings:652
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: wm2tj-bar-settings:654
+msgid "Sound"
+msgstr "音"
+
+#: wm2tj-bar-settings:656
+msgid "Volume step"
+msgstr "音量の 1 回の変化"
+
+#: wm2tj-bar-settings:658
+msgid "Input method"
+msgstr "入力メソッド"
+
+#: wm2tj-bar-settings:660
+msgid "Automatic (the one running)"
+msgstr "自動（動いているもの）"
+
+#: wm2tj-bar-settings:661
+msgid "Keyboard layouts (XKB)"
+msgstr "キーボード配列（XKB）"
+
+#: wm2tj-bar-settings:661
+msgid "Do not show"
+msgstr "出さない"
+
+#: wm2tj-bar-settings:661
+msgid "Indicator"
+msgstr "表示"
+
+#: wm2tj-bar-settings:662
+msgid "Settings program (IBus)"
+msgstr "設定のプログラム（IBus）"
+
+#: wm2tj-bar-settings:663
+msgid "The settings program opens from the last item of each menu."
+msgstr "設定のプログラムは、それぞれのメニューのいちばん下の項目から開く。"
+
+#: wm2tj-bar-settings:668
+msgid "System tray"
+msgstr "システムトレイ"
+
+#: wm2tj-bar-settings:669
+msgid "On"
+msgstr "オン"
+
+#: wm2tj-bar-settings:669
+msgid "Off"
+msgstr "オフ"
+
+#: wm2tj-bar-settings:670
+msgid "Hide these icons"
+msgstr "出さないアイコン"
+
+#: wm2tj-bar-settings:671
+msgid ""
+"Hidden icons stay docked, so the applications keep running. Use it for icons "
+"that repeat what the bar already shows. Off: for another tray such as "
+"stalonetray."
+msgstr ""
+"出さないアイコンもトレイには置くので、アプリは動いたまま。バーがもう出してい"
+"るものと重なるアイコンに使う。オフは stalonetray など別のトレイを使うとき。"
+
+#: wm2tj-bar-settings:711
+msgid "No changes; the bar has reloaded"
+msgstr "変更はありません。バーを読み直しました"
+
+#: wm2tj-bar-settings:713
+msgid "No changes"
+msgstr "変更はありません"
+
+#: wm2tj-bar-settings:724
+#, python-format
+msgid "Cannot save: %s"
+msgstr "保存できません: %s"
+
+#: wm2tj-bar-settings:730
+#, python-format
+msgid "Saved %d setting; the bar has reloaded"
+msgid_plural "Saved %d settings; the bar has reloaded"
+msgstr[0] "%d 項目を保存し、バーに反映しました"
+
+#: wm2tj-bar-settings:733
+#, python-format
+msgid "Saved %d setting"
+msgid_plural "Saved %d settings"
+msgstr[0] "%d 項目を保存しました"
+
+#~ msgid "Fcitx 5 (input method)"
+#~ msgstr "Fcitx 5（入力メソッド）"
+
+#~ msgid "IBus (input method)"
+#~ msgstr "IBus（入力メソッド）"
+
+#: wm2tj-bar.c
+msgid "NetworkManager is not running"
+msgstr "NetworkManager が動いていません"

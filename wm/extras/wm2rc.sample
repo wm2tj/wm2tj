@@ -1,0 +1,23 @@
+# wm2tj settings
+# タブの文字: Xft のフォント名（既定 "Noto Sans CJK JP:style=Bold:pixelsize=13"）
+# font "Noto Sans CJK JP:style=Bold:pixelsize=13"
+menufont "Noto Sans CJK JP-10"
+new_window xfce4-terminal   # 無ければ $TERMINAL か、よくある端末 (gnome-terminal, konsole, ..., xterm) を順に探す
+new_label "ターミナル"
+desktops 3
+tab_length 220        # タブの長さ(px)。0 でタイトルに合わせて伸縮
+# tab_width 32        # タブの太さ(px)。既定32、0 でフォントの高さ+4
+double_click_time 1300   # タブのダブルクリック(最大化)とみなす間隔(ms)
+
+# 色（色名 or "#RRGGBB"）。`#` 始まりは "" で囲む。反映は pkill -HUP -x wm2tj
+# 既定＝青い光沢タブ＋白文字＋黒い細枠（下の値）。灰色の元の見た目は
+#   tab_gloss none / tab_foreground black / button_background gray95 / borders black
+# tab_gloss         "#2a7de1"  # 光沢グラデーションの基調色（none で単色 tab_background）
+# tab_foreground    white      # タブの文字
+# button_background "#1a4f9c"  # タブの閉じるボタン
+# borders           black      # 枠線（none で線なし）
+# tab_background    gray80     # 単色タブの色（tab_gloss none のとき）
+# frame_background  gray95     # 枠
+# menu_background   gray80
+# menu_foreground   black
+# border 7                     # 枠の太さ。7 未満にすると窓の形が崩れる
