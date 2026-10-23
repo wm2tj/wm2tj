@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: wm2tj
-Upstream-Contact: tetsu <tetsu@example.invalid>
+Upstream-Contact: tetsu <wm2tj@biz.kaie-net.com>
 Source: https://github.com/wm2tj/wm2tj
 Comment: wm2tj is an independent fork of wm2 and is not affiliated with or
  endorsed by the original author.

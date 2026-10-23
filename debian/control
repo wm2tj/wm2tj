@@ -1,7 +1,7 @@
 Source: wm2tj
 Section: x11
 Priority: optional
-Maintainer: tetsu <tetsu@example.invalid>
+Maintainer: tetsu <wm2tj@biz.kaie-net.com>
 Build-Depends: debhelper-compat (= 13),
                pkgconf | pkg-config,
                libx11-dev,
