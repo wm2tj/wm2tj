@@ -2,8 +2,15 @@
 # タブの文字: Xft のフォント名（既定 "Noto Sans CJK JP:style=Bold:pixelsize=13"）
 # font "Noto Sans CJK JP:style=Bold:pixelsize=13"
 menufont "Noto Sans CJK JP-10"
-new_window xfce4-terminal   # 無ければ $TERMINAL か、よくある端末 (gnome-terminal, konsole, ..., xterm) を順に探す
-new_label "ターミナル"
+# メニューの一番上の項目（端末）。new_window が無いか、そのコマンドが無ければ
+# $TERMINAL → x-terminal-emulator（ディストリの既定）→ xfce4-terminal → gnome-terminal → … → xterm の順に探す。
+# new_window は行の残り全部（引数込み）を /bin/sh で実行する。"" や $HOME も使える
+#   Top entry of the root menu (a terminal). Without new_window, or if its program is
+#   missing: $TERMINAL, x-terminal-emulator (the distribution's default), ..., xterm.
+#   new_window runs the rest of the line, arguments included, through /bin/sh. e.g.:
+# new_window xfce4-terminal
+# new_window tilix --new-process --session="$HOME/.config/tilix/sessions/two-pane.json"
+new_label "Terminal"          # 例: new_label "ターミナル"。none で項目を出さない (none hides it)
 desktops 3
 tab_length 220        # タブの長さ(px)。0 でタイトルに合わせて伸縮
 # tab_width 32        # タブの太さ(px)。既定32、0 でフォントの高さ+4

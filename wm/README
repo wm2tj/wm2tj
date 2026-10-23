@@ -141,6 +141,45 @@ right-hand side of the rxvt window and is thick enough that wmx's
 resize handle doesn't obscure any of the text area.
 
 
+wm2tj: new_window in ~/.wm2rc
+=============================
+
+In wm2tj the root-menu entry for a new terminal (label "new_label")
+runs "new_window", which takes the whole rest of the line, arguments
+included.  It is run through /bin/sh, so quotes and $HOME work:
+
+  new_window tilix --new-process --session="$HOME/.config/tilix/sessions/two-pane.json"
+  new_label  "Terminal (2 panes)"
+
+A trailing " # comment" is ignored, and the old one-word form
+(new_window xterm, or new_window "xterm") still works.  Up to the
+2026-10-23 favseed release only the first word was read, so such an
+entry opened a plain one-pane terminal.
+
+Without new_window (the default), or if its program is not installed,
+the entry opens your terminal: $TERMINAL, else x-terminal-emulator (the
+default terminal of Debian/Ubuntu and their derivatives), else the
+first installed of xfce4-terminal, gnome-terminal, konsole, ..., xterm.
+The default label is "Terminal" (before 2026-10-23: xterm and "New").
+
+This entry is also listed at the top of the favourites editor
+(wm2tj-favorites).  If you use another terminal, remove it there: that
+writes "new_label none" (the old label is kept in a comment).  To get
+it back, add it from the top of the applications list.
+
+
+wm2tj: SIGHUP restart
+=====================
+
+"pkill -HUP -x wm2tj" restarts wm2tj in place (same PID, settings
+reread), so the login session survives.  Up to the 2026-10-23 favseed
+release this could crash: while releasing the windows, the active
+window activated the window focus should return to, which might have
+been released (freed) already.  wm2tj died with a segfault before it
+could restart, and the whole session ended.  It now drops the active
+window first.
+
+
 Credits
 =======
 

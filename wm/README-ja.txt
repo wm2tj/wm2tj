@@ -17,6 +17,16 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
 - 既定の見た目＝青い光沢タブ＋白い細枠（tab_gloss none で元の灰色）。タブの太さ tab_width（既定32px）
 - 別デスクトップの窓へフォーカスを戻そうとしてキーボードが効かなくなる不具合を修正
 - Whisker Menu を閉じた後にフォーカスが外れ、IME（fcitx5）が切り替わらなくなる不具合を修正
+- ~/.wm2rc の new_window（ルートメニューの「ターミナル」）に引数を書けるように（行の残り全部を /bin/sh で実行）。
+  例: new_window tilix --new-process --session="$HOME/.config/tilix/sessions/two-pane.json"
+  favseed 版までは最初の 1 語しか読まず、2 画面の指定などが捨てられて素の端末が開いていた
+- new_window の既定を空に: 書かなければ（またはそのコマンドが無ければ）$TERMINAL → x-terminal-emulator（Debian/Ubuntu 系の既定の端末）
+  → xfce4-terminal → gnome-terminal → … → xterm の順で、その人の端末を開く。項目名の既定は「Terminal」（以前は xterm と「New」）。
+  wm2rc.sample も new_window をコメントにし、new_label "Terminal"（日本語の例はコメント）
+- お気に入りの編集（wm2tj-favorites）の一番上に組み込みの「ターミナル」を表示。別の端末を使うなら削除できる（new_label none）。
+  右の一覧の先頭から戻せる
+- HUP（再起動）の終了処理で、アクティブな窓のフォーカスの戻り先が解放済みの窓を指したまま activate され、
+  segfault してセッションごと落ちることがあった不具合を修正
 
 操作
   タブ左ドラッグ=移動 / タブWクリック=最大化 / タブ中クリック=最小化

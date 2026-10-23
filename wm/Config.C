@@ -22,8 +22,10 @@ static void setDefaults(void)
     wm2config.nice_font          = xstrdup("Noto Sans CJK JP:style=Bold:pixelsize=13");
     wm2config.nice_menu_font     = xstrdup("Hack-11");
     wm2config.nasty_font         = xstrdup("sans-10");
-    wm2config.new_window_command = xstrdup("xterm");
-    wm2config.new_label          = xstrdup("New");
+    // empty: the user's terminal ($TERMINAL, x-terminal-emulator, ...),
+    // see WindowManager::spawn() (2026-10-23; was "xterm" and "New")
+    wm2config.new_window_command = xstrdup("");
+    wm2config.new_label          = xstrdup("Terminal");
     wm2config.submenu_prefix     = xstrdup("");
     wm2config.submenu_style      = xstrdup("cascade");
     wm2config.search_label       = xstrdup("Search...");
@@ -103,6 +105,31 @@ static char *readRest(char *p)
                      isspace((unsigned char)e[-1]))) {
         --e;
         *e = '\0';
+    }
+    return *p ? p : NULL;
+}
+
+// Rest of line as a shell command (new_window): a " # comment" outside
+// quotes is dropped, and a value that is one "quoted" string loses its
+// quotes (the old one-token form keeps working). NULL if empty.
+static char *readCommand(char *p)
+{
+    p = readRest(p);
+    if (!p) return NULL;
+
+    char quote = 0;
+    for (char *s = p; *s; ++s) {
+        if (quote) { if (*s == quote) quote = 0; }
+        else if (*s == '"' || *s == '\'') quote = *s;
+        else if (*s == '#' && isspace((unsigned char)s[-1])) { *s = '\0'; break; }
+    }
+    char *e = p + strlen(p);
+    while (e > p && isspace((unsigned char)e[-1])) *--e = '\0';
+
+    size_t n = strlen(p);
+    if (n >= 2 && p[0] == '"' && p[n - 1] == '"' && !memchr(p + 1, '"', n - 2)) {
+        p[n - 1] = '\0';
+        ++p;
     }
     return *p ? p : NULL;
 }
@@ -230,6 +257,14 @@ void wm2LoadConfig(void)
             continue;
         }
 
+        // new_window takes the whole rest of the line, arguments included
+        // (readToken kept only "tilix" of "tilix --session=..."; 2026-10-23)
+        if (!strcmp(key, "new_window")) {
+            char *cmd = readCommand(p);
+            if (cmd) replaceStr(&wm2config.new_window_command, cmd);
+            continue;
+        }
+
         char *val;
         p = readToken(p, &val);
         if (!val) continue;
@@ -237,7 +272,6 @@ void wm2LoadConfig(void)
         if      (!strcmp(key, "font"))               replaceStr(&wm2config.nice_font, val);
         else if (!strcmp(key, "menufont"))           replaceStr(&wm2config.nice_menu_font, val);
         else if (!strcmp(key, "nasty_font"))         replaceStr(&wm2config.nasty_font, val);
-        else if (!strcmp(key, "new_window"))         replaceStr(&wm2config.new_window_command, val);
         else if (!strcmp(key, "new_label"))          replaceStr(&wm2config.new_label, val);
         else if (!strcmp(key, "submenu_prefix"))     replaceStr(&wm2config.submenu_prefix, val);
         else if (!strcmp(key, "search_label"))       replaceStr(&wm2config.search_label, val);

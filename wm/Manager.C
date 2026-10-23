@@ -223,7 +223,13 @@ void WindowManager::release()
     }
 
     m_clients.remove_all();
-    
+
+    // No client is active while they go: Client::release() of the active
+    // one would activate its m_revert, which may be released (deleted)
+    // already -- skipInRevert() cannot fix it with m_clients empty.
+    // That crashed the SIGHUP restart and ended the session (2026-10-23).
+    setActiveClient(0);
+
     for (i = 0; i < unparentList.count(); ++i) {
 //	fprintf(stderr, "unparenting client %p\n",unparentList.item(i));
 	Client *uc = unparentList.item(i);
@@ -854,12 +860,13 @@ void WindowManager::spawn()
 		putenv(pstring);
 	    }
 
-	    // new_window from ~/.wm2rc if its program is installed; otherwise
-	    // $TERMINAL and the usual terminals of the various distributions.
+	    // new_window from ~/.wm2rc if set and its program is installed;
+	    // otherwise $TERMINAL, the distribution's default (Debian's
+	    // x-terminal-emulator) and the usual terminals, xterm last.
 	    // Always through /bin/sh ($SHELL may be fish/csh with other syntax).
 	    static const char *script =
 		"cmd=$1; set -- $cmd; "
-		"if command -v \"$1\" >/dev/null 2>&1; then eval \"exec $cmd\"; fi; "
+		"if [ -n \"$1\" ] && command -v \"$1\" >/dev/null 2>&1; then eval \"exec $cmd\"; fi; "
 		"for t in $TERMINAL x-terminal-emulator xfce4-terminal gnome-terminal "
 		"konsole mate-terminal lxterminal qterminal alacritty kitty urxvt xterm; do "
 		"command -v \"$t\" >/dev/null 2>&1 && exec \"$t\"; done; "

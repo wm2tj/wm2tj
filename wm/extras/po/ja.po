@@ -323,3 +323,16 @@ msgstr "システム"
 #: wm2-menu-gen (built-in categories, used without xfce-applications.menu)
 msgid "Other"
 msgstr "その他"
+
+#: wm2tj-favorites (the built-in new_window entry)
+msgid "Terminal"
+msgstr "ターミナル"
+
+#: wm2tj-favorites (the built-in new_window entry)
+#, python-format
+msgid "Built-in entry of wm2tj, always at the top (new_window in ~/.wm2rc): %s"
+msgstr "wm2tj に組み込みの項目。いつも一番上 (~/.wm2rc の new_window): %s"
+
+#: wm2tj-favorites (the built-in new_window entry)
+msgid "the default terminal ($TERMINAL, x-terminal-emulator, …)"
+msgstr "既定の端末 ($TERMINAL、x-terminal-emulator、…)"

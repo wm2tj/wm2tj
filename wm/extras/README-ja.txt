@@ -46,7 +46,10 @@ extras/
                                （PATH に無ければ ~/.local/bin/session-logout）
   wm2tj-settings            -> ~/.local/bin/  wm2tj の設定 GUI（GTK3/Python、.wm2rc の見た目を変えて HUP）。メニュー wm2tj → 設定…
   wm2tj-favorites           -> ~/.local/bin/  お気に入りの編集 GUI（~/.config/wm2tj/favorites）。メニュー wm2tj → お気に入りの編集…
+                               ファイルが無い間は wm2-menu-gen と同じ順（wm2tj-bar → Whisker Menu）で一覧を出し、最初の変更で作る
                                変えるたびに wm2-menu-gen を走らせて wm2tj に HUP（右クリックメニューがすぐ追従）
+                               一番上に wm2tj 組み込みの「ターミナル」（~/.wm2rc の new_label / new_window）も出る。
+                               別の端末を使うなら削除できる（new_label none にする。名前はコメントに残す）。戻すには右の一覧の先頭から追加
   wm2-menu-sync.path/.service -> ~/.local/share/systemd/user/  任意。アプリの追加・削除を右クリックメニューに反映する
                                systemd user の path ユニット。systemctl --user daemon-reload &&
                                systemctl --user enable --now wm2-menu-sync.path で有効化。systemd の無い環境では使わない
