@@ -21,11 +21,13 @@ install: all
 	$(MAKE) -C wm/extras install PREFIX='$(PREFIX)'
 	install -D -m644 man/wm2tj.1     $(DESTDIR)$(MANDIR)/man1/wm2tj.1
 	install -D -m644 man/wm2tj-bar.1 $(DESTDIR)$(MANDIR)/man1/wm2tj-bar.1
+	install -D -m644 man/wm2-swipe.1 $(DESTDIR)$(MANDIR)/man1/wm2-swipe.1
 
-# wm/extras is left alone: its "clean" would delete the committed po/ja.mo,
-# which is kept so that msgfmt is optional for people building from source.
+# (wm/extras "clean" removes only wm2-swipe; the committed po/ja.mo stays, so
+# that msgfmt is optional for people building from source)
 clean:
 	$(MAKE) -C wm distclean
 	$(MAKE) -C bar clean
+	$(MAKE) -C wm/extras clean
 
 .PHONY: all install clean

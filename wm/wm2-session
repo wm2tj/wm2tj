@@ -37,7 +37,11 @@ have dbus-update-activation-environment && dbus-update-activation-environment --
 if have fcitx5; then fcitx5 -r -d &
 elif have ibus-daemon; then pgrep -u "$(id -u)" -x ibus-daemon >/dev/null || ibus-daemon -drx
 fi
-have libinput-gestures && libinput-gestures &
+# touchpad: three-finger swipe between desktops (wm2-swipe, XInput 2.4), else
+# libinput-gestures if the user set it up
+if have wm2-swipe; then wm2-swipe &
+elif have libinput-gestures; then libinput-gestures &
+fi
 # compositor: wm2tj draws ARGB tabs, which need one. glx first, then the default backend
 if have picom; then picom --backend glx -b || picom -b; fi   # no --vsync: lower latency, may tear
 # wallpaper: the one chosen with "wm2-wallpaper --choose", else GNOME's

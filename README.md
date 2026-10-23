@@ -23,6 +23,7 @@ use it every day on a modern laptop:
 - A root menu with cascading folders and a search box (finds apps and open windows; works with an input method)
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop
 - No polling while moving windows
+- Three-finger touchpad swipe between desktops (`wm2-swipe`, XInput 2.4; no root or `input` group needed)
 
 Everything is done with the mouse, as in wm2 (there are no key bindings; the
 same list is in `man wm2tj`):
@@ -54,7 +55,7 @@ manager.
 | Directory | Contents |
 |---|---|
 | `wm/` | wm2tj, the window manager (C++). `wm/README` is the original wm2 README; `wm/README-ja.txt` describes the changes (Japanese) |
-| `wm/extras/` | menu generator, settings GUIs, `session-logout`, `power-dialog`, wallpaper, systemd units. See `wm/extras/README-ja.txt` |
+| `wm/extras/` | menu generator, settings GUIs, `session-logout`, `power-dialog`, wallpaper, `wm2-swipe`, systemd units. See `wm/extras/README-ja.txt` |
 | `bar/` | wm2tj-bar, the top bar (C). `bar/README.md` (English) / `bar/README.ja.md` (Japanese) |
 
 ## Building
@@ -62,7 +63,7 @@ manager.
 Debian / Ubuntu:
 
 ```
-sudo apt install g++ gcc make pkg-config libx11-dev libxext-dev libxft-dev picom
+sudo apt install g++ gcc make pkg-config libx11-dev libxext-dev libxft-dev libxi-dev picom
 make -C wm && sudo make -C wm install
 make -C bar && sudo make -C bar install
 make -C wm/extras install PREFIX=$HOME/.local   # optional extras
@@ -82,7 +83,7 @@ other EWMH window managers). Install both, or just the one you want
 (`wm2tj` only recommends the bar, it does not depend on it). To build them yourself:
 
 ```
-sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev gettext
+sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev libxi-dev gettext
 dpkg-buildpackage -us -uc -b
 sudo apt install ../wm2tj_*.deb ../wm2tj-bar_*.deb
 ```

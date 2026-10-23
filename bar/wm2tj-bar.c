@@ -252,7 +252,7 @@ static void loadConfig(void)
     cfg.height = 0;
     cfg.tabWidth = 32;
     cfg.tabLength = 0;
-    SET(borders, "white");
+    SET(borders, "black");	/* wm2tj's default too; "white" showed as a pale outline around the tab */
     SET(buttonBackground, "#1a4f9c");
     SET(barBackground, "black");
     SET(textColour, "white");

@@ -6,6 +6,8 @@ usr/bin/wm2tj-favorites
 usr/bin/wm2-wallpaper
 usr/bin/session-logout
 usr/bin/power-dialog
+usr/bin/wm2-swipe
+usr/share/man/man1/wm2-swipe.1
 usr/share/xsessions/wm2tj.desktop
 usr/share/wm2tj/wm2rc.sample
 usr/share/man/man1/wm2tj.1

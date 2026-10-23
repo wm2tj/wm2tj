@@ -35,14 +35,14 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
   別のデスクトップへ移す=パネルのタスクリストでボタンを右クリック→「別のワークスペースへ移動」
 
 ビルドと導入
-  sudo apt install g++ make pkg-config libx11-dev libxext-dev libxft-dev picom   # Debian/Ubuntu
+  sudo apt install g++ make pkg-config libx11-dev libxext-dev libxft-dev libxi-dev picom   # Debian/Ubuntu（libxi-dev は extras の wm2-swipe 用、無ければ wm2-swipe だけ省かれる）
     Fedora: gcc-c++ make pkgconf libX11-devel libXext-devel libXft-devel picom
-    Arch: base-devel libx11 libxext libxft picom   Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev picom
+    Arch: base-devel libx11 libxext libxft libxi picom   Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev libxi-dev picom
     （ヘッダとライブラリは pkg-config で探す。g++ でも clang++ でもビルドできる。CXX/CXXFLAGS/LDFLAGS/DESTDIR/PREFIX に従う）
   make && sudo make install              # /usr/local/bin/wm2tj
   sudo make install-session              # wm2-session → /usr/local/bin、wm2tj.desktop → /usr/share/xsessions
   ※ wm2-session は入っているものだけを起動する: fcitx5（無ければ ibus。ibus は im-config 等が先に起動していれば
-    二重に起動しない）・picom・wm2-wallpaper（壁紙）・xfsettingsd（無ければ xsettingsd）・
+    二重に起動しない）・wm2-swipe（無ければ libinput-gestures）・picom・wm2-wallpaper（壁紙）・xfsettingsd（無ければ xsettingsd）・
     polkit エージェント（mate/gnome/xfce/lxpolkit/kde のどれか。WM2TJ_POLKIT_AGENT= で指定可）・通知デーモン・
     wm2tj-bar。wm2tj-bar が無いときだけ xfce4-panel・nm-applet・blueman-applet・xfce4-power-manager
     （バーが Wi-Fi/Bluetooth/輝度キー/電源プロファイルを持つので、あるとトレイが二重になり電源キーを取り合う）。

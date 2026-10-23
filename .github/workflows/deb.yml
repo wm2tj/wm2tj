@@ -22,7 +22,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev gettext lintian
+            build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev libxi-dev gettext lintian
 
       - name: Build
         run: |

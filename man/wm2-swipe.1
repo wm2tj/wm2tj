@@ -1,0 +1,54 @@
+.TH WM2-SWIPE 1 "2026-10-23" "wm2tj 0.1.0" "User Commands"
+.SH NAME
+wm2-swipe \- switch virtual desktops with a three-finger touchpad swipe
+.SH SYNOPSIS
+.B wm2-swipe
+.RB [ \-f
+.IR fingers ]
+.RB [ \-t
+.IR threshold ]
+.RB [ \-r ]
+.RB [ \-w ]
+.SH DESCRIPTION
+.B wm2-swipe
+waits for touchpad swipe gestures and switches to the next or previous
+virtual desktop.  It reads the X server's own XInput 2.4 gesture events,
+which Xorg 21 and later deliver for libinput touchpads, so it needs no root
+privileges and no membership of the
+.I input
+group.  The switch is requested through the EWMH property
+.BR _NET_CURRENT_DESKTOP ,
+so it works with
+.BR wm2tj (1)
+and with any other EWMH window manager.
+.PP
+By default a swipe to the right goes to the next desktop and a swipe to the
+left to the previous one, and nothing happens at the first or last desktop.
+.B wm2-session
+starts it when it is installed.
+.SH OPTIONS
+.TP
+.BI \-f " fingers"
+Number of fingers of the swipe (default 3).
+.TP
+.BI \-t " threshold"
+Minimum horizontal travel, in libinput's unaccelerated motion units, before
+a swipe counts (default 60).  Shorter swipes, and swipes that move more
+vertically than horizontally, are ignored.
+.TP
+.B \-r
+Reverse the direction: a swipe to the left goes to the next desktop, as in
+GNOME and macOS.
+.TP
+.B \-w
+Wrap around: the next desktop after the last one is the first.
+.SH DIAGNOSTICS
+"the X server has no XInput 2.4 gestures": the X server is older than
+Xorg 21, or the session does not run on Xorg.  "gesture grab failed": another
+program already grabs the swipe gestures;
+.B wm2-swipe
+then still listens on the root window, but applications that use gestures
+themselves may take the swipe first.
+.SH SEE ALSO
+.BR wm2tj (1),
+.BR libinput (4)

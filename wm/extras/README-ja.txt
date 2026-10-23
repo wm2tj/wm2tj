@@ -25,7 +25,7 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
   別のデスクトップへ移す=パネルのタスクリストでボタンを右クリック→「別のワークスペースへ移動」
 
 ビルドと導入
-  sudo apt install g++ make libx11-dev libxext-dev libxmu-dev libxft-dev libfontconfig-dev picom
+  sudo apt install g++ make libx11-dev libxext-dev libxmu-dev libxft-dev libxi-dev libfontconfig-dev picom
   make && sudo install -m755 wm2tj /usr/local/bin/wm2tj
   sudo install -m755 wm2-session /usr/local/bin/wm2-session      # fcitx5/picom/xfce4-panel を起動して wm2tj を exec
   sudo make install-session   # wm2-session と wm2tj.desktop（上の階層の Makefile）
@@ -66,6 +66,9 @@ extras/
                                xfconf の /plugins/plugin-<id>/command-shutdown 等（パネル停止中に書く）
                                --ask を付けると power-dialog で確認してから実行（wm2tj のメニューとパネルの電源ボタンが使う）。
                                power-dialog は同じ場所か PATH から探し、起動できなければ zenity で確認
+  wm2-swipe.c               -> ~/.local/bin/wm2-swipe  3 本指の横スワイプで仮想デスクトップ移動（C、XInput 2.4 のジェスチャーを
+                               root でパッシブグラブ。root 権限も input グループも不要。右=次・左=前、-r で逆、-w で端から折り返し、
+                               -f 指の数、-t しきい値。libxi-dev があるときだけビルド。wm2-session が起動する）
   power-dialog              -> ~/.local/bin/  電源の確認画面（GTK3/Python。画面を暗くして中央にカード。
                                シャットダウン・再起動・サスペンド・ログアウトを選べる。選んだオプションを出力）
   panel-power/*.desktop     -> ~/.config/xfce4/panel/launcher-<id>/  パネル右端の電源ボタン（ランチャー）の項目。

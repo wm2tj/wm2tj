@@ -7,6 +7,7 @@ Build-Depends: debhelper-compat (= 13),
                libx11-dev,
                libxext-dev,
                libxft-dev,
+               libxi-dev,
                gettext
 Standards-Version: 4.7.0
 Homepage: https://github.com/wm2tj/wm2tj
@@ -35,7 +36,8 @@ Description: minimal X11 window manager with vertical tabs, based on wm2
  search box, and a small configuration file that is re-read on SIGHUP.
  .
  This package contains the window manager, the "wm2tj" session for the
- display manager, the menu generator and the settings windows.
+ display manager, the menu generator, the settings windows and wm2-swipe,
+ which switches desktops with a three-finger touchpad swipe.
 
 Package: wm2tj-bar
 Architecture: any
