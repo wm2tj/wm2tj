@@ -2,9 +2,9 @@
 
 A minimal X11 window manager based on [wm2](https://github.com/cannam/wm2) by Chris Cannam.
 
-**Status: beta (0.1.0).** Used daily on a few Xubuntu laptops. It builds
-warning-free on Debian, Ubuntu, Fedora, Arch and Alpine, but has only been run
-on Xubuntu so far (see "Known limitations").
+**Status: beta (0.1.0).** Used daily on a few Xubuntu and Ubuntu laptops. It
+builds warning-free on Debian, Ubuntu, Fedora, Arch and Alpine, but has only
+been run on Xubuntu and Ubuntu so far (see "Known limitations").
 
 Website (English / Japanese): <https://wm2tj.kaie-net.com/>
 
@@ -80,7 +80,13 @@ Prebuilt `.deb` files for the latest tag are on the
 [Releases](https://github.com/wm2tj/wm2tj/releases) page: `wm2tj` (window
 manager, session, helpers) and `wm2tj-bar` (the bar, which also works with
 other EWMH window managers). Install both, or just the one you want
-(`wm2tj` only recommends the bar, it does not depend on it). To build them yourself:
+(`wm2tj` only recommends the bar, it does not depend on it):
+
+```
+sudo apt install ./wm2tj_*.deb ./wm2tj-bar_*.deb
+```
+
+To build them yourself:
 
 ```
 sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev libxi-dev gettext
@@ -88,14 +94,30 @@ dpkg-buildpackage -us -uc -b
 sudo apt install ../wm2tj_*.deb ../wm2tj-bar_*.deb
 ```
 
+## First login
+
+Pick **wm2tj** in the session menu of the display manager (GDM, LightDM,
+SDDM). The session starts the compositor, the bar, the input method and the
+other helpers that are installed, and creates `~/.wm2rc` on the first login
+from `/usr/share/wm2tj/wm2rc.sample` (the settings) plus a root menu
+generated from the installed applications. Right-click the desktop: the
+**wm2tj** folder of the menu has the settings window, the favourites editor
+and the wallpaper chooser; everything else is in `~/.wm2rc` (see `man wm2tj`)
+and `~/.config/wm2tj-bar/config` (see `bar/README.md`). The menu is kept up
+to date as applications are installed and removed.
+
 ## Known limitations (beta)
 
 - Builds warning-free (`-Wall -Wextra`) on Debian stable, Ubuntu 24.04,
   Fedora, Arch and Alpine (musl, gcc and clang), but has only been *run* on
-  Xubuntu-based systems. NixOS, Void and Gentoo are untested
+  Xubuntu and Ubuntu (GDM and LightDM). NixOS, Void and Gentoo are untested
+- Packages exist for Debian / Ubuntu only; Arch, Fedora and Alpine build from
+  source with `make` (native packages are planned for the next beta)
+- X11 only (it is a window manager for Xorg; there is no Wayland version)
 - Volume control needs `wpctl` or `pactl` (plain ALSA is not supported)
 - No WPA-Enterprise in the Wi-Fi menu, no StatusNotifierItem tray, single
   screen only (screen 0), and no Latin-1 `WM_NAME` from very old applications
+- Touchpad swipes need Xorg 21 or later (XInput 2.4 gestures)
 
 ## Licence
 
