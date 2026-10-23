@@ -41,9 +41,12 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
     （ヘッダとライブラリは pkg-config で探す。g++ でも clang++ でもビルドできる。CXX/CXXFLAGS/LDFLAGS/DESTDIR/PREFIX に従う）
   make && sudo make install              # /usr/local/bin/wm2tj
   sudo make install-session              # wm2-session → /usr/local/bin、wm2tj.desktop → /usr/share/xsessions
-  ※ wm2-session は入っているものだけを起動する: fcitx5（無ければ ibus）・picom・xfsettingsd（無ければ xsettingsd）・
+  ※ wm2-session は入っているものだけを起動する: fcitx5（無ければ ibus。ibus は im-config 等が先に起動していれば
+    二重に起動しない）・picom・wm2-wallpaper（壁紙）・xfsettingsd（無ければ xsettingsd）・
     polkit エージェント（mate/gnome/xfce/lxpolkit/kde のどれか。WM2TJ_POLKIT_AGENT= で指定可）・通知デーモン・
-    wm2tj-bar（無ければ xfce4-panel）・nm-applet・blueman-applet・xfce4-power-manager。
+    wm2tj-bar。wm2tj-bar が無いときだけ xfce4-panel・nm-applet・blueman-applet・xfce4-power-manager
+    （バーが Wi-Fi/Bluetooth/輝度キー/電源プロファイルを持つので、あるとトレイが二重になり電源キーを取り合う）。
+    ~/.wm2rc が無ければ（初回ログイン）先に wm2-menu-gen を走らせて wm2rc.sample の設定 + メニューを作る。
     XDG_DATA_DIRS/XDG_CONFIG_DIRS はログインマネージャーの値を残し、Xfce/Xubuntu・Flatpak・snap のディレクトリがあれば足す。
     XDG_CURRENT_DESKTOP=wm2tj:XFCE（Xfce の設定ツールをメニューに出すため）
   ※ .desktop の Exec に sh -c '...' を書くと Xsession が引用符を無視して起動しない。起動処理は wm2-session に書く。
@@ -58,7 +61,8 @@ docs/
   開発記録.md               改造の経緯・原因・テスト方法（作業記録からの抜粋）
 
 extras/
-  wm2rc.sample              -> ~/.wm2rc（メニューは wm2-menu-gen で追記）
+  wm2rc.sample              -> $(PREFIX)/share/wm2tj/  ~/.wm2rc が無いとき wm2-menu-gen がこれを設定部分にして作る
+                               （手で ~/.wm2rc にコピーしてもよい。メニューは wm2-menu-gen で追記）
   wm2-menu-gen              -> ~/.local/bin/  Whisker Menu と同じメニュー（お気に入り→カテゴリ）を ~/.wm2rc に生成
                                末尾の「ログアウト」等は session-logout（PATH、無ければ ~/.local/bin）を呼ぶ
   session-logout            -> ~/.local/bin/  Xfce なら xfce4-session-logout、wm2tj なら wm2tj を終了。

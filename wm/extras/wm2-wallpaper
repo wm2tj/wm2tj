@@ -61,11 +61,15 @@ if [ ! -f "$path" ] && have_schema; then
     path=$(python3 -Ic 'import sys, urllib.parse as u; print(u.unquote(u.urlparse(sys.argv[1]).path))' "$uri")
 fi
 if [ -f "$path" ]; then
-    if have feh; then exec feh --no-fehbg --bg-fill "$path"
-    elif have xwallpaper; then exec xwallpaper --zoom "$path"
-    elif have hsetroot; then exec hsetroot -fill "$path"
-    else echo "wm2-wallpaper: needs feh, xwallpaper or hsetroot" >&2; exit 1
+    if have feh; then feh --no-fehbg --bg-fill "$path" && exit 0
+    elif have xwallpaper; then xwallpaper --zoom "$path" && exit 0
+    elif have hsetroot; then hsetroot -fill "$path" && exit 0
+    else echo "wm2-wallpaper: needs feh, xwallpaper or hsetroot" >&2
     fi
 fi
-echo "wm2-wallpaper: no wallpaper chosen (run with --choose), or not found: $path" >&2
+# Nothing chosen yet (a new user), GNOME's default is not there (Ubuntu's
+# schema points at a .jxl that is not installed) or no setter: a plain dark
+# root rather than the X server's black, so the desktop does not look broken.
+echo "wm2-wallpaper: no wallpaper chosen (run with --choose), or not usable: $path" >&2
+have xsetroot && xsetroot -solid "#2e3440"
 exit 1

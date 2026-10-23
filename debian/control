@@ -20,11 +20,11 @@ Recommends: wm2tj-bar,
             python3-gi,
             gir1.2-gtk-3.0,
             dunst | notification-daemon,
-            mate-polkit | polkit-1-auth-agent
+            mate-polkit | polkit-1-auth-agent,
+            feh | xwallpaper | hsetroot
 Suggests: fonts-noto-cjk,
           fcitx5,
-          xfce4-settings | xsettingsd,
-          feh | xwallpaper | hsetroot
+          xfce4-settings | xsettingsd
 Provides: x-window-manager
 Description: minimal X11 window manager with vertical tabs, based on wm2
  wm2tj is a window manager based on wm2 (1997): every window gets a tab on

@@ -7,6 +7,7 @@ usr/bin/wm2-wallpaper
 usr/bin/session-logout
 usr/bin/power-dialog
 usr/share/xsessions/wm2tj.desktop
+usr/share/wm2tj/wm2rc.sample
 usr/share/man/man1/wm2tj.1
 usr/share/locale/*/LC_MESSAGES/wm2tj.mo
 usr/lib/systemd/user/wm2-menu-sync.path

@@ -4,6 +4,7 @@
 # The optional systemd user units go to $(PREFIX)/share/systemd/user, which
 # systemd --user reads for both prefixes (~/.local/share and /usr/local/share).
 PREFIX    ?= /usr/local
+DATADIR   ?= $(PREFIX)/share
 LOCALEDIR ?= $(PREFIX)/share/locale
 UNITDIR   ?= $(PREFIX)/share/systemd/user
 
@@ -31,9 +32,10 @@ pot:
 
 install: all
 	set -e; for s in $(SCRIPTS); do \
-	    sed 's|@LOCALEDIR@|$(LOCALEDIR)|' $$s > $$s.tmp && \
+	    sed 's|@LOCALEDIR@|$(LOCALEDIR)|; s|@DATADIR@|$(DATADIR)|' $$s > $$s.tmp && \
 	    install -D -m755 $$s.tmp $(DESTDIR)$(PREFIX)/bin/$$s && rm -f $$s.tmp; \
 	done
+	install -D -m644 wm2rc.sample $(DESTDIR)$(DATADIR)/wm2tj/wm2rc.sample
 	set -e; for l in $(LANGS); do \
 	    [ -f po/$$l.mo ] && install -D -m644 po/$$l.mo \
 		$(DESTDIR)$(LOCALEDIR)/$$l/LC_MESSAGES/wm2tj.mo || true; \

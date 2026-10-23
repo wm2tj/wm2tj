@@ -27,13 +27,22 @@ export XDG_DATA_DIRS XDG_CONFIG_DIRS XDG_CURRENT_DESKTOP
 have dbus-update-activation-environment && dbus-update-activation-environment --systemd \
     XDG_CONFIG_DIRS XDG_DATA_DIRS XDG_CURRENT_DESKTOP LANG LANGUAGE LC_ALL LC_MESSAGES PATH 2>/dev/null
 
-# input method: fcitx5 (-r: replace a stale instance of the previous session), else IBus
+# First login: ~/.wm2rc does not exist yet, so build it (the settings from
+# wm2rc.sample followed by the generated root menu) before anything reads it.
+[ -f "$HOME/.wm2rc" ] || { have wm2-menu-gen && wm2-menu-gen; }
+
+# input method: fcitx5 (-r: replace a stale instance of the previous session), else IBus.
+# On Ubuntu im-config (Xsession.d) has already started ibus-daemon; a second one
+# would show up as two IBus panels, so start it only when none is running.
 if have fcitx5; then fcitx5 -r -d &
-elif have ibus-daemon; then ibus-daemon -drx
+elif have ibus-daemon; then pgrep -u "$(id -u)" -x ibus-daemon >/dev/null || ibus-daemon -drx
 fi
 have libinput-gestures && libinput-gestures &
 # compositor: wm2tj draws ARGB tabs, which need one. glx first, then the default backend
 if have picom; then picom --backend glx -b || picom -b; fi   # no --vsync: lower latency, may tear
+# wallpaper: the one chosen with "wm2-wallpaper --choose", else GNOME's
+# (needs feh, xwallpaper or hsetroot; quiet when nothing is chosen yet)
+have wm2-wallpaper && wm2-wallpaper >/dev/null 2>&1 &
 # xsettings daemon (GTK theme, fonts, DPI)
 if have xfsettingsd; then xfsettingsd &
 elif have xsettingsd; then xsettingsd &
@@ -66,11 +75,15 @@ then
 	command -v "$n" >/dev/null 2>&1 && { "$n" & break; }
     done
 fi
-# top bar: wm2tj-bar, else the Xfce panel
+# top bar: wm2tj-bar, else the Xfce panel with the usual applets. wm2tj-bar has
+# its own Wi-Fi, Bluetooth, brightness and power-profile handling, so with it
+# nm-applet and blueman-applet would only add a second tray icon, and
+# xfce4-power-manager would fight it for the brightness keys and the power button.
 if have wm2tj-bar; then wm2tj-bar &
-elif have xfce4-panel; then xfce4-panel &
+else
+    have xfce4-panel && xfce4-panel &
+    for a in nm-applet blueman-applet xfce4-power-manager; do
+	have "$a" && "$a" &
+    done
 fi
-for a in nm-applet blueman-applet xfce4-power-manager; do
-    have "$a" && "$a" &
-done
 exec "${WM2TJ:-wm2tj}"

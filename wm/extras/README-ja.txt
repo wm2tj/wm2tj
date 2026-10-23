@@ -29,14 +29,16 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
   make && sudo install -m755 wm2tj /usr/local/bin/wm2tj
   sudo install -m755 wm2-session /usr/local/bin/wm2-session      # fcitx5/picom/xfce4-panel を起動して wm2tj を exec
   sudo make install-session   # wm2-session と wm2tj.desktop（上の階層の Makefile）
-  ※ wm2-session は XDG_CONFIG_DIRS/XDG_DATA_DIRS を Xubuntu と同じにする（パネルのメニューを Xfce と揃える）。また polkit エージェント・nm-applet・blueman-applet・xfce4-power-manager も起動する
+  ※ wm2-session は XDG_CONFIG_DIRS/XDG_DATA_DIRS を Xubuntu と同じにする（パネルのメニューを Xfce と揃える）。また polkit エージェント・壁紙（wm2-wallpaper）も起動し、
+    ~/.wm2rc が無ければ wm2-menu-gen で作る。nm-applet・blueman-applet・xfce4-power-manager は wm2tj-bar が無いときだけ（バーと役割が重なるため）
   ※ .desktop の Exec に sh -c '...' を書くと Xsession が引用符を無視して起動しない。起動処理は wm2-session に書く。
 
 docs/
   開発記録.md               改造の経緯・原因・テスト方法（作業記録からの抜粋）
 
 extras/
-  wm2rc.sample              -> ~/.wm2rc（メニューは wm2-menu-gen で追記）
+  wm2rc.sample              -> $(PREFIX)/share/wm2tj/  ~/.wm2rc が無いとき wm2-menu-gen がこれを設定部分にして作る
+                               （手で ~/.wm2rc にコピーしてもよい。メニューは wm2-menu-gen で追記）
   wm2-menu-gen              -> ~/.local/bin/  右クリックメニュー（お気に入り→wm2tj→カテゴリ）を ~/.wm2rc に生成
                                お気に入りは ~/.config/wm2tj/favorites。無ければ wm2tj-bar のお気に入り
                                （~/.config/wm2tj-bar/favorites）→ Whisker Menu のお気に入り の順に写して作る
