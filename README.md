@@ -5,6 +5,8 @@ A minimal X11 window manager based on [wm2](https://github.com/cannam/wm2) by Ch
 **Status: beta (0.1.0).** Used daily on a few Xubuntu laptops; other
 distributions and compilers are untested (see "Known limitations").
 
+![wm2tj desktop: the settings window, a file manager and a terminal, each with a blue vertical tab on its left, under the wm2tj-bar top bar](screenshots/wm2tj.webp)
+
 wm2 (1997) gives every window a vertical tab on its left side and does almost
 nothing else. I have used it for years whenever I put Linux on an underpowered
 machine, and I still think it is one of the coolest-looking window managers
