@@ -1,0 +1,13 @@
+usr/bin/wm2tj
+usr/bin/wm2-session
+usr/bin/wm2-menu-gen
+usr/bin/wm2tj-settings
+usr/bin/wm2tj-favorites
+usr/bin/wm2-wallpaper
+usr/bin/session-logout
+usr/bin/power-dialog
+usr/share/xsessions/wm2tj.desktop
+usr/share/man/man1/wm2tj.1
+usr/share/locale/*/LC_MESSAGES/wm2tj.mo
+usr/lib/systemd/user/wm2-menu-sync.path
+usr/lib/systemd/user/wm2-menu-sync.service

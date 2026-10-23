@@ -10,7 +10,7 @@ BINDIR      ?= $(PREFIX)/bin
 XSESSIONDIR ?= /usr/share/xsessions
 PKG_CONFIG  ?= pkg-config
 PKGS         = x11 xext xft
-CXXFLAGS    ?= -O2
+CXXFLAGS    ?= -O2 -Wall -Wextra
 CPPFLAGS    += $(shell $(PKG_CONFIG) --cflags $(PKGS))
 LIBS         = $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
 # Rotated.C (core-font text rotation from the original wm2) is no longer

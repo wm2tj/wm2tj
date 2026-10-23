@@ -170,7 +170,7 @@ int Border::edgePixel(WindowManager *wm, unsigned long *p)
 Border::Border(Client *const c, Window child) :
     m_client(c), m_parent(0), m_tab(0),
     m_child(child), m_button(0), m_resize(0), m_edge(None), m_label(0),
-    m_tabHeight(-1), m_prevW(-1), m_prevH(-1),
+    m_prevW(-1), m_prevH(-1), m_tabHeight(-1),
     m_labelPixmap(None), m_labelPixW(0), m_labelPixH(0),
     m_glossPixmap(None), m_glossPixH(0)
 {

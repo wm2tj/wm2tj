@@ -195,12 +195,12 @@ void WindowManager::checkDelaysForFocus()
 {
     if (!CONFIG_AUTO_RAISE) return;
 
-    int t = timestamp(True);
+    Time t = timestamp(True);
 
     if (m_focusPointerMoved) {	// only raise when pointer stops
 
 	if (t < m_focusTimestamp ||
-	    t - m_focusTimestamp > CONFIG_POINTER_STOPPED_DELAY) {
+	    t - m_focusTimestamp > (Time)CONFIG_POINTER_STOPPED_DELAY) {
 
 	    if (m_focusPointerNowStill) {
 		m_focusCandidate->focusIfAppropriate(True);
@@ -212,7 +212,7 @@ void WindowManager::checkDelaysForFocus()
     } else {
 
 	if (t < m_focusTimestamp ||
-	    t - m_focusTimestamp > CONFIG_AUTO_RAISE_DELAY) {
+	    t - m_focusTimestamp > (Time)CONFIG_AUTO_RAISE_DELAY) {
 
 	    m_focusCandidate->focusIfAppropriate(True);
 
@@ -497,7 +497,7 @@ void Client::eventUnmap(XUnmapEvent *e)
 void WindowManager::eventCreate(XCreateWindowEvent *e)
 {
     if (e->override_redirect) return;
-    Client *c = windowToClient(e->window, True);
+    (void)windowToClient(e->window, True);
 }
 
 
@@ -566,7 +566,7 @@ void WindowManager::eventClient(XClientMessageEvent *e)
     if (e->message_type == Atoms::net_wm_desktop) {
 	if (c && e->format == 32) {
 	    int d = (int)e->data.l[0];
-	    if (d < 0 || d == 0xFFFFFFFF) {
+	    if (d < 0 || (unsigned long)e->data.l[0] == 0xFFFFFFFFUL) {
 		// EWMH all-desktops / sticky. Keep the window visible on every
 		// desktop instead of clamping it onto desktop 0.
 		c->setSticky(True);

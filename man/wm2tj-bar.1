@@ -1,0 +1,85 @@
+.TH WM2TJ-BAR 1 "2026-10-22" "wm2tj-bar 0.1.0" "User Commands"
+.SH NAME
+wm2tj-bar \- top bar for wm2tj and other EWMH window managers
+.SH SYNOPSIS
+.B wm2tj-bar
+.RB [ \-\-version ]
+.SH DESCRIPTION
+.B wm2tj-bar
+is a top bar for the X Window System, written for wm2tj but usable with any
+window manager that follows the EWMH specification: it talks to the window
+manager only through EWMH properties.  It is one process, plain C and Xlib,
+and reads CPU, memory, Wi-Fi, Bluetooth and battery state straight from
+.I /proc
+and
+.IR /sys .
+.PP
+From left to right: the application menu button, drawn as a wm2tj tab laid
+on its side; the windows on the current desktop (click to raise, click again
+to minimise); the virtual desktops (click or scroll); CPU and memory; the
+system tray (XEmbed); Wi-Fi; the input method; Bluetooth; volume; battery;
+and the clock.  Hovering over an icon shows the numbers.  Clicking most
+icons opens a menu: Wi-Fi networks (with a password box of its own),
+paired Bluetooth devices, sound outputs and mute, brightness and the power
+profile.  The bar also handles the brightness and volume keys and switches
+the power profile when the charger is plugged in or out.
+.SH OPTIONS
+.TP
+.B \-\-version
+Print the version and exit.
+.SH CONFIGURATION
+Settings are read from
+.I ~/.config/wm2tj-bar/config
+(see
+.I config.sample
+in the source distribution for every keyword) and re-read on
+.BR SIGHUP .
+The look of the menu button follows the tab settings in
+.IR ~/.wm2rc ,
+so the bar matches the window tabs.
+.B wm2tj-bar-settings
+edits the configuration in a window.
+.PP
+The bar runs these programs when they are installed, and hides the item
+otherwise:
+.B nmcli
+(NetworkManager) for Wi-Fi,
+.B wpctl
+or
+.B pactl
+for volume,
+.B bluetoothctl
+for Bluetooth,
+.B powerprofilesctl
+for the power profile,
+.B fcitx5-remote
+or
+.B ibus
+for the input method, and
+.BR systemctl / loginctl
+for the session commands.
+.SH SIGNALS
+.TP
+.B SIGHUP
+Re-read the configuration:
+.B pkill \-HUP \-x wm2tj-bar
+.SH FILES
+.TP
+.I ~/.config/wm2tj-bar/config
+Configuration.
+.TP
+.I ~/.config/wm2tj-bar/favorites
+Favourites of the application menu.  With
+.B sync_wm2tj yes
+the bar shares
+.I ~/.config/wm2tj/favorites
+with the wm2tj root menu instead.
+.SH SEE ALSO
+.BR wm2tj (1),
+.BR nmcli (1),
+.BR wpctl (1),
+.BR bluetoothctl (1)
+.PP
+https://github.com/wm2tj/wm2tj
+.SH AUTHOR
+tetsu

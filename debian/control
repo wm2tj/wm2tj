@@ -1,0 +1,63 @@
+Source: wm2tj
+Section: x11
+Priority: optional
+Maintainer: tetsu <tetsu@example.invalid>
+Build-Depends: debhelper-compat (= 13),
+               pkgconf | pkg-config,
+               libx11-dev,
+               libxext-dev,
+               libxft-dev,
+               gettext
+Standards-Version: 4.7.0
+Homepage: https://github.com/wm2tj/wm2tj
+Rules-Requires-Root: no
+
+Package: wm2tj
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3
+Recommends: wm2tj-bar,
+            picom,
+            python3-gi,
+            gir1.2-gtk-3.0,
+            dunst | notification-daemon,
+            mate-polkit | polkit-1-auth-agent
+Suggests: fonts-noto-cjk,
+          fcitx5,
+          xfce4-settings | xsettingsd,
+          feh | xwallpaper | hsetroot
+Provides: x-window-manager
+Description: minimal X11 window manager with vertical tabs, based on wm2
+ wm2tj is a window manager based on wm2 (1997): every window gets a tab on
+ its left edge with the title drawn bottom to top, a close button and a thin
+ frame, and very little else.  On top of that it adds what a laptop needs
+ today: titles in UTF-8 through Xft, maximise and minimise, virtual desktops,
+ EWMH support for taskbars, pagers and docks, a root menu with folders and a
+ search box, and a small configuration file that is re-read on SIGHUP.
+ .
+ This package contains the window manager, the "wm2tj" session for the
+ display manager, the menu generator and the settings windows.
+
+Package: wm2tj-bar
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3
+Recommends: python3-gi,
+            gir1.2-gtk-3.0,
+            network-manager,
+            wireplumber | pulseaudio-utils,
+            bluez,
+            power-profiles-daemon,
+            xsecurelock
+Suggests: wm2tj,
+          fonts-noto-cjk,
+          nm-connection-editor,
+          pavucontrol,
+          blueman
+Description: top bar for wm2tj and other EWMH window managers
+ A top bar drawn as a wm2tj tab laid on its side: application menu, running
+ windows, virtual desktops, CPU, memory, system tray, Wi-Fi (with its own
+ password prompt), input method, Bluetooth, volume, battery and clock, each
+ with a menu.  It also handles the brightness and volume keys and the power
+ profile, replacing a panel and a power manager.
+ .
+ Plain C and Xlib in one process.  It talks to the window manager only
+ through EWMH properties, so it also works with other EWMH window managers.

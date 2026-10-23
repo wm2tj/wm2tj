@@ -1819,7 +1819,7 @@ static void loadImes(void)
 	    imes[0].current = 1;
 	}
     } else if (imKind == IM_XKB) {
-	char lay[XkbNumKbdGroups][16], id[8], name[96];
+	char lay[XkbNumKbdGroups][16], id[16], name[96];
 	int nl = xkbLayouts(lay, XkbNumKbdGroups), g = xkbGroup();
 	for (i = 0; i < nl; ++i) {
 	    xkbGroupName(i, name, sizeof name);

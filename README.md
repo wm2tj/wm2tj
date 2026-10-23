@@ -46,13 +46,28 @@ make -C wm/extras install PREFIX=$HOME/.local   # optional extras
 ```
 
 Package names for Fedora, Arch and Alpine are listed in `wm/README-ja.txt`
-and `bar/README.md`. `make -C wm install-session` adds a "wm2tj" entry to the
-display manager's session list.
+and `bar/README.md` (Alpine also needs `gettext-dev` for the bar). `make -C wm install-session` adds a "wm2tj" entry to the
+display manager's session list. The top-level `make` / `sudo make install`
+does all of the above (including the man pages) in one go.
+
+### Debian / Ubuntu packages
+
+Prebuilt `.deb` files for the latest tag are on the
+[Releases](https://github.com/wm2tj/wm2tj/releases) page: `wm2tj` (window
+manager, session, helpers) and `wm2tj-bar` (the bar, which also works with
+other EWMH window managers). To build them yourself:
+
+```
+sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev gettext
+dpkg-buildpackage -us -uc -b
+sudo apt install ../wm2tj_*.deb ../wm2tj-bar_*.deb
+```
 
 ## Known limitations (beta)
 
-- Tested on Xubuntu-based systems only. clang++ and musl (Alpine) compile in
-  theory but have not been built; NixOS, Void and Gentoo are untested
+- Builds warning-free (`-Wall -Wextra`) on Debian stable, Ubuntu 24.04,
+  Fedora, Arch and Alpine (musl, gcc and clang), but has only been *run* on
+  Xubuntu-based systems. NixOS, Void and Gentoo are untested
 - Volume control needs `wpctl` or `pactl` (plain ALSA is not supported)
 - No WPA-Enterprise in the Wi-Fi menu, no StatusNotifierItem tray, single
   screen only (screen 0), and no Latin-1 `WM_NAME` from very old applications

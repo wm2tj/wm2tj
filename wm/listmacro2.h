@@ -25,7 +25,7 @@ public: \
 	assert(index >= 0 && index < m_count); \
 	return m_items[index]; \
     } \
-    T *array(long index, long count) { \
+    T *array(long index, long) { \
 	return m_items + index; \
     } \
 \
@@ -41,7 +41,7 @@ private: \
 
 #define implementList(List, T) \
 \
-List::List() : m_count(0), m_items(0) { } \
+List::List() : m_items(0), m_count(0) { } \
 \
 List::~List() { remove_all(); } \
 \

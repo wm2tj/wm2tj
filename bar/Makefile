@@ -10,7 +10,10 @@ CC         ?= cc
 CFLAGS     ?= -O2 -Wall -Wextra
 PKGS        = x11 xext xft
 CPPFLAGS   += $(shell $(PKG_CONFIG) --cflags $(PKGS)) -DLOCALEDIR='"$(LOCALEDIR)"'
-LIBS        = $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
+LIBS        = $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm $(INTL_LIBS)
+# glibc has gettext built in; musl (Alpine) needs the separate libintl
+# (package gettext-dev).  Link -lintl only where it exists.
+INTL_LIBS  ?= $(shell echo 'int main(void){return 0;}' | $(CC) -x c - -lintl -o /dev/null 2>/dev/null && echo -lintl)
 MSGFMT     := $(shell command -v msgfmt 2>/dev/null)
 
 LANGS      = ja

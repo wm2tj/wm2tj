@@ -1373,7 +1373,6 @@ Boolean Client::move(XButtonEvent *e)
     XEvent event;
     Boolean found;
     Boolean doSomething = False;
-    struct timeval sleepval;
 
     while (!done) {
 
@@ -1504,7 +1503,6 @@ void Client::resize(XButtonEvent *e, Boolean horizontal, Boolean vertical)
     Boolean found;
     Boolean doSomething = False;
     Boolean done = False;
-    struct timeval sleepval;
 
     while (!done) {
 
@@ -1676,7 +1674,6 @@ void Border::eventButton(XButtonEvent *e)
     XEvent event;
     Boolean found;
     Boolean done = False;
-    struct timeval sleepval;
     unsigned long tdiff = 0L;
     int x = e->x;
     int y = e->y;
@@ -1689,7 +1686,7 @@ void Border::eventButton(XButtonEvent *e)
 
 	found = False;
 
-	if (tdiff > CONFIG_DESTROY_WINDOW_DELAY && action == 1) {
+	if (tdiff > (unsigned long)CONFIG_DESTROY_WINDOW_DELAY && action == 1) {
 	    windowManager()->installCursor(WindowManager::DeleteCursor);
 	    action = 2;
 	}

@@ -136,7 +136,7 @@ Apply it with `sudo systemctl kill -s HUP systemd-logind`. Stop xfce4-power-mana
 ```
 sudo apt install build-essential pkg-config libx11-dev libxext-dev libxft-dev gettext   # Debian/Ubuntu
 # Fedora: gcc make pkgconf libX11-devel libXext-devel libXft-devel gettext
-# Arch:   base-devel libx11 libxext libxft gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev gettext
+# Arch:   base-devel libx11 libxext libxft gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev gettext gettext-dev
 # Void:   base-devel pkg-config libX11-devel libXext-devel libXft-devel gettext
 # the settings window (optional): python3 + PyGObject + GTK 3 = python3-gi / python3-gobject / python-gobject / py3-gobject3
 # make works without gettext's msgfmt too (the bundled .mo is used as it is)

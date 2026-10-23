@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+# Offer wm2tj as a choice for x-window-manager (priority below the desktop
+# environments' own window managers).
+if [ "$1" = configure ]; then
+    update-alternatives --install /usr/bin/x-window-manager x-window-manager /usr/bin/wm2tj 40 \
+        --slave /usr/share/man/man1/x-window-manager.1.gz x-window-manager.1.gz /usr/share/man/man1/wm2tj.1.gz
+fi
+
+#DEBHELPER#
+
+exit 0

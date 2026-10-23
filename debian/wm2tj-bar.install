@@ -1,0 +1,5 @@
+usr/bin/wm2tj-bar
+usr/bin/wm2tj-bar-settings
+usr/share/applications/wm2tj-bar-settings.desktop
+usr/share/man/man1/wm2tj-bar.1
+usr/share/locale/*/LC_MESSAGES/wm2tj-bar.mo
