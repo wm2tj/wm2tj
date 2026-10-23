@@ -24,6 +24,11 @@ app menu, task list, virtual desktops, system tray, CPU / memory / Wi-Fi /
 Bluetooth / volume / battery with their own menus, brightness and volume keys,
 and a clock. Plain C and Xlib; English UI with a Japanese translation.
 
+The two are separate programs and you can use either without the other: the
+window manager alone (the session then starts `xfce4-panel` if it is
+installed, or runs with no bar), or the bar alone under another EWMH window
+manager.
+
 ![wm2tj-bar](bar/screenshot.png)
 
 ## Layout
@@ -55,7 +60,8 @@ does all of the above (including the man pages) in one go.
 Prebuilt `.deb` files for the latest tag are on the
 [Releases](https://github.com/wm2tj/wm2tj/releases) page: `wm2tj` (window
 manager, session, helpers) and `wm2tj-bar` (the bar, which also works with
-other EWMH window managers). To build them yourself:
+other EWMH window managers). Install both, or just the one you want
+(`wm2tj` only recommends the bar, it does not depend on it). To build them yourself:
 
 ```
 sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev gettext
