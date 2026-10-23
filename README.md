@@ -2,8 +2,11 @@
 
 A minimal X11 window manager based on [wm2](https://github.com/cannam/wm2) by Chris Cannam.
 
-**Status: beta (0.1.0).** Used daily on a few Xubuntu laptops; other
-distributions and compilers are untested (see "Known limitations").
+**Status: beta (0.1.0).** Used daily on a few Xubuntu laptops. It builds
+warning-free on Debian, Ubuntu, Fedora, Arch and Alpine, but has only been run
+on Xubuntu so far (see "Known limitations").
+
+Website (English / Japanese): <https://wm2tj.kaie-net.com/>
 
 ![wm2tj desktop: the settings window, a file manager and a terminal, each with a blue vertical tab on its left, under the wm2tj-bar top bar](screenshots/wm2tj.webp)
 
