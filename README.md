@@ -123,4 +123,6 @@ to date as applications are installed and removed.
 
 wm2tj is an independent fork. It is not affiliated with or endorsed by the
 original author. Licensed under the MIT (X11) licence, as wm2 is; see
-`COPYING`, `wm/COPYING` and `bar/COPYING`.
+`LICENSE`, `COPYING`, `wm/COPYING` and `bar/COPYING`. The wm2 notice in
+`wm/COPYING` adds that the names of the authors shall not be used in
+advertising without permission; that applies to `wm/`.
