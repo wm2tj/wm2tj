@@ -19,6 +19,19 @@ use it every day on a modern laptop:
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop
 - No polling while moving windows
 
+Everything is done with the mouse, as in wm2 (there are no key bindings; the
+same list is in `man wm2tj`):
+
+| Action | Result |
+|---|---|
+| Left-drag the tab | Move the window (a click raises and focuses it) |
+| Double-click the tab | Maximise / restore |
+| Middle-click the tab (three-finger tap on a touchpad) | Minimise; bring it back from the bar's task list or the root menu |
+| The square at the end of the tab | Close |
+| Left-drag the bottom-right corner of the frame | Resize |
+| Left-click the desktop | Cycle through the windows |
+| Right-click the desktop | Root menu: favourites, application folders, open windows, session commands; type to search |
+
 It comes with **wm2tj-bar**, a top bar drawn as a wm2tj tab laid on its side:
 app menu, task list, virtual desktops, system tray, CPU / memory / Wi-Fi /
 Bluetooth / volume / battery with their own menus, brightness and volume keys,
