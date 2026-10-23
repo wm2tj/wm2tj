@@ -29,6 +29,9 @@ jobs:
           dpkg-buildpackage -us -uc -b
           mkdir -p dist
           mv ../*.deb ../*.changes ../*.buildinfo dist/
+          # Ubuntu also emits -dbgsym .ddeb files, and lintian refuses a .changes
+          # whose listed files are missing; Debian builders produce none
+          mv ../*.ddeb dist/ 2>/dev/null || true
           ls -l dist
 
       - name: lintian
