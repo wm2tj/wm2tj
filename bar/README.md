@@ -32,7 +32,7 @@ A standalone top bar for wm2tj, a window manager based on wm2. Written in C with
 - **Favourites** at the top. Right-click an application → "Add to favourites" / "Remove from favourites". Saved in `~/.config/wm2tj-bar/favorites` (one .desktop file name per line)
   - `sync_wm2tj yes` ("Sync the menu with wm2tj" in the settings window) reads and writes `~/.config/wm2tj/favorites`, the favourites of the wm2tj right-click menu, so a favourite added or removed on either side shows in both
     - until that file exists the bar shows its own favourites (`~/.config/wm2tj-bar/favorites`) and the first change creates the shared file (wm2tj's `wm2-menu-gen` also starts it from the bar's list when missing)
-    - after each change the bar runs `wm2tj_menu_command` so the wm2tj menu follows; the default runs `wm2-menu-gen` (from PATH, `~/.local/bin` or `/usr/local/bin`) and sends wm2tj SIGHUP
+    - after each change the bar runs `wm2tj_menu_command` so the wm2tj menu follows; the default runs `wm2-menu-gen` (from PATH, `~/.local/bin` or `/usr/local/bin`) and sends wm2tj SIGHUP, unless wm2tj's `wm2-menu-sync.path` (systemd --user) is watching the favourites file and does the same (so wm2tj does not restart twice)
   - `"Name" command` lines in that file show as favourites too and run the command. The bar keeps them, and the comments at the top, when it writes the file
 - **Applications** ▶ by category (Accessories / Internet / Office / Graphics / Multimedia / Development / Education / Science / Games / System / Settings / Other)
   - .desktop files from `~/.local/share/applications`, then `$XDG_DATA_DIRS/applications` (default `/usr/local/share` `/usr/share`). For files with the same name the first one wins, so a local `Hidden=true` hides a system entry

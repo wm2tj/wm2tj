@@ -218,8 +218,32 @@ void WindowManager::release()
 	else unparentList.append(c);
     }
 
-    for (i = normalList.count()-1; i >= 0; --i) {
-	unparentList.append(normalList.item(i));
+    // Normal windows go in their stacking order, bottom first: each
+    // XReparentWindow puts the window on top, so the topmost goes last and
+    // the restarted wm2tj, which adopts them in XQueryTree order (bottom to
+    // top), keeps the stack.  Going by creation order turned the stack over
+    // on every SIGHUP (the favourites editor ended up under the terminal).
+    ClientList stacked;
+    Window w1, w2, *wins = 0;
+    unsigned int k, n = 0;
+    if (XQueryTree(m_display, m_root, &w1, &w2, &wins, &n)) {
+	for (k = 0; k < n; ++k) {
+	    for (i = 0; i < normalList.count(); ++i) {
+		c = normalList.item(i);
+		if (c && c->parent() == wins[k]) {
+		    stacked.append(c);
+		    normalList.item(i) = 0;
+		    break;
+		}
+	    }
+	}
+	if (wins) XFree((void *)wins);
+    }
+    for (i = normalList.count()-1; i >= 0; --i) {	// not found: at the bottom
+	if (normalList.item(i)) unparentList.append(normalList.item(i));
+    }
+    for (i = 0; i < stacked.count(); ++i) {
+	unparentList.append(stacked.item(i));
     }
 
     m_clients.remove_all();

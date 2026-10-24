@@ -1,3 +1,17 @@
+wm2tj (0.1.0~beta3) unstable; urgency=medium
+
+  * wm2tj: keep the stacking order across a restart (SIGHUP). Windows were
+    released in reverse creation order, which turned the stack over on
+    every restart and could leave a settings window under the others.
+  * wm2tj-favorites, wm2tj-bar: do not rebuild the menu and restart wm2tj
+    themselves while wm2-menu-sync.path (systemd --user) watches the
+    favourites file, so a change restarts wm2tj once instead of twice.
+  * wm2tj-favorites: drop the raise after the restart (it had no effect);
+    a hand-written comment after "new_label none" is no longer taken for
+    the entry's name.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 24 Oct 2026 18:48:17 +0900
+
 wm2tj (0.1.0~beta2) unstable; urgency=medium
 
   * wm2tj-favorites: changes stay in the window until Apply (with Revert,
