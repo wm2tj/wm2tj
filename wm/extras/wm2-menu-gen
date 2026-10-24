@@ -13,9 +13,11 @@
 - --settle N: first wait until the application dirs and the favourites have
   not changed for N seconds (at most a minute): a package manager installs
   several apps in a row, and each would rebuild the menu (wm2-menu-sync).
-- --hup: send wm2tj SIGHUP (it restarts in place and rereads ~/.wm2rc), but
-  only when the menu changed. ~/.wm2rc is not rewritten when it would stay
-  the same.
+- --hup: make wm2tj take the new menu, only when it changed. A wm2tj that
+  rereads the menu by itself when it opens (it sets _WM2TJ_MENU_RELOAD on
+  the root window) needs nothing; an older one gets SIGHUP (it restarts in
+  place, which re-frames every window). ~/.wm2rc is not rewritten when it
+  would stay the same.
 
 The menu's own labels are English, translated with gettext (text domain
 "wm2tj", po/ in this directory); application names come from the .desktop
@@ -387,8 +389,48 @@ def main(argv):
         return
     rc.write_text(text, encoding="utf-8")
     print(f"{rc}: favorites + {n} entries")
-    if hup:
+    if hup and not wm_rereads_menu():
         subprocess.run(["pkill", "-HUP", "-x", "wm2tj|wm2"])
+
+
+def wm_rereads_menu():
+    """True when the running wm2tj takes a changed menu at the next menu
+    (_WM2TJ_MENU_RELOAD on the root window). Plain Xlib through ctypes:
+    no python3-xlib or xprop needed."""
+    import ctypes, ctypes.util
+    from ctypes import c_void_p, c_char_p, c_int, c_long, c_ulong, byref, POINTER
+    try:
+        x = ctypes.CDLL(ctypes.util.find_library("X11") or "libX11.so.6")
+    except OSError:
+        return False
+    x.XOpenDisplay.restype = c_void_p
+    x.XOpenDisplay.argtypes = [c_char_p]
+    dpy = x.XOpenDisplay(None)
+    if not dpy:
+        return False
+    try:
+        x.XInternAtom.restype = c_ulong
+        x.XInternAtom.argtypes = [c_void_p, c_char_p, c_int]
+        atom = x.XInternAtom(dpy, b"_WM2TJ_MENU_RELOAD", True)
+        if not atom:
+            return False
+        x.XDefaultRootWindow.restype = c_ulong
+        x.XDefaultRootWindow.argtypes = [c_void_p]
+        x.XGetWindowProperty.argtypes = [
+            c_void_p, c_ulong, c_ulong, c_long, c_long, c_int, c_ulong,
+            POINTER(c_ulong), POINTER(c_int), POINTER(c_ulong),
+            POINTER(c_ulong), POINTER(c_void_p)]
+        x.XFree.argtypes = [c_void_p]
+        typ, fmt, n, after, data = c_ulong(), c_int(), c_ulong(), c_ulong(), c_void_p()
+        ok = x.XGetWindowProperty(dpy, x.XDefaultRootWindow(dpy), atom, 0, 1,
+                                  False, 0, byref(typ), byref(fmt), byref(n),
+                                  byref(after), byref(data)) == 0
+        if data:
+            x.XFree(data)
+        return ok and typ.value != 0
+    finally:
+        x.XCloseDisplay.argtypes = [c_void_p]
+        x.XCloseDisplay(dpy)
 
 
 def sample_settings():

@@ -32,7 +32,7 @@ wm2 をもとにしたウィンドウマネージャー wm2tj と組み合わせ
 - 上に **お気に入り**。アプリを右クリック →「お気に入りに追加 / 削除」。保存先 `~/.config/wm2tj-bar/favorites` (1 行 1 つの .desktop ファイル名)
   - `sync_wm2tj yes` (設定 GUI の「wm2tj とメニューを同期する」) で、wm2tj の右クリックメニューと同じ `~/.config/wm2tj/favorites` を読み書きする。どちらで足したり外したりしても両方に出る
     - そのファイルがまだ無ければ自分のお気に入り (`~/.config/wm2tj-bar/favorites`) を出し、最初の変更で共有ファイルを作る (wm2tj の `wm2-menu-gen` も、無ければバーのお気に入りから作る)
-    - 変えるたびに `wm2tj_menu_command` を走らせて wm2tj 側のメニューを作り直す。既定は `wm2-menu-gen` (PATH → `~/.local/bin` → `/usr/local/bin`) を実行して wm2tj に SIGHUP。wm2tj の `wm2-menu-sync.path` (systemd --user) がお気に入りのファイルを見張っているときは何もしない (同じことをするので、wm2tj が 2 回再起動しないように)
+    - 変えるたびに `wm2tj_menu_command` を走らせて wm2tj 側のメニューを作り直す。既定は `wm2-menu-gen --hup` (PATH → `~/.local/bin` → `/usr/local/bin`) を実行する。wm2tj は次にメニューを開いたときに読み直す (古い wm2tj には SIGHUP)。wm2tj の `wm2-menu-sync.path` (systemd --user) がお気に入りのファイルを見張っているときは何もしない (同じことをするので)
   - そのファイルの `"名前" コマンド` の行もお気に入りとして出し、選ぶとそのコマンドを実行する。書き直すときもその行と頭のコメントはそのまま残す
 - **アプリケーション** ▶ カテゴリ別 (アクセサリ / インターネット / オフィス / グラフィックス / マルチメディア / 開発 / 教育 / 科学 / ゲーム / システム / 設定 / その他)
   - `~/.local/share/applications` → `$XDG_DATA_DIRS/applications` (既定 `/usr/local/share` `/usr/share`) の .desktop。同じ名前のファイルは前のものが優先 (ローカルの `Hidden=true` でシステムのものを隠せる)

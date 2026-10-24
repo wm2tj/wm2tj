@@ -44,6 +44,15 @@ Settings are read from
 .I ~/.wm2rc
 at start-up and again on
 .BR SIGHUP .
+When the file has changed, the next root menu reads its menu part again
+(the entries,
+.BR new_label ,
+.BR new_window ,
+.BR submenu_prefix ,
+.BR submenu_style ,
+.BR search_label ,
+.BR everything_on_root )
+without a restart.
 One setting per line,
 .I keyword value
 ; a

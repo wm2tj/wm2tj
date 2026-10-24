@@ -57,6 +57,7 @@ struct WM2Config {
 extern WM2Config wm2config;
 
 void wm2LoadConfig(void);
+int  wm2ReloadMenu(void);	// at menu open: 1 if ~/.wm2rc changed and the menu was read again
 
 #define CONFIG_NICE_FONT              (wm2config.nice_font)
 #define CONFIG_NICE_MENU_FONT         (wm2config.nice_menu_font)

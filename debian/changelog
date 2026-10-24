@@ -1,3 +1,17 @@
+wm2tj (0.1.0~beta6) unstable; urgency=medium
+
+  * wm2tj: the root menu is read again from ~/.wm2rc when the file has
+    changed, as the menu opens, with no restart. Installing applications
+    (wm2-menu-sync) or editing the favourites restarted wm2tj, which
+    re-frames every window: the screen flickered and windows jumped for
+    each app installed. Fonts, colours and frames still need SIGHUP.
+  * wm2tj sets _WM2TJ_MENU_RELOAD on the root window; wm2-menu-gen --hup
+    then sends no SIGHUP (an older wm2tj still gets one). The favourites
+    editor and wm2tj-bar (sync_wm2tj) now leave the restart to
+    wm2-menu-gen --hup.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 24 Oct 2026 22:00:24 +0900
+
 wm2tj (0.1.0~beta5) unstable; urgency=medium
 
   * wm2tj-bar: the .deb build compiled the bar with PREFIX=/usr/local, so

@@ -42,6 +42,7 @@ Atom    Atoms::net_wm_state_maximized_horz;
 Atom    Atoms::net_wm_state_fullscreen;
 Atom    Atoms::wm2_restore_geometry;
 Atom    Atoms::wm2_off_desktop;
+Atom    Atoms::wm2tj_menu_reload;
 Atom    Atoms::net_wm_strut;
 Atom    Atoms::net_wm_strut_partial;
 
@@ -172,6 +173,7 @@ WindowManager::WindowManager() :
     Atoms::net_wm_state_fullscreen = XInternAtom(m_display, "_NET_WM_STATE_FULLSCREEN", False);
     Atoms::wm2_restore_geometry    = XInternAtom(m_display, "_WM2_RESTORE_GEOMETRY",    False);
     Atoms::wm2_off_desktop         = XInternAtom(m_display, "_WM2_OFF_DESKTOP",         False);
+    Atoms::wm2tj_menu_reload       = XInternAtom(m_display, "_WM2TJ_MENU_RELOAD",       False);
 
     Atoms::net_wm_strut            = XInternAtom(m_display, "_NET_WM_STRUT",            False);
     Atoms::net_wm_strut_partial    = XInternAtom(m_display, "_NET_WM_STRUT_PARTIAL",    False);
@@ -185,6 +187,11 @@ WindowManager::WindowManager() :
 
     XSetSelectionOwner(m_display, Atoms::wm2_running,
 		       m_menuWindow, timestamp(True));
+    // tells wm2-menu-gen that a changed ~/.wm2rc menu is taken at the
+    // next menu without a SIGHUP (wm2ReloadMenu); gone when we go
+    long one = 1;
+    XChangeProperty(m_display, m_root, Atoms::wm2tj_menu_reload, XA_CARDINAL,
+		    32, PropModeReplace, (unsigned char *)&one, 1);
     XSync(m_display, False);
     m_initialising = False;
     m_returnCode = 0;
@@ -219,6 +226,7 @@ void WindowManager::release()
     // (the XSync(True) in Client::unreparent() would drop them) and carry
     // them out before we disconnect, which also ends the grab.
     XGrabServer(m_display);
+    XDeleteProperty(m_display, m_root, Atoms::wm2tj_menu_reload);
     XSync(m_display, False);
     Window pendingMap[64];
     int pendingMaps = 0;

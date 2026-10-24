@@ -128,15 +128,16 @@ static struct {
 } cfg;
 
 /* with sync_wm2tj: regenerate ~/.wm2rc and make wm2tj reread it. wm2-menu-gen
-   is wm2tj's (extras/), installed to ~/.local/bin or /usr/local/bin; wm2 is
-   its name before 2026-10-21. Nothing to do while wm2tj's
-   wm2-menu-sync.path (systemd --user) watches the favourites file: it does
-   the same, and a second SIGHUP would restart wm2tj twice. */
+   is wm2tj's (extras/), installed to ~/.local/bin or /usr/local/bin; with
+   --hup it restarts wm2tj (SIGHUP) only when the menu changed and wm2tj
+   does not reread the menu by itself (2026-10-24). Nothing to do while
+   wm2tj's wm2-menu-sync.path (systemd --user) watches the favourites file:
+   it does the same. */
 #define DEFAULT_SYNC_CMD \
     "systemctl --user -q is-active wm2-menu-sync.path 2>/dev/null && exit 0; " \
     "g=$(command -v wm2-menu-gen) || for d in \"$HOME/.local/bin\" /usr/local/bin; do " \
     "[ -x \"$d/wm2-menu-gen\" ] && g=\"$d/wm2-menu-gen\" && break; done; " \
-    "[ -n \"$g\" ] && \"$g\" >/dev/null 2>&1 && pkill -HUP -x 'wm2tj|wm2'"
+    "[ -n \"$g\" ] && \"$g\" --hup >/dev/null 2>&1"
 
 static char configDir[512];
 static int inPath(const char *prog);

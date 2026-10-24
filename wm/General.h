@@ -75,6 +75,7 @@ public:
     static Atom net_wm_state_fullscreen;
     static Atom wm2_restore_geometry;
     static Atom wm2_off_desktop;
+    static Atom wm2tj_menu_reload;
     static Atom net_wm_strut;
     static Atom net_wm_strut_partial;
 };

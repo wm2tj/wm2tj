@@ -47,19 +47,21 @@ extras/
                                末尾の「ログアウト」「再起動」「シャットダウン」は session-logout を呼ぶ
                                （PATH に無ければ ~/.local/bin/session-logout）
                                --settle N: アプリのフォルダとお気に入りが N 秒動かなくなるまで待ってから作る（最大 60 秒）
-                               --hup: メニューが変わったときだけ wm2tj に HUP。同じ内容なら ~/.wm2rc を書き直さない
+                               --hup: メニューが変わったときだけ wm2tj に反映させる。今の wm2tj は次にメニューを開いたとき自分で読み直すので
+                               （ルート窓の _WM2TJ_MENU_RELOAD で判定）何もしない。古い wm2tj にだけ HUP。同じ内容なら ~/.wm2rc を書き直さない
   wm2tj-settings            -> ~/.local/bin/  wm2tj の設定 GUI（GTK3/Python、.wm2rc の見た目を変えて HUP）。メニュー wm2tj → 設定…
   wm2tj-favorites           -> ~/.local/bin/  お気に入りの編集 GUI（~/.config/wm2tj/favorites）。メニュー wm2tj → お気に入りの編集…
                                ファイルが無い間は wm2-menu-gen と同じ順（wm2tj-bar → Whisker Menu）で一覧を出し、最初の変更で作る
-                               「適用」で wm2-menu-gen を走らせて wm2tj に HUP（右クリックメニューがすぐ追従）。
-                               wm2-menu-sync.path が動いていればそちらに任せる（HUP が 2 回にならないように）
+                               「適用」で wm2-menu-gen --hup を走らせる（右クリックメニューは次に開いたときに追従。再起動しない）。
+                               wm2-menu-sync.path が動いていればそちらに任せる
                                一番上に wm2tj 組み込みの「ターミナル」（~/.wm2rc の new_label / new_window）も出る。
                                別の端末を使うなら削除できる（new_label none にする。名前はコメントに残す）。戻すには右の一覧の先頭から追加
   wm2-menu-sync.path/.service -> ~/.local/share/systemd/user/  任意。アプリの追加・削除を右クリックメニューに反映する
                                systemd user の path ユニット。systemctl --user daemon-reload &&
                                systemctl --user enable --now wm2-menu-sync.path で有効化。systemd の無い環境では使わない
                                （お気に入りの変更は wm2tj-favorites と wm2tj-bar が自分で反映するので、これは無くてもよい）
-                               wm2-menu-gen --settle 3 --hup を走らせるので、パッケージをまとめて入れても再起動は静かになってから 1 回
+                               wm2-menu-gen --settle 3 --hup を走らせる。メニューは次に開いたときに wm2tj が読み直すので再起動しない
+                               （古い wm2tj では HUP。パッケージをまとめて入れても静かになってから 1 回）
   wm2-wallpaper             -> ~/.local/bin/  壁紙（~/.config/wm2tj/wallpaper に保存。GNOME のスキーマがあればそちらにも書く。--choose で選ぶ）。メニュー wm2tj → 壁紙を変更
                                貼るのは feh / xwallpaper / hsetroot のどれか、選ぶのは zenity / yad / PyGObject の GTK ダイアログのどれか
   Makefile                  上の 4 本・session-logout・power-dialog・翻訳・systemd ユニットを入れる。make install（/usr/local）か make install PREFIX=$HOME/.local

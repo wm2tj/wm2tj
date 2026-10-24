@@ -750,7 +750,8 @@ def regen_wm2tj_menu():
         if os.access(os.path.join(d, "wm2-menu-gen"), os.X_OK):
             gen = os.path.join(d, "wm2-menu-gen")
     if gen:
-        subprocess.Popen(["sh", "-c", '"$0" >/dev/null 2>&1; pkill -HUP -x "wm2tj|wm2"', gen])
+        # --hup: SIGHUP only to a wm2tj that does not reread the menu itself
+        subprocess.Popen(["sh", "-c", '"$0" --hup >/dev/null 2>&1', gen])
 
 
 if __name__ == "__main__":

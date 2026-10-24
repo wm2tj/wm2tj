@@ -358,6 +358,9 @@ void WindowManager::menu(XButtonEvent *e)
 {
     if (e->window == m_menuWindow) return;
 
+    // wm2-menu-gen rewrote ~/.wm2rc: take the new menu (no restart)
+    if (wm2ReloadMenu()) fprintf(stderr, "wm2tj: menu reread from ~/.wm2rc\n");
+
     int i;
     ClientList clients;
 

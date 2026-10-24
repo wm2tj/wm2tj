@@ -39,9 +39,9 @@
 #  そのファイルがまだ無ければ自分のお気に入りを出し、最初の変更で作る)
 # sync_wm2tj      no
 # 共有中にお気に入りを変えたあと wm2tj のメニューを作り直すコマンド
-# (既定: PATH → ~/.local/bin → /usr/local/bin の wm2-menu-gen を実行して wm2tj に HUP。
-#  wm2tj の wm2-menu-sync.path が動いていれば、そちらに任せて何もしない)
-# wm2tj_menu_command  "wm2-menu-gen && pkill -HUP -x wm2tj"
+# (既定: PATH → ~/.local/bin → /usr/local/bin の wm2-menu-gen --hup を実行。wm2tj は次に
+#  メニューを開いたときに読み直す。wm2tj の wm2-menu-sync.path が動いていれば、そちらに任せて何もしない)
+# wm2tj_menu_command  "wm2-menu-gen --hup"
 
 # 電源まわり (xfce4-power-manager などの電源管理ソフトを使わないとき)
 # 明るさキー: 1 回で変える割合 (%)。0 でキーを取らない (別のソフトに任せる)

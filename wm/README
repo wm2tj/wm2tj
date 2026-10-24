@@ -179,6 +179,15 @@ been released (freed) already.  wm2tj died with a segfault before it
 could restart, and the whole session ended.  It now drops the active
 window first.
 
+The menu alone needs no restart: when ~/.wm2rc has changed since it was
+read, the next root menu reads its menu part again (the entries and
+new_label, new_window, submenu_prefix, submenu_style, search_label,
+everything_on_root).  wm2-menu-gen --hup therefore sends no SIGHUP to
+a wm2tj that sets _WM2TJ_MENU_RELOAD on the root window.  Before
+(up to 0.1.0~beta5) every app installed restarted wm2tj, which
+re-framed every window: the screen flickered and the windows jumped.
+Fonts, colours and frames are still read at start only (SIGHUP).
+
 
 Credits
 =======
