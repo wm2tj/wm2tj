@@ -86,6 +86,19 @@ other EWMH window managers). Install both, or just the one you want
 sudo apt install ./wm2tj_*.deb ./wm2tj-bar_*.deb
 ```
 
+Install from a terminal as above. Double-clicking the `.deb` opens GDebi on
+Xubuntu and other Ubuntu flavours, and its install step silently does
+nothing after the password prompt (a GDebi/pkexec problem, not specific to
+these packages). Upgrading works the same way: download the new `.deb` files
+and run the same command.
+
+If you built and installed from source before, that copy is in
+`/usr/local/bin`, which comes first in `PATH`, so it keeps running after the
+package is installed. Check with `which -a wm2tj wm2tj-bar` and remove the
+`/usr/local` copies (`wm2tj`, `wm2tj-bar`, `wm2tj-bar-settings` and the
+other files `make install` put there) before or after installing the
+package.
+
 To build them yourself:
 
 ```
