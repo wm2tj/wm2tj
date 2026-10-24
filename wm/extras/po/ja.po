@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wm2tj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:20+0900\n"
+"POT-Creation-Date: 2026-10-24 19:05+0900\n"
 "PO-Revision-Date: 2026-10-21 20:00+0900\n"
 "Last-Translator: tetsu\n"
 "Language-Team: Japanese\n"
@@ -15,83 +15,83 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: wm2-menu-gen:107
+#: wm2-menu-gen:113
 msgid "Settings…"
 msgstr "設定…"
 
-#: wm2-menu-gen:108
+#: wm2-menu-gen:114
 msgid "Edit Favourites…"
 msgstr "お気に入りの編集…"
 
-#: wm2-menu-gen:110
+#: wm2-menu-gen:116
 msgid "Change Wallpaper…"
 msgstr "壁紙を変更"
 
-#: wm2-menu-gen:112
+#: wm2-menu-gen:118
 msgid "Restart wm2tj (reload settings)"
 msgstr "wm2tj を再起動（設定の再読込）"
 
-#: wm2-menu-gen:113 power-dialog:33 session-logout:35
+#: wm2-menu-gen:119 power-dialog:33 session-logout:35
 msgid "Log Out"
 msgstr "ログアウト"
 
-#: wm2-menu-gen:115 power-dialog:31 session-logout:20
+#: wm2-menu-gen:121 power-dialog:31 session-logout:20
 msgid "Restart"
 msgstr "再起動"
 
-#: wm2-menu-gen:116 power-dialog:30 session-logout:19
+#: wm2-menu-gen:122 power-dialog:30 session-logout:19
 msgid "Shut Down"
 msgstr "シャットダウン"
 
-#: wm2-menu-gen:216
+#: wm2-menu-gen:222
 msgid "Accessories"
 msgstr "アクセサリー"
 
-#: wm2-menu-gen:216
+#: wm2-menu-gen:222
 msgid "Development"
 msgstr "開発"
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Education"
 msgstr "教育"
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Games"
 msgstr "ゲーム"
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Graphics"
 msgstr "グラフィックス"
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Internet"
 msgstr "インターネット"
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Multimedia"
 msgstr "マルチメディア"
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Office"
 msgstr "オフィス"
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "Science"
 msgstr "科学"
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "Settings"
 msgstr "設定"
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "System"
 msgstr "システム"
 
-#: wm2-menu-gen:229
+#: wm2-menu-gen:235
 msgid "Other"
 msgstr "その他"
 
-#: wm2-menu-gen:354 wm2tj-favorites:152 wm2tj-favorites:438
+#: wm2-menu-gen:399 wm2tj-favorites:154 wm2tj-favorites:450
 msgid "Terminal"
 msgstr "ターミナル"
 
@@ -103,7 +103,7 @@ msgstr "wm2tj の設定"
 msgid "Appearance"
 msgstr "見た目"
 
-#: wm2tj-settings:297 wm2tj-favorites:330
+#: wm2tj-settings:297 wm2tj-favorites:342
 msgid "Revert"
 msgstr "元に戻す"
 
@@ -111,7 +111,7 @@ msgstr "元に戻す"
 msgid "Discard the changes not applied yet and reread ~/.wm2rc"
 msgstr "適用していない変更を捨てて ~/.wm2rc を読み直す"
 
-#: wm2tj-settings:300 wm2tj-favorites:333 wm2tj-favorites:531
+#: wm2tj-settings:300 wm2tj-favorites:345 wm2tj-favorites:539
 msgid "Apply"
 msgstr "適用"
 
@@ -191,7 +191,7 @@ msgstr "フォルダ名の前に付ける印（例: ▶ ）。空にすると後
 msgid "Folder mark"
 msgstr "フォルダの印"
 
-#: wm2tj-settings:445 wm2tj-favorites:476
+#: wm2tj-settings:445 wm2tj-favorites:488
 msgid "Nothing changed"
 msgstr "変更はありません"
 
@@ -211,96 +211,96 @@ msgstr[0] "%d 項目を保存して wm2tj に反映しました"
 msgid "%s (not found)"
 msgstr "%s（見つかりません）"
 
-#: wm2tj-favorites:155
+#: wm2tj-favorites:157
 #, python-format
 msgid "Built-in entry of wm2tj, always at the top (new_window in ~/.wm2rc): %s"
 msgstr "wm2tj に組み込みの項目。いつも一番上 (~/.wm2rc の new_window): %s"
 
-#: wm2tj-favorites:156
+#: wm2tj-favorites:158
 msgid "the default terminal ($TERMINAL, x-terminal-emulator, …)"
 msgstr "既定の端末 ($TERMINAL、x-terminal-emulator、…)"
 
-#: wm2tj-favorites:265
+#: wm2tj-favorites:277
 msgid "Edit Favourites — wm2tj"
 msgstr "お気に入りの編集 — wm2tj"
 
-#: wm2tj-favorites:288
+#: wm2tj-favorites:300
 msgid "Favourites"
 msgstr "お気に入り"
 
-#: wm2tj-favorites:293
+#: wm2tj-favorites:305
 msgid "Move up"
 msgstr "上へ"
 
-#: wm2tj-favorites:294
+#: wm2tj-favorites:306
 msgid "Move down"
 msgstr "下へ"
 
-#: wm2tj-favorites:303
+#: wm2tj-favorites:315
 msgid "Add to favourites"
 msgstr "お気に入りに追加"
 
-#: wm2tj-favorites:305
+#: wm2tj-favorites:317
 msgid "Remove from favourites"
 msgstr "お気に入りから削除"
 
-#: wm2tj-favorites:313
+#: wm2tj-favorites:325
 msgid "Applications"
 msgstr "アプリケーション"
 
-#: wm2tj-favorites:314
+#: wm2tj-favorites:326
 msgid "Search"
 msgstr "検索"
 
-#: wm2tj-favorites:322
+#: wm2tj-favorites:334
 msgid "Add Command…"
 msgstr "コマンドを追加…"
 
-#: wm2tj-favorites:331
+#: wm2tj-favorites:343
 msgid "Discard the changes not applied yet"
 msgstr "適用していない変更を捨てる"
 
-#: wm2tj-favorites:335
+#: wm2tj-favorites:347
 msgid "Save the favourites and update the wm2tj menu"
 msgstr "お気に入りを保存して wm2tj のメニューに反映する"
 
-#: wm2tj-favorites:466 wm2tj-favorites:467
+#: wm2tj-favorites:478 wm2tj-favorites:479
 msgid "Not applied yet"
 msgstr "まだ適用していません"
 
-#: wm2tj-favorites:497
+#: wm2tj-favorites:511
 msgid "Applied"
 msgstr "適用しました"
 
-#: wm2tj-favorites:528
+#: wm2tj-favorites:536
 msgid "Apply the changes before closing?"
 msgstr "閉じる前に変更を適用しますか?"
 
-#: wm2tj-favorites:529
+#: wm2tj-favorites:537
 msgid "Discard"
 msgstr "破棄"
 
-#: wm2tj-favorites:530 wm2tj-favorites:596 power-dialog:162 session-logout:38
+#: wm2tj-favorites:538 wm2tj-favorites:602 power-dialog:162 session-logout:38
 msgid "Cancel"
 msgstr "キャンセル"
 
-#: wm2tj-favorites:595
+#: wm2tj-favorites:601
 msgid "Add Command"
 msgstr "コマンドを追加"
 
-#: wm2tj-favorites:597
+#: wm2tj-favorites:603
 msgid "Add"
 msgstr "追加"
 
-#: wm2tj-favorites:602
+#: wm2tj-favorites:608
 msgid "e.g. mousepad ~/notes.txt"
 msgstr "例: mousepad ~/メモ.txt"
 
-#: wm2tj-favorites:603
+#: wm2tj-favorites:609
 msgid "Name"
 msgstr "名前"
 
-#: wm2tj-favorites:605
+#: wm2tj-favorites:611
 msgid "Command"
 msgstr "コマンド"
 

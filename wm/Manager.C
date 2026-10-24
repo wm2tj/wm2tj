@@ -210,6 +210,37 @@ void WindowManager::release()
     Client *c;
     int i;
 
+    // Requests redirected to us that the main loop left when the signal
+    // came (it stops reading at once) would be lost with our connection:
+    // a program started from the root menu -- which also holds the SIGHUP
+    // back until it closes -- asks to be mapped just as we go, and its
+    // window never appeared (the wallpaper chooser "froze", 2026-10-24).
+    // Grab the server so no more come to us, take them out of the queue
+    // (the XSync(True) in Client::unreparent() would drop them) and carry
+    // them out before we disconnect, which also ends the grab.
+    XGrabServer(m_display);
+    XSync(m_display, False);
+    Window pendingMap[64];
+    int pendingMaps = 0;
+    XEvent pe;
+    while (XCheckMaskEvent(m_display, SubstructureRedirectMask, &pe)) {
+	if (pe.type == MapRequest && pendingMaps < 64) {
+	    pendingMap[pendingMaps++] = pe.xmaprequest.window;
+	} else if (pe.type == ConfigureRequest) {
+	    XWindowChanges wc;
+	    wc.x = pe.xconfigurerequest.x;
+	    wc.y = pe.xconfigurerequest.y;
+	    wc.width = pe.xconfigurerequest.width;
+	    wc.height = pe.xconfigurerequest.height;
+	    wc.border_width = pe.xconfigurerequest.border_width;
+	    ignoreBadWindowErrors = True;
+	    XConfigureWindow(m_display, pe.xconfigurerequest.window,
+			     pe.xconfigurerequest.value_mask &
+			     (CWX | CWY | CWWidth | CWHeight | CWBorderWidth), &wc);
+	    ignoreBadWindowErrors = False;
+	}
+    }
+
     for (i = 0; i < m_clients.count(); ++i) {
 	c = m_clients.item(i);
 //    fprintf(stderr, "client %d is %p\n", i, c);
@@ -275,6 +306,14 @@ void WindowManager::release()
 	unparentList.item(i)->release();
 	unparentList.item(i) = 0;
     }
+
+    // the windows that asked to be mapped: viewable, the restarted wm2tj
+    // frames them (without us nobody would map them); on top, as a new
+    // window would be (the others were just stacked over it)
+    ignoreBadWindowErrors = True;
+    for (i = 0; i < pendingMaps; ++i) XMapRaised(m_display, pendingMap[i]);
+    XSync(m_display, False);
+    ignoreBadWindowErrors = False;
 
     XSetInputFocus(m_display, PointerRoot, RevertToPointerRoot,
 		   timestamp(False));

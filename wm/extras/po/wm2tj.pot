@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wm2tj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 17:20+0900\n"
+"POT-Creation-Date: 2026-10-24 19:05+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,83 +18,83 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: wm2-menu-gen:107
+#: wm2-menu-gen:113
 msgid "Settings…"
 msgstr ""
 
-#: wm2-menu-gen:108
+#: wm2-menu-gen:114
 msgid "Edit Favourites…"
 msgstr ""
 
-#: wm2-menu-gen:110
+#: wm2-menu-gen:116
 msgid "Change Wallpaper…"
 msgstr ""
 
-#: wm2-menu-gen:112
+#: wm2-menu-gen:118
 msgid "Restart wm2tj (reload settings)"
 msgstr ""
 
-#: wm2-menu-gen:113 power-dialog:33 session-logout:35
+#: wm2-menu-gen:119 power-dialog:33 session-logout:35
 msgid "Log Out"
 msgstr ""
 
-#: wm2-menu-gen:115 power-dialog:31 session-logout:20
+#: wm2-menu-gen:121 power-dialog:31 session-logout:20
 msgid "Restart"
 msgstr ""
 
-#: wm2-menu-gen:116 power-dialog:30 session-logout:19
+#: wm2-menu-gen:122 power-dialog:30 session-logout:19
 msgid "Shut Down"
 msgstr ""
 
-#: wm2-menu-gen:216
+#: wm2-menu-gen:222
 msgid "Accessories"
 msgstr ""
 
-#: wm2-menu-gen:216
+#: wm2-menu-gen:222
 msgid "Development"
 msgstr ""
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Education"
 msgstr ""
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Games"
 msgstr ""
 
-#: wm2-menu-gen:217
+#: wm2-menu-gen:223
 msgid "Graphics"
 msgstr ""
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Internet"
 msgstr ""
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Multimedia"
 msgstr ""
 
-#: wm2-menu-gen:218
+#: wm2-menu-gen:224
 msgid "Office"
 msgstr ""
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "Science"
 msgstr ""
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "Settings"
 msgstr ""
 
-#: wm2-menu-gen:219
+#: wm2-menu-gen:225
 msgid "System"
 msgstr ""
 
-#: wm2-menu-gen:229
+#: wm2-menu-gen:235
 msgid "Other"
 msgstr ""
 
-#: wm2-menu-gen:354 wm2tj-favorites:152 wm2tj-favorites:438
+#: wm2-menu-gen:399 wm2tj-favorites:154 wm2tj-favorites:450
 msgid "Terminal"
 msgstr ""
 
@@ -106,7 +106,7 @@ msgstr ""
 msgid "Appearance"
 msgstr ""
 
-#: wm2tj-settings:297 wm2tj-favorites:330
+#: wm2tj-settings:297 wm2tj-favorites:342
 msgid "Revert"
 msgstr ""
 
@@ -114,7 +114,7 @@ msgstr ""
 msgid "Discard the changes not applied yet and reread ~/.wm2rc"
 msgstr ""
 
-#: wm2tj-settings:300 wm2tj-favorites:333 wm2tj-favorites:531
+#: wm2tj-settings:300 wm2tj-favorites:345 wm2tj-favorites:539
 msgid "Apply"
 msgstr ""
 
@@ -194,7 +194,7 @@ msgstr ""
 msgid "Folder mark"
 msgstr ""
 
-#: wm2tj-settings:445 wm2tj-favorites:476
+#: wm2tj-settings:445 wm2tj-favorites:488
 msgid "Nothing changed"
 msgstr ""
 
@@ -215,96 +215,96 @@ msgstr[1] ""
 msgid "%s (not found)"
 msgstr ""
 
-#: wm2tj-favorites:155
+#: wm2tj-favorites:157
 #, python-format
 msgid "Built-in entry of wm2tj, always at the top (new_window in ~/.wm2rc): %s"
 msgstr ""
 
-#: wm2tj-favorites:156
+#: wm2tj-favorites:158
 msgid "the default terminal ($TERMINAL, x-terminal-emulator, …)"
 msgstr ""
 
-#: wm2tj-favorites:265
+#: wm2tj-favorites:277
 msgid "Edit Favourites — wm2tj"
 msgstr ""
 
-#: wm2tj-favorites:288
+#: wm2tj-favorites:300
 msgid "Favourites"
 msgstr ""
 
-#: wm2tj-favorites:293
+#: wm2tj-favorites:305
 msgid "Move up"
 msgstr ""
 
-#: wm2tj-favorites:294
+#: wm2tj-favorites:306
 msgid "Move down"
 msgstr ""
 
-#: wm2tj-favorites:303
+#: wm2tj-favorites:315
 msgid "Add to favourites"
 msgstr ""
 
-#: wm2tj-favorites:305
+#: wm2tj-favorites:317
 msgid "Remove from favourites"
 msgstr ""
 
-#: wm2tj-favorites:313
+#: wm2tj-favorites:325
 msgid "Applications"
 msgstr ""
 
-#: wm2tj-favorites:314
+#: wm2tj-favorites:326
 msgid "Search"
 msgstr ""
 
-#: wm2tj-favorites:322
+#: wm2tj-favorites:334
 msgid "Add Command…"
 msgstr ""
 
-#: wm2tj-favorites:331
+#: wm2tj-favorites:343
 msgid "Discard the changes not applied yet"
 msgstr ""
 
-#: wm2tj-favorites:335
+#: wm2tj-favorites:347
 msgid "Save the favourites and update the wm2tj menu"
 msgstr ""
 
-#: wm2tj-favorites:466 wm2tj-favorites:467
+#: wm2tj-favorites:478 wm2tj-favorites:479
 msgid "Not applied yet"
 msgstr ""
 
-#: wm2tj-favorites:497
+#: wm2tj-favorites:511
 msgid "Applied"
 msgstr ""
 
-#: wm2tj-favorites:528
+#: wm2tj-favorites:536
 msgid "Apply the changes before closing?"
 msgstr ""
 
-#: wm2tj-favorites:529
+#: wm2tj-favorites:537
 msgid "Discard"
 msgstr ""
 
-#: wm2tj-favorites:530 wm2tj-favorites:596 power-dialog:162 session-logout:38
+#: wm2tj-favorites:538 wm2tj-favorites:602 power-dialog:162 session-logout:38
 msgid "Cancel"
 msgstr ""
 
-#: wm2tj-favorites:595
+#: wm2tj-favorites:601
 msgid "Add Command"
 msgstr ""
 
-#: wm2tj-favorites:597
+#: wm2tj-favorites:603
 msgid "Add"
 msgstr ""
 
-#: wm2tj-favorites:602
+#: wm2tj-favorites:608
 msgid "e.g. mousepad ~/notes.txt"
 msgstr ""
 
-#: wm2tj-favorites:603
+#: wm2tj-favorites:609
 msgid "Name"
 msgstr ""
 
-#: wm2tj-favorites:605
+#: wm2tj-favorites:611
 msgid "Command"
 msgstr ""
 

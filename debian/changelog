@@ -1,3 +1,19 @@
+wm2tj (0.1.0~beta4) unstable; urgency=medium
+
+  * wm2tj: a window that asks to be mapped while wm2tj restarts (such as a
+    program started from the root menu, which holds a SIGHUP back until
+    it closes) is no longer lost: pending map and configure requests are
+    carried out before wm2tj lets go of the display, and the window comes
+    up on top. The wallpaper chooser could fail to appear this way.
+  * wm2-menu-gen: new --settle N (wait until the application dirs and the
+    favourites have been quiet for N seconds) and --hup (restart wm2tj
+    only when the menu changed; ~/.wm2rc is not rewritten when it would
+    stay the same). wm2-menu-sync.service uses both, so installing many
+    applications at once restarts wm2tj once instead of every few
+    seconds.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 24 Oct 2026 19:05:10 +0900
+
 wm2tj (0.1.0~beta3) unstable; urgency=medium
 
   * wm2tj: keep the stacking order across a restart (SIGHUP). Windows were

@@ -3,8 +3,9 @@ Description=Regenerate the wm2tj root menu (favourites and installed apps)
 
 [Service]
 Type=oneshot
-# let the writer finish: favorites is renamed into place, .desktop files come in bursts
-ExecStartPre=sleep 2
-ExecStart=@BINDIR@/wm2-menu-gen
-# SIGHUP: wm2tj re-execs in place and rereads ~/.wm2rc (wm2 = its old name)
-ExecStartPost=-pkill -HUP -x 'wm2tj|wm2'
+# --settle 3: let the writers finish (favorites is renamed into place, a
+# package manager installs .desktop files in bursts) -- until nothing changed
+# for 3 s, at most a minute. --hup: SIGHUP wm2tj (it re-execs in place and
+# rereads ~/.wm2rc) only when the menu changed, so an install of many apps
+# restarts wm2tj once instead of every few seconds (2026-10-24)
+ExecStart=@BINDIR@/wm2-menu-gen --settle 3 --hup

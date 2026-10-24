@@ -10,12 +10,18 @@
   (xfce-applications.menu, freedesktop menu-spec subset), named and
   sorted like Whisker does (localized names, alphabetical).
 - Everything above the marker line in ~/.wm2rc is kept.
+- --settle N: first wait until the application dirs and the favourites have
+  not changed for N seconds (at most a minute): a package manager installs
+  several apps in a row, and each would rebuild the menu (wm2-menu-sync).
+- --hup: send wm2tj SIGHUP (it restarts in place and rereads ~/.wm2rc), but
+  only when the menu changed. ~/.wm2rc is not rewritten when it would stay
+  the same.
 
 The menu's own labels are English, translated with gettext (text domain
 "wm2tj", po/ in this directory); application names come from the .desktop
 files in the user's language.
 """
-import os, re, sys, shutil, subprocess, configparser, gettext
+import os, re, sys, shutil, subprocess, configparser, gettext, time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -312,7 +318,36 @@ def q(s):
     return s.replace('"', "")
 
 
-def main():
+def last_change():
+    """The newest mtime of the application dirs, their .desktop files and
+    the favourites."""
+    newest = 0.0
+    for p in [Path(d) / "applications" for d in DATA_DIRS] + [FAVORITES]:
+        try:
+            newest = max(newest, p.stat().st_mtime)
+            if p.is_dir():
+                for f in p.rglob("*.desktop"):
+                    newest = max(newest, f.stat().st_mtime)
+        except OSError:     # gone in the meantime
+            pass
+    return newest
+
+
+def settle(quiet, limit=60):
+    """Wait until nothing changed for `quiet` seconds, at most `limit`."""
+    end = time.time() + limit
+    while True:
+        wait = quiet - (time.time() - last_change())
+        if wait <= 0 or time.time() >= end:
+            return
+        time.sleep(min(wait, end - time.time()) + 0.1)
+
+
+def main(argv):
+    hup = "--hup" in argv
+    if "--settle" in argv:
+        i = argv.index("--settle")
+        settle(float(argv[i + 1]) if i + 1 < len(argv) else 3)
     apps = load_apps()
     out = [MARKER]
     favs = favorite_lines(apps)
@@ -342,8 +377,18 @@ def main():
         # built-in defaults; its "Terminal" label in the user's language
         head = sample_settings()
     head = "\n".join(l for l in head.splitlines() if l.strip() not in (RESTART, LOGOUT, *POWER)).rstrip() + "\n\n"
-    rc.write_text(head + "\n".join(out) + "\n", encoding="utf-8")
+    text = head + "\n".join(out) + "\n"
+    try:
+        old = rc.read_text(encoding="utf-8")
+    except OSError:
+        old = None
+    if text == old:
+        print(f"{rc}: unchanged ({n} entries)")
+        return
+    rc.write_text(text, encoding="utf-8")
     print(f"{rc}: favorites + {n} entries")
+    if hup:
+        subprocess.run(["pkill", "-HUP", "-x", "wm2tj|wm2"])
 
 
 def sample_settings():
@@ -358,4 +403,4 @@ def sample_settings():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
