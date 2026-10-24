@@ -1,10 +1,16 @@
 #!/usr/bin/make -f
 # Build with:  dpkg-buildpackage -us -uc -b
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+include /usr/share/dpkg/pkg-info.mk
 
 %:
 	dh $@
 
+# PREFIX=/usr for the build as well: the bar compiles in its locale directory
+# (built with the default /usr/local it looked there and came up in English).
+override_dh_auto_build:
+	dh_auto_build -- PREFIX=/usr VERSION=$(DEB_VERSION_UPSTREAM)
+
 # PREFIX=/usr, and the systemd user units where Debian keeps them.
 override_dh_auto_install:
-	dh_auto_install -- PREFIX=/usr UNITDIR=/usr/lib/systemd/user
+	dh_auto_install -- PREFIX=/usr VERSION=$(DEB_VERSION_UPSTREAM) UNITDIR=/usr/lib/systemd/user

@@ -61,7 +61,9 @@
 
 #define PROGNAME "wm2tj-bar"
 #define SETTINGS_PROG PROGNAME "-settings"
+#ifndef VERSION
 #define VERSION  "0.1.0"
+#endif
 #ifndef LOCALEDIR
 #define LOCALEDIR "/usr/local/share/locale"
 #endif

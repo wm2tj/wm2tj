@@ -5,11 +5,13 @@
 # it is, and without any .mo the bar is simply in English.
 PREFIX     ?= /usr/local
 LOCALEDIR  ?= $(PREFIX)/share/locale
+VERSION    ?= 0.1.0
 PKG_CONFIG ?= pkg-config
 CC         ?= cc
 CFLAGS     ?= -O2 -Wall -Wextra
 PKGS        = x11 xext xft
-CPPFLAGS   += $(shell $(PKG_CONFIG) --cflags $(PKGS)) -DLOCALEDIR='"$(LOCALEDIR)"'
+CPPFLAGS   += $(shell $(PKG_CONFIG) --cflags $(PKGS)) -DLOCALEDIR='"$(LOCALEDIR)"' \
+	      -DVERSION='"$(VERSION)"'
 LIBS        = $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm $(INTL_LIBS)
 # glibc has gettext built in; musl (Alpine) needs the separate libintl
 # (package gettext-dev).  Link -lintl only where it exists.
@@ -21,7 +23,14 @@ MOS        = $(LANGS:%=po/%.mo)
 
 all: wm2tj-bar $(MOS)
 
-wm2tj-bar: wm2tj-bar.c
+# LOCALEDIR and VERSION are compiled in.  The stamp changes when they do, so
+# "make" followed by "make install PREFIX=/usr" rebuilds the bar instead of
+# installing one that looks for its translations under /usr/local.
+BUILDCONF   = .build-config
+$(BUILDCONF): FORCE
+	@echo '$(LOCALEDIR) $(VERSION)' | cmp -s - $@ || echo '$(LOCALEDIR) $(VERSION)' > $@
+
+wm2tj-bar: wm2tj-bar.c $(BUILDCONF)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ wm2tj-bar.c $(LIBS)
 
 po/%.mo: po/%.po
@@ -49,6 +58,6 @@ install: all
 	done
 
 clean:
-	rm -f wm2tj-bar $(MOS)
+	rm -f wm2tj-bar $(MOS) $(BUILDCONF)
 
-.PHONY: all pot install clean
+.PHONY: all pot install clean FORCE

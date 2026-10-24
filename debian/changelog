@@ -1,3 +1,13 @@
+wm2tj (0.1.0~beta5) unstable; urgency=medium
+
+  * wm2tj-bar: the .deb build compiled the bar with PREFIX=/usr/local, so
+    it looked for its translations in /usr/local/share/locale and its menus
+    came up in English. debian/rules now builds with PREFIX=/usr, and the
+    bar is rebuilt whenever LOCALEDIR changes between make and make install.
+  * wm2tj-bar --version prints the package version (0.1.0~beta5).
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 24 Oct 2026 20:51:53 +0900
+
 wm2tj (0.1.0~beta4) unstable; urgency=medium
 
   * wm2tj: a window that asks to be mapped while wm2tj restarts (such as a
