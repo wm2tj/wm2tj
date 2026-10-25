@@ -1,3 +1,18 @@
+wm2tj (0.1.0~beta7) unstable; urgency=medium
+
+  * wm2tj: windows no longer end up under the top bar. The strip a dock
+    reserves with _NET_WM_STRUT(_PARTIAL) is now off limits for every
+    window, not only for placement and maximizing: dragging a window
+    stops at the bar, an application that asks for a position under it
+    is moved down, and windows already there are pushed down when a bar
+    appears or grows. Without a bar the strip is free again. Fullscreen
+    windows still cover the whole screen.
+  * wm2tj publishes _NET_WORKAREA on the root window (the screen minus
+    the struts, per desktop), so GTK and Qt place dialogs and popups
+    clear of the bar.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 25 Oct 2026 13:40:00 +0900
+
 wm2tj (0.1.0~beta6) unstable; urgency=medium
 
   * wm2tj: the root menu is read again from ~/.wm2rc when the file has

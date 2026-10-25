@@ -110,6 +110,7 @@ private:
     int    m_strutTop;
     int    m_strutBottom;
     void   recomputeStruts();
+    void   publishWorkArea();
 
     Boolean m_looping;
     int m_returnCode;

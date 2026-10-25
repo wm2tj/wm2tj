@@ -45,6 +45,7 @@ Atom    Atoms::wm2_off_desktop;
 Atom    Atoms::wm2tj_menu_reload;
 Atom    Atoms::net_wm_strut;
 Atom    Atoms::net_wm_strut_partial;
+Atom    Atoms::net_workarea;
 
 volatile sig_atomic_t WindowManager::m_signalled = False;
 int     WindowManager::m_restart = False;
@@ -177,6 +178,7 @@ WindowManager::WindowManager() :
 
     Atoms::net_wm_strut            = XInternAtom(m_display, "_NET_WM_STRUT",            False);
     Atoms::net_wm_strut_partial    = XInternAtom(m_display, "_NET_WM_STRUT_PARTIAL",    False);
+    Atoms::net_workarea            = XInternAtom(m_display, "_NET_WORKAREA",            False);
 
     int dummy;
     if (!XShapeQueryExtension(m_display, &m_shapeEvent, &dummy))
@@ -523,7 +525,7 @@ void WindowManager::initialiseScreen()
 	Atoms::net_client_list_stacking, Atoms::net_active_window,
 	Atoms::net_supporting_wm_check, Atoms::net_wm_name,
 	Atoms::net_wm_window_type, Atoms::net_wm_window_type_dock,
-	Atoms::net_wm_strut, Atoms::net_wm_strut_partial,
+	Atoms::net_wm_strut, Atoms::net_wm_strut_partial, Atoms::net_workarea,
 	Atoms::net_wm_state, Atoms::net_wm_state_maximized_vert,
 	Atoms::net_wm_state_maximized_horz, Atoms::net_wm_state_fullscreen,
     };
@@ -571,6 +573,7 @@ void WindowManager::publishDesktops()
     XChangeProperty(m_display, m_root, Atoms::net_number_of_desktops,
 		    XA_CARDINAL, 32, PropModeReplace,
 		    (unsigned char *)&nd, 1);
+    publishWorkArea();
 
     updateNetCurrentDesktop();
 }
@@ -1141,6 +1144,28 @@ void WindowManager::recomputeStruts()
 	for (int i = 0; i < m_clients.count(); ++i) {
 	    Client *c = m_clients.item(i);
 	    if (c->isMaximized()) c->applyStateGeometry();
+	    else c->keepOffStrut();
 	}
     }
+    publishWorkArea();
+}
+
+
+// _NET_WORKAREA: the screen minus the struts, one rectangle per desktop
+// (all the same here).  GTK/Qt use it to place dialogs and popups.
+void WindowManager::publishWorkArea()
+{
+    int n = m_numDesktops > 0 ? m_numDesktops : 1;
+    if (n > 64) n = 64;
+    unsigned long wa[64 * 4];
+    unsigned long w = DisplayWidth(m_display, m_screenNumber);
+    unsigned long h = DisplayHeight(m_display, m_screenNumber);
+    for (int i = 0; i < n; ++i) {
+	wa[i * 4 + 0] = 0;
+	wa[i * 4 + 1] = m_strutTop;
+	wa[i * 4 + 2] = w;
+	wa[i * 4 + 3] = h - m_strutTop - m_strutBottom;
+    }
+    XChangeProperty(m_display, m_root, Atoms::net_workarea, XA_CARDINAL, 32,
+		    PropModeReplace, (unsigned char *)wa, n * 4);
 }

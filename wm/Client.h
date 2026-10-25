@@ -40,6 +40,8 @@ public:
     void resize(XButtonEvent *, Boolean, Boolean);
     void moveOrResize(XButtonEvent *);
     void ensureVisible();	// make sure x, y are on-screen
+    int  minY();		// lowest y the client may have: below the top strut
+    void keepOffStrut();	// move down if a dock now covers the top
 
     // maximize / fullscreen (EWMH _NET_WM_STATE)
     void toggleMaximize();

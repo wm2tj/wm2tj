@@ -78,6 +78,7 @@ public:
     static Atom wm2tj_menu_reload;
     static Atom net_wm_strut;
     static Atom net_wm_strut_partial;
+    static Atom net_workarea;
 };
 
 extern Boolean ignoreBadWindowErrors; // tidiness hack

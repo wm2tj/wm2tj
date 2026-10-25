@@ -1420,6 +1420,8 @@ Boolean Client::move(XButtonEvent *e)
 
 	case MotionNotify:
 	    x = event.xbutton.x; y = event.xbutton.y;
+	    // the panel's strip is off limits (minY), the rest is free
+	    if (y + yoff < minY()) y = minY() - yoff;
 	    if (x + xoff != m_x || y + yoff != m_y) {
 		windowManager()->showGeometry(x + xoff, y + yoff);
 		m_border->moveTo(x + xoff, y + yoff);
@@ -1430,6 +1432,8 @@ Boolean Client::move(XButtonEvent *e)
     }
 
     windowManager()->removeGeometry();
+
+    if (y >= 0 && y + yoff < minY()) y = minY() - yoff;
 
     // a click jitters a pixel or two; don't count that as a move
     Boolean moved = (x >= 0 && doSomething &&

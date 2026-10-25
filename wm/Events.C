@@ -319,6 +319,12 @@ void Client::eventConfigureRequest(XConfigureRequestEvent *e)
 
     gravitate(False);
 
+    // apps restoring a saved position may ask for y under the panel
+    if (m_managed && m_y < minY()) {
+	m_y = minY();
+	e->value_mask |= CWY;
+    }
+
     if (e->value_mask & CWStackMode) {
 	if (e->detail == Above) raise = True;
 	e->value_mask &= ~CWStackMode;

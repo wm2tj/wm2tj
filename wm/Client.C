@@ -244,8 +244,7 @@ void Client::manage(Boolean mapped)
 
     if (m_x < m_border->xIndent()) m_x = m_border->xIndent();
     if (m_y < m_border->yIndent()) m_y = m_border->yIndent();
-    if (m_y < windowManager()->strutTop() + m_border->yIndent())
-	m_y = windowManager()->strutTop() + m_border->yIndent();
+    if (m_y < minY()) m_y = minY();
 
     m_border->configure(m_x, m_y, m_w, m_h, 0L, Above);
 
@@ -878,9 +877,28 @@ void Client::ensureVisible()
     if (m_x + m_w > mx) m_x = mx - m_w;
     if (m_y + m_h > my) m_y = my - m_h;
     if (m_x < 0) m_x = 0;
-    if (m_y < 0) m_y = 0;
+    if (m_y < minY()) m_y = minY();
 
     if (m_x != px || m_y != py) m_border->moveTo(m_x, m_y);
+}
+
+
+// A dock (panel) with a top strut owns that strip of the screen: like
+// GNOME, no window may be put under it, not even by hand.  Fullscreen
+// windows are the exception and go to 0,0.
+int Client::minY()
+{
+    if (m_fullscreen) return 0;
+    return windowManager()->strutTop() + m_border->yIndent();
+}
+
+
+void Client::keepOffStrut()
+{
+    if (m_y >= minY()) return;
+    m_y = minY();
+    m_border->moveTo(m_x, m_y);
+    sendConfigureNotify();
 }
 
 
