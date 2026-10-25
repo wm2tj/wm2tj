@@ -134,6 +134,20 @@ to date as applications are installed and removed.
   X screen only (several monitors on it are fine), and no Latin-1 `WM_NAME` from very old applications
 - Touchpad swipes need Xorg 21 or later (XInput 2.4 gestures)
 
+## Resource use
+
+Measured with beta 8 on Ubuntu 26.04 (x86_64, Intel Core i5 laptop, one
+monitor), with the desktop idle:
+
+| | Memory of its own (private) | RSS, shared libraries included | CPU while idle |
+|---|---|---|---|
+| wm2tj | 5.3 MB | 17 MB | none measurable |
+| wm2tj-bar | 5.0 MB | 15 MB | about 1–2 ms a second |
+
+Multi-monitor support (beta 8) costs nothing measurable on a single monitor:
+wm2tj stays at zero CPU and grows by about 0.2 MB, and the monitor layout is
+read again only when XRandR reports a change.
+
 ## Licence
 
 wm2tj is an independent fork. It is not affiliated with or endorsed by the
