@@ -221,8 +221,22 @@ void Client::manage(Boolean mapped)
 
     gravitate(False);
 
-    // zeros are iffy, should be calling some Manager method
-    int dw = DisplayWidth(display(), 0), dh = DisplayHeight(display(), 0);
+    // A new window the application did not place goes to the monitor the
+    // pointer is on, at the same spot it would have had on the first one;
+    // any window is then kept within one monitor.
+    const WindowManager::Monitor *mon =
+	&windowManager()->monitorFor(m_x, m_y, m_w, m_h);
+    if (!mapped && m_transient == None &&
+	!(m_sizeHints.flags & (USPosition | PPosition))) {
+	const WindowManager::Monitor &pm = windowManager()->pointerMonitor();
+	if (&pm != mon) {
+	    m_x += pm.x - mon->x;
+	    m_y += pm.y - mon->y;
+	    mon = &pm;
+	}
+    }
+    int dx0 = mon->x, dy0 = mon->y;
+    int dw = mon->x + mon->w, dh = mon->y + mon->h;
 
     if (m_w < m_minWidth) {
 	m_w = m_minWidth; m_fixedSize = False; reshape = True;
@@ -231,8 +245,8 @@ void Client::manage(Boolean mapped)
 	m_h = m_minHeight; m_fixedSize = False; reshape = True;
     }
 
-    if (m_w > dw - 8) m_w = dw - 8;
-    if (m_h > dh - 8) m_h = dh - 8;
+    if (m_w > mon->w - 8) m_w = mon->w - 8;
+    if (m_h > mon->h - 8) m_h = mon->h - 8;
 
     if (m_x > dw - m_border->xIndent()) {
 	m_x = dw - m_border->xIndent();
@@ -242,8 +256,8 @@ void Client::manage(Boolean mapped)
 	m_y = dh - m_border->yIndent();
     }
 
-    if (m_x < m_border->xIndent()) m_x = m_border->xIndent();
-    if (m_y < m_border->yIndent()) m_y = m_border->yIndent();
+    if (m_x < dx0 + m_border->xIndent()) m_x = dx0 + m_border->xIndent();
+    if (m_y < dy0 + m_border->yIndent()) m_y = dy0 + m_border->yIndent();
     if (m_y < minY()) m_y = minY();
 
     m_border->configure(m_x, m_y, m_w, m_h, 0L, Above);
@@ -888,8 +902,15 @@ void Client::ensureVisible()
 // windows are the exception and go to 0,0.
 int Client::minY()
 {
+    return minYAt(m_x, m_y);
+}
+
+// the y the client may have when at x, y: below a dock's strip on that monitor
+int Client::minYAt(int x, int y)
+{
     if (m_fullscreen) return 0;
-    return windowManager()->strutTop() + m_border->yIndent();
+    int yi = m_border->yIndent();
+    return windowManager()->topLimit(x + m_w / 2, y - yi) + yi;
 }
 
 
@@ -985,7 +1006,6 @@ void Client::writeNetState()
 
 void Client::applyStateGeometry()
 {
-    int dw = DisplayWidth(display(), 0), dh = DisplayHeight(display(), 0);
     int incW, incH;
 
     if (!m_maxH && !m_maxV && !m_fullscreen) {
@@ -999,18 +1019,21 @@ void Client::applyStateGeometry()
 	    m_restoreW = m_w; m_restoreH = m_h;
 	    m_haveRestore = True;
 	}
+	// the monitor the window is on (as it was before maximizing)
+	const WindowManager::Monitor &mon = windowManager()->monitorFor(
+	    m_restoreX, m_restoreY, m_restoreW, m_restoreH);
 	if (m_fullscreen) {
-	    m_x = 0; m_y = 0; m_w = dw; m_h = dh;
+	    m_x = mon.x; m_y = mon.y; m_w = mon.w; m_h = mon.h;
 	} else {
 	    if (m_maxH) {
-		m_x = m_border->xIndent();
-		m_w = dw - m_x - 1;
+		m_x = mon.x + mon.left + m_border->xIndent();
+		m_w = mon.x + mon.w - mon.right - m_x - 1;
 	    } else {
 		m_x = m_restoreX; m_w = m_restoreW;
 	    }
 	    if (m_maxV) {
-		m_y = windowManager()->strutTop() + m_border->yIndent();
-		m_h = dh - windowManager()->strutBottom() - m_y - 1;
+		m_y = mon.y + mon.top + m_border->yIndent();
+		m_h = mon.y + mon.h - mon.bottom - m_y - 1;
 	    } else {
 		m_y = m_restoreY; m_h = m_restoreH;
 	    }

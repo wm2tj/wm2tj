@@ -58,6 +58,17 @@ or
 for the input method, and
 .BR systemctl / loginctl
 for the session commands.
+.PP
+.B monitors
+chooses the monitors that show the bar:
+.B primary
+(the default), 
+.BR all ,
+or monitor names as
+.B xrandr \-\-listmonitors
+prints them.  The bar itself, with the tray, sits on the primary monitor
+(or the first one chosen); the others get a copy that acts just like it.
+Only a bar at the top edge of the screen reserves a strut.
 .SH SIGNALS
 .TP
 .B SIGHUP

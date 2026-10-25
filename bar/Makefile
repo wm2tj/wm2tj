@@ -9,7 +9,7 @@ VERSION    ?= 0.1.0
 PKG_CONFIG ?= pkg-config
 CC         ?= cc
 CFLAGS     ?= -O2 -Wall -Wextra
-PKGS        = x11 xext xft
+PKGS        = x11 xext xft xrandr
 CPPFLAGS   += $(shell $(PKG_CONFIG) --cflags $(PKGS)) -DLOCALEDIR='"$(LOCALEDIR)"' \
 	      -DVERSION='"$(VERSION)"'
 LIBS        = $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm $(INTL_LIBS)

@@ -1,3 +1,32 @@
+wm2tj (0.1.0~beta8) unstable; urgency=medium
+
+  * wm2tj-bar: monitors chooses where the bar goes: primary (the
+    default), all, or monitor names. The bar sits on the primary monitor
+    and every other monitor chosen gets a copy whose clicks, tips and
+    menus act as on the bar; menus stay inside the monitor. The bar
+    follows XRandR changes. Builds with libxrandr.
+  * wm2tj: maximize, fullscreen and the strip a dock keeps free are per
+    monitor (XRandR): a window maximizes on its own monitor, not across
+    all of them. A dock along the top or bottom edge of any monitor keeps
+    that strip free, with or without a strut; left and right struts and
+    panels count too. Monitors are followed as they change (XRandR, and
+    the root's ConfigureNotify that xrandr --setmonitor sends); clones
+    count once. Builds with libxrandr.
+  * wm2tj: a new window the application did not place opens on the
+    monitor the pointer is on (it opened on the first one), and windows,
+    the root menu and the geometry box stay within one monitor.
+  * wm2tj-bar: a bar or copy with no monitor above it reserves a strut
+    over its own columns, so other window managers keep it free as well.
+    Clones get one bar. Up to 16 monitors.
+  * tests/multimonitor: an automatic test on a dummy Xorg (14 layouts:
+    stacked, side by side, L-shaped, 2x2, portrait, mirrored, hotplug,
+    side panels).
+  * wm2tj-bar: the brightness keys and slider set every backlight of the
+    best type together (a machine with two panels has two raw ones; only
+    the first was set). backlight takes several names.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 25 Oct 2026 17:00:00 +0900
+
 wm2tj (0.1.0~beta7) unstable; urgency=medium
 
   * wm2tj: windows no longer end up under the top bar. The strip a dock

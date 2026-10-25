@@ -24,6 +24,7 @@ use it every day on a modern laptop:
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop; a changed menu (apps installed, favourites edited) is picked up when the menu next opens, without a restart
 - No polling while moving windows
 - Three-finger touchpad swipe between desktops (`wm2-swipe`, XInput 2.4; no root or `input` group needed)
+- Several monitors (XRandR): a window maximises or goes fullscreen on its own monitor, new windows open on the monitor the pointer is on, and the menu stays on one monitor. Monitors added or removed while running are followed
 
 Everything is done with the mouse, as in wm2 (there are no key bindings; the
 same list is in `man wm2tj`):
@@ -41,7 +42,8 @@ same list is in `man wm2tj`):
 It comes with **wm2tj-bar**, a top bar drawn as a wm2tj tab laid on its side:
 app menu, task list, virtual desktops, system tray, CPU / memory / Wi-Fi /
 Bluetooth / volume / battery with their own menus, brightness and volume keys,
-and a clock. Plain C and Xlib; English UI with a Japanese translation.
+and a clock. With several monitors it can show on each of them (`monitors all`).
+Plain C and Xlib; English UI with a Japanese translation.
 
 The two are separate programs and you can use either without the other: the
 window manager alone (the session then starts `xfce4-panel` if it is
@@ -63,7 +65,7 @@ manager.
 Debian / Ubuntu:
 
 ```
-sudo apt install g++ gcc make pkg-config libx11-dev libxext-dev libxft-dev libxi-dev picom
+sudo apt install g++ gcc make pkg-config libx11-dev libxext-dev libxft-dev libxi-dev libxrandr-dev picom
 make -C wm && sudo make -C wm install
 make -C bar && sudo make -C bar install
 make -C wm/extras install PREFIX=$HOME/.local   # optional extras
@@ -102,7 +104,7 @@ package.
 To build them yourself:
 
 ```
-sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev libxi-dev gettext
+sudo apt install build-essential debhelper pkgconf libx11-dev libxext-dev libxft-dev libxi-dev libxrandr-dev gettext
 dpkg-buildpackage -us -uc -b
 sudo apt install ../wm2tj_*.deb ../wm2tj-bar_*.deb
 ```
@@ -128,8 +130,8 @@ to date as applications are installed and removed.
   source with `make` (native packages are planned for the next beta)
 - X11 only (it is a window manager for Xorg; there is no Wayland version)
 - Volume control needs `wpctl` or `pactl` (plain ALSA is not supported)
-- No WPA-Enterprise in the Wi-Fi menu, no StatusNotifierItem tray, single
-  screen only (screen 0), and no Latin-1 `WM_NAME` from very old applications
+- No WPA-Enterprise in the Wi-Fi menu, no StatusNotifierItem tray, a single
+  X screen only (several monitors on it are fine), and no Latin-1 `WM_NAME` from very old applications
 - Touchpad swipes need Xorg 21 or later (XInput 2.4 gestures)
 
 ## Licence

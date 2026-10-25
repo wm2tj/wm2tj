@@ -8,6 +8,7 @@ Build-Depends: debhelper-compat (= 13),
                libxext-dev,
                libxft-dev,
                libxi-dev,
+               libxrandr-dev,
                gettext
 Standards-Version: 4.7.0
 Homepage: https://github.com/wm2tj/wm2tj

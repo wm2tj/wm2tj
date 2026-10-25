@@ -66,6 +66,15 @@ public:
     int  strutTop()    { return m_strutTop; }
     int  strutBottom() { return m_strutBottom; }
 
+    // Monitors (XRandR), each with the strips its docks take at the top
+    // and bottom.  Maximize, fullscreen and the off-limits strip are per
+    // monitor; without XRandR the whole screen is one monitor.
+    struct Monitor { int x, y, w, h, top, bottom, left, right; };
+    const Monitor &monitorFor(int x, int y, int w, int h);
+    const Monitor &monitorAt(int x, int y) { return monitorFor(x, y, 1, 1); }
+    const Monitor &pointerMonitor();
+    int  topLimit(int cx, int top);	// lowest frame top allowed at x = cx
+
     // shouldn't really be public
     int attemptGrab(Window, Window, int, int);
     void releaseGrab(XButtonEvent *);
@@ -109,6 +118,12 @@ private:
     int    m_dockCount;
     int    m_strutTop;
     int    m_strutBottom;
+#define MAX_MONITORS 16
+    Monitor m_monitors[MAX_MONITORS];
+    int    m_monitorCount;
+    int    m_rrEvent;		// XRandR event base, -1 without XRandR
+    void   updateMonitors();
+    Boolean isDock(Window);
     void   recomputeStruts();
     void   publishWorkArea();
 

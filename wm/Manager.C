@@ -1,5 +1,6 @@
 
 #include "Manager.h"
+#include <X11/extensions/Xrandr.h>
 #include "Client.h"
 #include <string.h>
 #include <strings.h>
@@ -136,6 +137,8 @@ WindowManager::WindowManager() :
     m_wmCheck = None;
     m_dockCount = 0;
     m_strutTop = m_strutBottom = 0;
+    m_monitorCount = 0;
+    m_rrEvent = -1;
     if (m_numDesktops < 1) m_numDesktops = 1;
     // Dynamic mode: allow the maximum while windows come back after a
     // restart (_NET_WM_DESKTOP); updateDynamicDesktops() trims it.
@@ -186,6 +189,13 @@ WindowManager::WindowManager() :
 
     // we only cope with one screen!
     initialiseScreen();
+
+    // ... but with several monitors on it
+    int rrError;
+    if (XRRQueryExtension(m_display, &m_rrEvent, &rrError))
+	XRRSelectInput(m_display, m_root, RRScreenChangeNotifyMask);
+    else m_rrEvent = -1;
+    updateMonitors();
 
     XSetSelectionOwner(m_display, Atoms::wm2_running,
 		       m_menuWindow, timestamp(True));
@@ -446,7 +456,8 @@ void WindowManager::initialiseScreen()
     attr.cursor = m_cursor;
     attr.event_mask = SubstructureRedirectMask | SubstructureNotifyMask |
 	ColormapChangeMask | ButtonPressMask | ButtonReleaseMask | 
-	PropertyChangeMask | FocusChangeMask;
+	PropertyChangeMask | FocusChangeMask |
+	StructureNotifyMask;	// the root resized, or its monitors changed
     XChangeWindowAttributes(m_display, m_root, CWCursor | CWEventMask, &attr);
     XSync(m_display, False);
 
@@ -1114,9 +1125,110 @@ void WindowManager::raiseDocks()
     for (int i = 0; i < m_dockCount; ++i) XRaiseWindow(m_display, m_docks[i]);
 }
 
+void WindowManager::updateMonitors()
+{
+    int n = 0;
+    XRRMonitorInfo *mon = m_rrEvent >= 0 ?
+	XRRGetMonitors(m_display, m_root, True, &n) : 0;
+
+    m_monitorCount = 0;
+    for (int i = 0; mon && i < n && m_monitorCount < MAX_MONITORS; ++i) {
+	if (mon[i].width < 1 || mon[i].height < 1) continue;
+	// a mirrored (cloned) monitor is the same rectangle twice: keep one
+	int j;
+	for (j = 0; j < m_monitorCount; ++j)
+	    if (m_monitors[j].x == mon[i].x && m_monitors[j].y == mon[i].y &&
+		m_monitors[j].w == mon[i].width && m_monitors[j].h == mon[i].height) break;
+	if (j < m_monitorCount) continue;
+	Monitor &m = m_monitors[m_monitorCount++];
+	m.x = mon[i].x; m.y = mon[i].y; m.w = mon[i].width; m.h = mon[i].height;
+	m.top = m.bottom = m.left = m.right = 0;
+    }
+    if (mon) XRRFreeMonitors(mon);
+    if (m_monitorCount == 0) {
+	Monitor &m = m_monitors[m_monitorCount++];
+	m.x = m.y = 0;
+	m.w = DisplayWidth(m_display, m_screenNumber);
+	m.h = DisplayHeight(m_display, m_screenNumber);
+	m.top = m.bottom = m.left = m.right = 0;
+    }
+    recomputeStruts();
+}
+
+// the monitor the pointer is on (new windows and the root menu go there)
+const WindowManager::Monitor &WindowManager::pointerMonitor()
+{
+    Window r, c;
+    int x = 0, y = 0, wx, wy;
+    unsigned int mask;
+
+    XQueryPointer(m_display, m_root, &r, &c, &x, &y, &wx, &wy, &mask);
+    return monitorAt(x, y);
+}
+
+static int overlap(int a0, int a1, int b0, int b1)
+{
+    int lo = a0 > b0 ? a0 : b0, hi = a1 < b1 ? a1 : b1;
+    return hi > lo ? hi - lo : 0;
+}
+
+// the monitor a rectangle is mostly on; off every monitor, the nearest
+const WindowManager::Monitor &WindowManager::monitorFor(int x, int y, int w, int h)
+{
+    int best = 0;
+    long bestArea = -1, bestDist = -1;
+    int cx = x + w / 2, cy = y + h / 2;
+
+    for (int i = 0; i < m_monitorCount; ++i) {
+	Monitor &m = m_monitors[i];
+	long a = (long)overlap(x, x + w, m.x, m.x + m.w) *
+		 overlap(y, y + h, m.y, m.y + m.h);
+	long dx = cx < m.x ? m.x - cx : cx >= m.x + m.w ? cx - (m.x + m.w - 1) : 0;
+	long dy = cy < m.y ? m.y - cy : cy >= m.y + m.h ? cy - (m.y + m.h - 1) : 0;
+	long dist = dx * dx + dy * dy;
+	if (a > bestArea || (a == 0 && bestArea == 0 && dist < bestDist)) {
+	    best = i; bestArea = a; bestDist = dist;
+	}
+    }
+    return m_monitors[best];
+}
+
+// A frame whose top edge is at (cx, top): pushed below a dock's strip when
+// the edge is in one, or onto the topmost monitor when above all of them.
+// Elsewhere it is free, so a window can be dragged from one monitor to the
+// one above (it jumps over the strip once the pointer has crossed it).
+int WindowManager::topLimit(int cx, int top)
+{
+    const Monitor *highest = 0;
+
+    for (int i = 0; i < m_monitorCount; ++i) {
+	Monitor &m = m_monitors[i];
+	if (cx < m.x || cx >= m.x + m.w) continue;
+	if (top >= m.y && top < m.y + m.top) return m.y + m.top;
+	if (!highest || m.y < highest->y) highest = &m;
+    }
+    if (highest && top < highest->y) return highest->y + highest->top;
+    if (!highest && top < 0) return 0;
+    return top;
+}
+
+Boolean WindowManager::isDock(Window w)
+{
+    for (int i = 0; i < m_dockCount; ++i) if (m_docks[i] == w) return True;
+    return False;
+}
+
 void WindowManager::recomputeStruts()
 {
     int prevTop = m_strutTop, prevBottom = m_strutBottom;
+    Monitor prev[MAX_MONITORS];
+    Boolean changed = False;
+    int sw = DisplayWidth(m_display, m_screenNumber);
+    int sh = DisplayHeight(m_display, m_screenNumber);
+
+    memcpy(prev, m_monitors, sizeof prev);
+    for (int i = 0; i < m_monitorCount; ++i)
+	m_monitors[i].top = m_monitors[i].bottom = m_monitors[i].left = m_monitors[i].right = 0;
     m_strutTop = m_strutBottom = 0;
 
     for (int i = 0; i < m_dockCount; ++i) {
@@ -1136,11 +1248,83 @@ void WindowManager::recomputeStruts()
 	    long *s = (long *)data;
 	    if (s[2] > m_strutTop)    m_strutTop = (int)s[2];
 	    if (s[3] > m_strutBottom) m_strutBottom = (int)s[3];
+	    // the strut reaches in from the screen's edge: the monitors it covers
+	    // (_NET_WM_STRUT_PARTIAL: left_start_y, left_end_y, right_start_y,
+	    // right_end_y, top_start_x, top_end_x, bottom_start_x, bottom_end_x)
+	    long ly0 = 0, ly1 = sh - 1, ry0 = 0, ry1 = sh - 1;
+	    long tx0 = 0, tx1 = sw - 1, bx0 = 0, bx1 = sw - 1;
+	    if (n >= 12 && type == XA_CARDINAL) {
+		if (s[5] >= s[4] && s[5] > 0) { ly0 = s[4]; ly1 = s[5]; }
+		if (s[7] >= s[6] && s[7] > 0) { ry0 = s[6]; ry1 = s[7]; }
+		if (s[9] >= s[8] && s[9] > 0) { tx0 = s[8]; tx1 = s[9]; }
+		if (s[11] >= s[10] && s[11] > 0) { bx0 = s[10]; bx1 = s[11]; }
+	    }
+	    for (int j = 0; j < m_monitorCount; ++j) {
+		Monitor &m = m_monitors[j];
+		if (s[2] > m.y && overlap(m.x, m.x + m.w, tx0, tx1 + 1)) {
+		    int t = (int)s[2] - m.y;
+		    if (t > m.h) t = m.h;
+		    if (t > m.top) m.top = t;
+		}
+		if (sh - s[3] < m.y + m.h && overlap(m.x, m.x + m.w, bx0, bx1 + 1)) {
+		    int b = m.y + m.h - (sh - (int)s[3]);
+		    if (b > m.h) b = m.h;
+		    if (b > m.bottom) m.bottom = b;
+		}
+		if (s[0] > m.x && overlap(m.y, m.y + m.h, ly0, ly1 + 1)) {
+		    int l = (int)s[0] - m.x;
+		    if (l > m.w) l = m.w;
+		    if (l > m.left) m.left = l;
+		}
+		if (sw - s[1] < m.x + m.w && overlap(m.y, m.y + m.h, ry0, ry1 + 1)) {
+		    int r = m.x + m.w - (sw - (int)s[1]);
+		    if (r > m.w) r = m.w;
+		    if (r > m.right) m.right = r;
+		}
+	    }
 	}
 	if (data) XFree(data);
+
+	// A dock lying along a monitor's top or bottom edge takes that strip
+	// even without a strut: struts only reach in from the screen's edges,
+	// so a panel at the top of a lower monitor cannot say so.
+	XWindowAttributes attr;
+	Window child;
+	int dx, dy;
+	if (XGetWindowAttributes(m_display, m_docks[i], &attr) &&
+	    attr.map_state == IsViewable &&
+	    XTranslateCoordinates(m_display, m_docks[i], m_root, 0, 0,
+				  &dx, &dy, &child)) {
+	    for (int j = 0; j < m_monitorCount; ++j) {
+		Monitor &m = m_monitors[j];
+		// a long thin dock: across the monitor at its top or bottom,
+		// or down it at its left or right
+		if (overlap(m.x, m.x + m.w, dx, dx + attr.width) * 2 >= m.w &&
+		    overlap(m.y, m.y + m.h, dy, dy + attr.height) > 0 &&
+		    attr.height * 3 <= m.h) {
+		    if (dy == m.y && attr.height > m.top) m.top = attr.height;
+		    if (dy + attr.height == m.y + m.h && attr.height > m.bottom)
+			m.bottom = attr.height;
+		}
+		if (overlap(m.y, m.y + m.h, dy, dy + attr.height) * 2 >= m.h &&
+		    overlap(m.x, m.x + m.w, dx, dx + attr.width) > 0 &&
+		    attr.width * 3 <= m.w) {
+		    if (dx == m.x && attr.width > m.left) m.left = attr.width;
+		    if (dx + attr.width == m.x + m.w && attr.width > m.right)
+			m.right = attr.width;
+		}
+	    }
+	}
     }
 
-    if (m_strutTop != prevTop || m_strutBottom != prevBottom) {
+    for (int i = 0; i < m_monitorCount; ++i)
+	if (prev[i].x != m_monitors[i].x || prev[i].y != m_monitors[i].y ||
+	    prev[i].w != m_monitors[i].w || prev[i].h != m_monitors[i].h ||
+	    prev[i].top != m_monitors[i].top || prev[i].bottom != m_monitors[i].bottom ||
+	    prev[i].left != m_monitors[i].left || prev[i].right != m_monitors[i].right)
+	    changed = True;
+
+    if (changed || m_strutTop != prevTop || m_strutBottom != prevBottom) {
 	for (int i = 0; i < m_clients.count(); ++i) {
 	    Client *c = m_clients.item(i);
 	    if (c->isMaximized()) c->applyStateGeometry();

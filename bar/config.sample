@@ -46,7 +46,8 @@
 # 電源まわり (xfce4-power-manager などの電源管理ソフトを使わないとき)
 # 明るさキー: 1 回で変える割合 (%)。0 でキーを取らない (別のソフトに任せる)
 # brightness_step 10
-# backlight       intel_backlight   # 既定は /sys/class/backlight の最初のもの
+# backlight       intel_backlight   # 既定は /sys/class/backlight の一番よい種類 (raw) を全部。
+#                                   # パネルが 2 枚なら両方を同じ割合で変える。空白区切りで複数書ける
 # 電源をつないだとき / バッテリーのときの power-profiles-daemon のプロファイル
 # (power-saver / balanced / performance)。書かなければ切り替えない
 # profile_on_ac          balanced
@@ -82,3 +83,13 @@
 # 入力メソッド自身のアイコン (IBus の ibus-ui-gtk、fcitx5 の fcitx) は、バーが入力メソッドを
 # 出している間は書かなくても隠れる (input_method none のときはトレイに出る)
 # tray_hide       nm-applet blueman-tray
+# バーを出す画面 (モニタ)。primary (既定) はプライマリの画面だけ、all は全部の画面。
+# 画面の名前 (xrandr --listmonitors で見える eDP-1 など) を空白区切りで並べるとその画面に出す
+# (primary も名前として並べられる)。トレイの付いた本体のバーはプライマリ (選んだ中に
+# 無ければ最初の画面) に置き、ほかの画面にはその写しを出す。写しでもクリックやメニューは
+# 本体と同じに動き、幅が違う画面では左右の端を寄せて見せる。
+# 場所 (ストラット) を確保できるのは画面全体の上端にあるバーだけ (EWMH では画面全体の
+# 端からしか取れない) なので、それより下の画面のバーには上端のウィンドウが隠れることがある
+# monitors        primary
+# monitors        all
+# monitors        eDP-1 HDMI-1

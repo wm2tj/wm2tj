@@ -32,6 +32,7 @@
 #include <X11/Xft/Xft.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/dpms.h>
+#include <X11/extensions/Xrandr.h>
 #include <X11/XF86keysym.h>
 #include <X11/XKBlib.h>
 
@@ -79,6 +80,7 @@ static Colormap cmap;
 static int depth;
 static GC gc;
 static int scrW, scrH;
+static int rrBase = -1;		/* XRandR events, -1: no XRandR */
 
 static volatile sig_atomic_t gotHup, gotTerm;
 
@@ -124,6 +126,7 @@ static struct {
     int  tray;			/* be the system tray */
     char trayHide[256];		/* WM_CLASS names whose tray icons stay hidden */
     int  syncWm2tj;		/* share the favourites with the wm2tj menu */
+    char monitors[256];		/* primary, all, or monitor names (eDP-1 HDMI-1 ...) */
     char syncCmd[512];		/* ... and rebuild that menu after a change */
 } cfg;
 
@@ -241,6 +244,7 @@ static void readConfig(void)
 	else if (!strcmp(k, "sync_wm2tj"))
 	    cfg.syncWm2tj = !strcmp(v, "yes") || !strcmp(v, "true") || !strcmp(v, "1");
 	else if (!strcmp(k, "wm2tj_menu_command")) SET(syncCmd, v);
+	else if (!strcmp(k, "monitors"))         SET(monitors, v);
 	else fprintf(stderr, PROGNAME ": %s: unknown key \"%s\"\n", path, k);
     }
     fclose(f);
@@ -296,6 +300,7 @@ static void loadConfig(void)
     cfg.tray = 1;
     cfg.trayHide[0] = '\0';
     cfg.syncWm2tj = 0;
+    SET(monitors, "primary");
     SET(syncCmd, DEFAULT_SYNC_CMD);
 
     readWm2rc();
@@ -1861,6 +1866,27 @@ static void toggleIme(void)
 
 static Window bar;
 static Pixmap barGloss, barBack, taskGloss;
+
+/*
+ * Which monitors show the bar (monitors in the config). The bar itself, with
+ * the tray, sits at the top of the primary one (or the first one chosen) and
+ * is laid out for its width, barW; every other monitor chosen gets a copy: a
+ * window of its own showing the bar's picture, whose clicks act on the bar.
+ * A narrower copy shows the bar's two ends, a wider one spreads them apart.
+ * A bar reserves a strut when no monitor lies above it: EWMH struts reach
+ * in from the root's top edge, so one under another monitor cannot say so
+ * (wm2tj keeps the strip of any dock free anyway).
+ */
+typedef struct { Window w; int x, y, width, height; } Place;
+#define MAXMIRRORS 15
+static Place home;			/* the bar's monitor (home.w is unused) */
+static Place mirrors[MAXMIRRORS];
+static int nMirrors, barW;
+static Place monList[MAXMIRRORS + 1];	/* every monitor, clones once */
+static int nMon;
+/* the bar that was last used: menus and tips open under it, inside its monitor */
+static int barX, barY, monW, monH;
+static int curL, curD;	/* its left part is curL wide, the rest moved curD right */
 static XftDraw *barDraw;
 
 static int nDesktops, curDesktop;
@@ -1967,7 +1993,7 @@ static void renderTab(Pixmap p)
 }
 
 /* cut the 1px gap round the button out of the window, as wm2tj does */
-static void shapeBar(void)
+static void shapeWindow(Window w)
 {
     XRectangle r[4];
     int lo = notchLo() + 1, hi = notchHi() - 1, n = hi - lo + 1;
@@ -1976,9 +2002,68 @@ static void shapeBar(void)
     r[1].x = lo; r[1].y = hi; r[1].width = n; r[1].height = 1;
     r[2].x = lo; r[2].y = lo; r[2].width = 1; r[2].height = n;
     r[3].x = hi; r[3].y = lo; r[3].width = 1; r[3].height = n;
-    XShapeCombineMask(dpy, bar, ShapeBounding, 0, 0, None, ShapeSet);
-    XShapeCombineRectangles(dpy, bar, ShapeBounding, 0, 0, r, 4,
+    XShapeCombineMask(dpy, w, ShapeBounding, 0, 0, None, ShapeSet);
+    XShapeCombineRectangles(dpy, w, ShapeBounding, 0, 0, r, 4,
 			    ShapeSubtract, Unsorted);
+}
+
+static void shapeBar(void)
+{
+    int i;
+
+    shapeWindow(bar);
+    for (i = 0; i < nMirrors; ++i) shapeWindow(mirrors[i].w);
+}
+
+static int mirrorOf(Window w)
+{
+    int i;
+
+    for (i = 0; i < nMirrors; ++i) if (mirrors[i].w == w) return i;
+    return -1;
+}
+
+static int tabLen(void);
+
+/* copy i: the bar's left half at the left, the rest at the right; between
+   them on a wider monitor, plain bar background from the bar's right end */
+static void showMirror(int i)
+{
+    Window w = mirrors[i].w;
+    int cw = mirrors[i].width, d = cw - barW, l = (cw < barW ? cw : barW) / 2;
+    int src = d < 0 ? l - d : l, x, chunk = barW - tabLen() - 10;
+
+    XCopyArea(dpy, barBack, w, gc, 0, 0, l, barH, 0, 0);
+    XCopyArea(dpy, barBack, w, gc, src, 0, barW - src, barH, src + d, 0);
+    if (chunk < 1) chunk = 1;
+    for (x = l; x < l + d; x += chunk) {
+	int n = l + d - x < chunk ? l + d - x : chunk;
+	XCopyArea(dpy, barGloss, w, gc, barW - n, 0, n, barH, x, 0);
+    }
+}
+
+/* window w was pressed or hovered at x: make it the bar in use, and return
+   x on the bar (barW + 1 between the two halves of a wide copy, -1: not a bar) */
+static int onBar(Window w, int x)
+{
+    int i = mirrorOf(w);
+    Place *p = w == bar ? &home : i >= 0 ? &mirrors[i] : 0;
+    int cw;
+
+    if (!p) return -1;
+    cw = w == bar ? barW : p->width;
+    barX = p->x; barY = p->y; monW = p->width; monH = p->height;
+    curD = cw - barW;
+    curL = (cw < barW ? cw : barW) / 2;
+    if (x < curL) return x;
+    if (x < curL + (curD > 0 ? curD : 0)) return barW + 1;
+    return x - curD;
+}
+
+/* x on the bar to x on the root window, for the bar in use */
+static int rootX(int x)
+{
+    return barX + (x < curL ? x : x + curD);
 }
 
 /* the status icons: drawn with rectangles, centred on the bar */
@@ -2257,14 +2342,14 @@ static void showTip(void)
 	}
     w = textWidth(menuFont, text) + 16;
     h = menuFont->ascent + menuFont->descent + 8;
-    x = (x + x1 - w) / 2;
-    if (x + w > scrW - 2) x = scrW - 2 - w;
-    if (x < 2) x = 2;
+    x = rootX((x + x1) / 2) - w / 2;
+    if (x + w > barX + monW - 2) x = barX + monW - 2 - w;
+    if (x < barX + 2) x = barX + 2;
 
     a.override_redirect = True;
     a.save_under = True;
     a.background_pixmap = None;
-    tipWin = XCreateWindow(dpy, root, x, barH + 2, w, h, 0, depth, InputOutput,
+    tipWin = XCreateWindow(dpy, root, x, barY + barH + 2, w, h, 0, depth, InputOutput,
 			   vis, CWOverrideRedirect | CWSaveUnder | CWBackPixmap, &a);
     tipBack = XCreatePixmap(dpy, root, w, h, depth);
     tipDraw = XftDrawCreate(dpy, tipBack, vis, cmap);
@@ -2595,7 +2680,7 @@ static void drawBar(void)
     time_t now = time(0);
 
     nHits = 0;
-    XCopyArea(dpy, barGloss, barBack, gc, 0, 0, scrW, barH, 0, 0);
+    XCopyArea(dpy, barGloss, barBack, gc, 0, 0, barW, barH, 0, 0);
 
     /* the button: wm2tj's tab button, the ■ menu */
     XftDrawRect(barDraw, &cBorder, b0, b0, bs, bs);
@@ -2614,9 +2699,9 @@ static void drawBar(void)
 
     /* right side, built right to left: clock, status icons, desktops */
     strftime(clock, sizeof clock, cfg.clockFormat, localtime(&now));
-    right = scrW - 10 - textWidth(barFont, clock);
+    right = barW - 10 - textWidth(barFont, clock);
     drawLabel(barDraw, barFont, &cText, right, by, clock, 0);
-    addHit(right - 4, scrW, H_CLOCK, 0);
+    addHit(right - 4, barW, H_CLOCK, 0);
 
     if (batPresent) {
 	char pct[16];
@@ -2686,19 +2771,37 @@ static void drawBar(void)
 
     drawTasks(tabLen() + 6, right - gap);
 
-    XCopyArea(dpy, barBack, bar, gc, 0, 0, scrW, barH, 0, 0);
+    XCopyArea(dpy, barBack, bar, gc, 0, 0, barW, barH, 0, 0);
+    for (i = 0; i < nMirrors; ++i) showMirror(i);
     if (flashKind != H_NONE || hoverKind >= H_CPU) showTip(); else hideTip();
+}
+
+/* the strut of a bar at x, y, width wide: from the root's top edge down to
+   the bar's bottom, over its own columns; none with a monitor above it */
+static void setStrutOf(Window w, int x, int y, int width)
+{
+    long strut[4] = { 0, 0, y + barH, 0 };
+    long partial[12] = { 0, 0, y + barH, 0, 0, 0, 0, 0, x, x + width - 1, 0, 0 };
+    int i;
+
+    for (i = 0; i < nMon; ++i)
+	if (monList[i].y < y && monList[i].x < x + width && monList[i].x + monList[i].width > x) {
+	    XDeleteProperty(dpy, w, aStrutPartial);
+	    XDeleteProperty(dpy, w, aStrut);
+	    return;
+	}
+    XChangeProperty(dpy, w, aStrutPartial, XA_CARDINAL, 32, PropModeReplace,
+		    (unsigned char *)partial, 12);
+    if (y == 0)		/* the old _NET_WM_STRUT spans the whole width */
+	XChangeProperty(dpy, w, aStrut, XA_CARDINAL, 32, PropModeReplace,
+			(unsigned char *)strut, 4);
+    else
+	XDeleteProperty(dpy, w, aStrut);
 }
 
 static void setStruts(void)
 {
-    long strut[4] = { 0, 0, barH, 0 };
-    long partial[12] = { 0, 0, barH, 0, 0, 0, 0, 0, 0, scrW - 1, 0, 0 };
-
-    XChangeProperty(dpy, bar, aStrutPartial, XA_CARDINAL, 32, PropModeReplace,
-		    (unsigned char *)partial, 12);
-    XChangeProperty(dpy, bar, aStrut, XA_CARDINAL, 32, PropModeReplace,
-		    (unsigned char *)strut, 4);
+    setStrutOf(bar, home.x, home.y, barW);
 }
 
 static void makeBarBuffers(void)
@@ -2706,11 +2809,11 @@ static void makeBarBuffers(void)
     if (barDraw) XftDrawDestroy(barDraw);
     if (barBack) XFreePixmap(dpy, barBack);
     if (barGloss) XFreePixmap(dpy, barGloss);
-    barGloss = XCreatePixmap(dpy, root, scrW, barH, depth);
+    barGloss = XCreatePixmap(dpy, root, barW, barH, depth);
     XSetForeground(dpy, gc, cBarBg.pixel);
-    XFillRectangle(dpy, barGloss, gc, 0, 0, scrW, barH);
+    XFillRectangle(dpy, barGloss, gc, 0, 0, barW, barH);
     renderTab(barGloss);
-    barBack = XCreatePixmap(dpy, root, scrW, barH, depth);
+    barBack = XCreatePixmap(dpy, root, barW, barH, depth);
     barDraw = XftDrawCreate(dpy, barBack, vis, cmap);
     if (!taskGloss) {
 	taskGloss = renderGloss(200, taskH(), taskBase);
@@ -2721,19 +2824,31 @@ static void makeBarBuffers(void)
     }
 }
 
-static void createBar(void)
+static void dockHints(Window w, int x, int y, int width)
+{
+    XSizeHints sh;
+
+    sh.flags = PPosition | PSize | PMinSize | PMaxSize;
+    sh.x = x; sh.y = y;
+    sh.width = sh.min_width = sh.max_width = width;
+    sh.height = sh.min_height = sh.max_height = barH;
+    XSetWMNormalHints(dpy, w, &sh);
+}
+
+/* a dock window across the top of a monitor, for the bar or a copy */
+static Window makeDock(int x, int y, int w)
 {
     XSetWindowAttributes a;
     XClassHint ch = { PROGNAME, PROGNAME };
     XWMHints wmh;
-    XSizeHints sh;
     long desk = 0xFFFFFFFF;
     Atom states[4] = { aSticky, aAbove, aSkipTaskbar, aSkipPager };
+    Window bar;
 
     a.background_pixmap = None;
     a.event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
 	PointerMotionMask | LeaveWindowMask;
-    bar = XCreateWindow(dpy, root, 0, 0, scrW, barH, 0, depth, InputOutput,
+    bar = XCreateWindow(dpy, root, x, y, w, barH, 0, depth, InputOutput,
 			vis, CWBackPixmap | CWEventMask, &a);
 
     XChangeProperty(dpy, bar, aType, XA_ATOM, 32, PropModeReplace,
@@ -2749,16 +2864,130 @@ static void createBar(void)
     wmh.flags = InputHint;
     wmh.input = False;
     XSetWMHints(dpy, bar, &wmh);
-    sh.flags = PPosition | PSize | PMinSize | PMaxSize;
-    sh.x = sh.y = 0;
-    sh.width = sh.min_width = sh.max_width = scrW;
-    sh.height = sh.min_height = sh.max_height = barH;
-    XSetWMNormalHints(dpy, bar, &sh);
+    dockHints(bar, x, y, w);
+    return bar;
+}
+
+/* is monitor name (an atom) in the list of names? */
+static int nameListed(const char *list, Atom name)
+{
+    char *n = XGetAtomName(dpy, name), buf[256], *t, *save;
+    int found = 0;
+
+    if (!n) return 0;
+    snprintf(buf, sizeof buf, "%s", list);
+    for (t = strtok_r(buf, " \t,", &save); t && !found; t = strtok_r(0, " \t,", &save))
+	found = !strcmp(t, n);
+    XFree(n);
+    return found;
+}
+
+/*
+ * Choose the monitors from cfg.monitors: home (the bar) and the copies.
+ * Without XRandR, or when no monitor matches, the bar spans the top of the root.
+ */
+static void chooseMonitors(Place *list, int *count)
+{
+    XRRMonitorInfo *mon = 0;
+    int i, n = 0, h = -1, all = !strcmp(cfg.monitors, "all"), byName;
+    char pick[MAXMIRRORS + 1];
+
+    *count = 0;
+    nMon = 0;
+    home.x = home.y = 0; home.width = scrW; home.height = scrH;
+    if (rrBase >= 0) mon = XRRGetMonitors(dpy, root, True, &n);
+    if (!mon) return;
+    byName = !all && strcmp(cfg.monitors, "primary") != 0;
+    if (n > MAXMIRRORS + 1) n = MAXMIRRORS + 1;
+    for (i = 0; i < n; ++i) {
+	int j;
+	/* a mirrored (cloned) monitor: the same rectangle again, one bar is enough */
+	for (j = 0; j < i; ++j)
+	    if (mon[j].x == mon[i].x && mon[j].y == mon[i].y &&
+		mon[j].width == mon[i].width && mon[j].height == mon[i].height) break;
+	if (j < i) { pick[i] = 0; continue; }
+	monList[nMon].x = mon[i].x; monList[nMon].y = mon[i].y;
+	monList[nMon].width = mon[i].width; monList[nMon].height = mon[i].height;
+	++nMon;
+	pick[i] = all || (byName ? nameListed(cfg.monitors, mon[i].name) ||
+				  (mon[i].primary && nameListed(cfg.monitors, XInternAtom(dpy, "primary", False)))
+			  : mon[i].primary);
+    }
+    for (i = 0; i < n; ++i) if (pick[i] && mon[i].primary) h = i;
+    for (i = 0; i < n && h < 0; ++i) if (pick[i]) h = i;
+    if (h < 0)		/* nothing chosen (no primary, or no such name): the primary, else the first */
+	for (i = 0; i < n; ++i) if (mon[i].primary) h = i;
+    if (h < 0 && n > 0) h = 0;
+    if (h >= 0 && mon[h].width > 1) {
+	home.x = mon[h].x; home.y = mon[h].y;
+	home.width = mon[h].width; home.height = mon[h].height;
+    }
+    for (i = 0; i < n; ++i)
+	if (pick[i] && i != h && mon[i].width > 1) {
+	    list[*count].x = mon[i].x; list[*count].y = mon[i].y;
+	    list[*count].width = mon[i].width; list[*count].height = mon[i].height;
+	    ++*count;
+	}
+    XRRFreeMonitors(mon);
+}
+
+static void makeMirrors(Place *list, int count)
+{
+    int i;
+
+    while (nMirrors) XDestroyWindow(dpy, mirrors[--nMirrors].w);
+    for (i = 0; i < count && i < MAXMIRRORS; ++i) {
+	mirrors[i] = list[i];
+	mirrors[i].w = makeDock(list[i].x, list[i].y, list[i].width);
+	setStrutOf(mirrors[i].w, list[i].x, list[i].y, list[i].width);
+	shapeWindow(mirrors[i].w);
+	XMapRaised(dpy, mirrors[i].w);
+	nMirrors = i + 1;
+    }
+}
+
+/* the bar in use is the bar itself, until a copy is clicked */
+static void useHome(void)
+{
+    barX = home.x; barY = home.y; monW = home.width; monH = home.height;
+    curL = barW; curD = 0;
+}
+
+static void createBar(void)
+{
+    Place list[MAXMIRRORS];
+    int n;
+
+    chooseMonitors(list, &n);
+    barW = home.width;
+    useHome();
+    bar = makeDock(home.x, home.y, barW);
     setStruts();
 
     makeBarBuffers();
     shapeBar();
     XMapRaised(dpy, bar);
+    makeMirrors(list, n);
+}
+
+/* the screen or the monitors changed: move the bar, remake the copies */
+static void relayoutBar(void)
+{
+    Place list[MAXMIRRORS];
+    int n, oldW = barW;
+
+    scrW = DisplayWidth(dpy, scr);
+    scrH = DisplayHeight(dpy, scr);
+    chooseMonitors(list, &n);
+    barW = home.width;
+    useHome();
+    XMoveResizeWindow(dpy, bar, home.x, home.y, barW, barH);
+    dockHints(bar, home.x, home.y, barW);
+    setStruts();
+    if (barW != oldW) makeBarBuffers();
+    makeMirrors(list, n);
+    shapeBar();
+    drawBar();
 }
 
 static void readDesktops(void)
@@ -3446,7 +3675,7 @@ static void layoutMenu(Menu *m)
     if (maxW < 140) maxW = 140;
     m->colW = maxW;
 
-    if (total + 2 <= scrH) {
+    if (total + 2 <= monH) {
 	int y = 1;
 	for (i = 0; i < m->n; ++i) {
 	    m->items[i].x = 1;
@@ -3458,7 +3687,7 @@ static void layoutMenu(Menu *m)
 	m->h = y + 1;
 	return;
     }
-    rows = (scrH - 2) / itemH;
+    rows = (monH - 2) / itemH;
     if (rows < 1) rows = 1;
     cols = (m->n + rows - 1) / rows;
     for (i = 0; i < m->n; ++i) {
@@ -3656,10 +3885,10 @@ static void grabInput(void)
 
 static void placeMenu(Menu *m, int x, int y)
 {
-    if (x + m->w > scrW) x = scrW - m->w;
-    if (y + m->h > scrH) y = scrH - m->h;
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
+    if (x + m->w > barX + monW) x = barX + monW - m->w;
+    if (y + m->h > barY + monH) y = barY + monH - m->h;
+    if (x < barX) x = barX;
+    if (y < barY) y = barY;
     m->x = x;
     m->y = y;
 }
@@ -3686,7 +3915,7 @@ static Menu *openMenu(int type, int arg, int parent, int item, int px, int py)
 	Menu *p = &menus[parent];
 	Item *it = &p->items[item];
 	int x = p->x + it->x + p->colW;
-	if (x + m->w > scrW) x = p->x + it->x - m->w;
+	if (x + m->w > barX + monW) x = p->x + it->x - m->w;
 	placeMenu(m, x, p->y + it->y - 1);
     } else {
 	placeMenu(m, px, py);
@@ -3735,7 +3964,7 @@ static void openRootMenu(void)
     loadFavs();
     menuOpen = 1;
     drawBar();
-    openMenu(M_ROOT, 0, -1, -1, 0, barH);
+    openMenu(M_ROOT, 0, -1, -1, barX, barY + barH);
 }
 
 /* under the Wi-Fi icon, its right edge at x */
@@ -3748,8 +3977,8 @@ static void openWifiMenu(int x)
 	spawn("nmcli dev wifi rescan");
 	wifiRefreshAt = time(0) + 4;
     }
-    if (!(m = openMenu(M_WIFI, 0, -1, -1, x, barH))) return;
-    placeMenu(m, x - m->w, barH);
+    if (!(m = openMenu(M_WIFI, 0, -1, -1, rootX(x), barY + barH))) return;
+    placeMenu(m, rootX(x) - m->w, barY + barH);
     XMoveWindow(dpy, m->win, m->x, m->y);
 }
 
@@ -3760,8 +3989,8 @@ static void openBtMenu(int x)
 
     readBluetooth();
     loadBtDevices();
-    if (!(m = openMenu(M_BT, 0, -1, -1, x, barH))) return;
-    placeMenu(m, x - m->w, barH);
+    if (!(m = openMenu(M_BT, 0, -1, -1, rootX(x), barY + barH))) return;
+    placeMenu(m, rootX(x) - m->w, barY + barH);
     XMoveWindow(dpy, m->win, m->x, m->y);
 }
 
@@ -3772,8 +4001,8 @@ static void openSoundMenu(int x)
 
     readVolume();
     loadSinks();
-    if (!(m = openMenu(M_SOUND, 0, -1, -1, x, barH))) return;
-    placeMenu(m, x - m->w, barH);
+    if (!(m = openMenu(M_SOUND, 0, -1, -1, rootX(x), barY + barH))) return;
+    placeMenu(m, rootX(x) - m->w, barY + barH);
     XMoveWindow(dpy, m->win, m->x, m->y);
 }
 
@@ -3784,8 +4013,8 @@ static void openImeMenu(int x)
 
     readIme();
     loadImes();
-    if (!(m = openMenu(M_IME, 0, -1, -1, x, barH))) return;
-    placeMenu(m, x - m->w, barH);
+    if (!(m = openMenu(M_IME, 0, -1, -1, rootX(x), barY + barH))) return;
+    placeMenu(m, rootX(x) - m->w, barY + barH);
     XMoveWindow(dpy, m->win, m->x, m->y);
 }
 
@@ -3795,8 +4024,8 @@ static void openBatteryMenu(int x)
     Menu *m;
 
     loadProfiles();
-    if (!(m = openMenu(M_BATTERY, 0, -1, -1, x, barH))) return;
-    placeMenu(m, x - m->w, barH);
+    if (!(m = openMenu(M_BATTERY, 0, -1, -1, rootX(x), barY + barH))) return;
+    placeMenu(m, rootX(x) - m->w, barY + barH);
     XMoveWindow(dpy, m->win, m->x, m->y);
 }
 
@@ -3819,9 +4048,9 @@ static Menu *openDialog(int type, int arg, int act)
     closeMenus(0);
     m = openMenu(type, arg, -1, -1, 0, 0);
     if (!m) return 0;
-    XMoveWindow(dpy, m->win, (scrW - m->w) / 2, (scrH - m->h) / 3);
-    m->x = (scrW - m->w) / 2;
-    m->y = (scrH - m->h) / 3;
+    m->x = barX + (monW - m->w) / 2;
+    m->y = barY + (monH - m->h) / 3;
+    XMoveWindow(dpy, m->win, m->x, m->y);
     for (i = 0; i < m->n; ++i)
 	if (m->items[i].kind == IT_ACT && m->items[i].act == act) m->sel = i;
     drawMenu(m);
@@ -4242,114 +4471,124 @@ static void grabBrightnessKeys(void)
 	XGrabKey(dpy, kcBrightDown, AnyModifier, root, False, GrabModeAsync, GrabModeAsync);
 }
 
-static int findBacklight(char *name, size_t n)
+/*
+ * The backlights to set: the names in backlight, else every one of the best
+ * type (like logind: raw > platform > firmware), so a machine with two
+ * panels (two raw backlights) dims both together. 0: none.
+ */
+#define MAXBACKLIGHTS 4
+static int findBacklights(char names[][64])
 {
     DIR *d;
     struct dirent *e;
+    int n = 0, best = -1;
 
     if (cfg.backlight[0]) {
-	snprintf(name, n, "%s", cfg.backlight);
-	return 1;
+	char buf[sizeof cfg.backlight], *t, *save;
+	snprintf(buf, sizeof buf, "%s", cfg.backlight);
+	for (t = strtok_r(buf, " \t,", &save); t && n < MAXBACKLIGHTS;
+	     t = strtok_r(0, " \t,", &save))
+	    snprintf(names[n++], 64, "%.63s", t);
+	return n;
     }
     if (!(d = opendir("/sys/class/backlight"))) return 0;
-    name[0] = '\0';
-    /* readdir order is creation order; with acpi_video0 next to
-       intel_backlight/amdgpu_bl0 prefer by type like logind: raw > platform > firmware */
-    {
-	int best = -1;
-	while ((e = readdir(d))) {
-	    char path[512], buf[32];
-	    int rank;
-	    if (e->d_name[0] == '.') continue;
-	    snprintf(path, sizeof path, "/sys/class/backlight/%s/type", e->d_name);
-	    if (readFile(path, buf, sizeof buf) <= 0) rank = 0;
-	    else rank = !strcmp(buf, "raw") ? 3 : !strcmp(buf, "platform") ? 2 : 1;
-	    if (rank > best) {
-		best = rank;
-		snprintf(name, n, "%.63s", e->d_name);
-	    }
-	}
+    while ((e = readdir(d))) {
+	char path[512], buf[32];
+	int rank;
+	if (e->d_name[0] == '.') continue;
+	snprintf(path, sizeof path, "/sys/class/backlight/%s/type", e->d_name);
+	if (readFile(path, buf, sizeof buf) <= 0) rank = 0;
+	else rank = !strcmp(buf, "raw") ? 3 : !strcmp(buf, "platform") ? 2 : 1;
+	if (rank > best) { best = rank; n = 0; }
+	if (rank == best && n < MAXBACKLIGHTS) snprintf(names[n++], 64, "%.63s", e->d_name);
     }
     closedir(d);
-    return name[0] != '\0';
+    return n;
 }
 
 /*
  * Writing /sys needs root, so ask logind to do it for this session
  * (org.freedesktop.login1.Session.SetBrightness). Key repeat and the
  * slider come faster than sysfs catches up, so for a second keep
- * counting from the last value sent.
+ * counting from the last value sent. Levels are in 1/1000 of the maximum,
+ * the same for every backlight.
  */
 static long brTarget = -1;
 static struct timeval brSent;
 
-static int readBrightness(char *name, size_t n, long *cur, long *max)
+/* the brightest backlight's level, -1: none that can be set */
+static long readBrightness(void)
 {
-    char path[512], buf[32];
+    char names[MAXBACKLIGHTS][64], path[512], buf[32];
     struct timeval now;
+    int i, n;
+    long level = -1;
 
-    if (!haveBusctl || !findBacklight(name, n)) return 0;
-    snprintf(path, sizeof path, "/sys/class/backlight/%s/max_brightness", name);
-    if (readFile(path, buf, sizeof buf) <= 0 || (*max = atol(buf)) <= 0) return 0;
-    snprintf(path, sizeof path, "/sys/class/backlight/%s/brightness", name);
-    if (readFile(path, buf, sizeof buf) <= 0) return 0;
-    *cur = atol(buf);
+    if (!haveBusctl || !(n = findBacklights(names))) return -1;
+    for (i = 0; i < n; ++i) {
+	long cur, max;
+	snprintf(path, sizeof path, "/sys/class/backlight/%s/max_brightness", names[i]);
+	if (readFile(path, buf, sizeof buf) <= 0 || (max = atol(buf)) <= 0) continue;
+	snprintf(path, sizeof path, "/sys/class/backlight/%s/brightness", names[i]);
+	if (readFile(path, buf, sizeof buf) <= 0) continue;
+	cur = atol(buf);
+	if (cur * 1000 / max > level) level = cur * 1000 / max;
+    }
+    if (level < 0) return -1;
     gettimeofday(&now, 0);
     if (brTarget >= 0 && (now.tv_sec - brSent.tv_sec) * 1000 +
 	(now.tv_usec - brSent.tv_usec) / 1000 < 1000)
-	*cur = brTarget;
-    return 1;
+	level = brTarget;
+    return level;
 }
 
-static void setBrightness(const char *name, long v, long max)
+static void setBrightness(long level)
 {
-    char cmd[512];
-    long least = max / 100 > 1 ? max / 100 : 1;		/* never black */
+    char names[MAXBACKLIGHTS][64], path[512], buf[32], cmd[512];
+    int i, n = findBacklights(names);
 
-    if (v > max) v = max;
-    if (v < least) v = least;
-    if (v == brTarget) return;
-    if (haveBusctl == 2)
-	snprintf(cmd, sizeof cmd, "dbus-send --system --dest=org.freedesktop.login1 "
-		 "/org/freedesktop/login1/session/auto org.freedesktop.login1.Session.SetBrightness "
-		 "string:backlight string:'%s' uint32:%ld", name, v);
-    else
-	snprintf(cmd, sizeof cmd, "busctl call org.freedesktop.login1 "
-		 "/org/freedesktop/login1/session/auto org.freedesktop.login1.Session "
-		 "SetBrightness ssu backlight '%s' %ld", name, v);
-    spawn(cmd);
-    brTarget = v;
+    if (level > 1000) level = 1000;
+    if (level < 10) level = 10;			/* never black */
+    if (level == brTarget) return;
+    for (i = 0; i < n; ++i) {
+	long max, v;
+	snprintf(path, sizeof path, "/sys/class/backlight/%s/max_brightness", names[i]);
+	if (readFile(path, buf, sizeof buf) <= 0 || (max = atol(buf)) <= 0) continue;
+	v = (max * level + 500) / 1000;
+	if (v < 1) v = 1;
+	if (haveBusctl == 2)
+	    snprintf(cmd, sizeof cmd, "dbus-send --system --dest=org.freedesktop.login1 "
+		     "/org/freedesktop/login1/session/auto org.freedesktop.login1.Session.SetBrightness "
+		     "string:backlight string:'%s' uint32:%ld", names[i], v);
+	else
+	    snprintf(cmd, sizeof cmd, "busctl call org.freedesktop.login1 "
+		     "/org/freedesktop/login1/session/auto org.freedesktop.login1.Session "
+		     "SetBrightness ssu backlight '%s' %ld", names[i], v);
+	spawn(cmd);
+    }
+    brTarget = level;
     gettimeofday(&brSent, 0);
 }
 
 static void stepBrightness(int dir)
 {
-    char name[64];
-    long cur, max, step;
+    long level = readBrightness(), step = cfg.brightnessStep * 10;
 
-    if (!readBrightness(name, sizeof name, &cur, &max)) return;
-    step = max * cfg.brightnessStep / 100;
-    if (step < 1) step = 1;
-    setBrightness(name, cur + dir * step, max);
+    if (level < 0) return;
+    setBrightness(level + dir * step);
 }
 
 /* in %, -1: no backlight that can be set */
 static int brightnessPct(void)
 {
-    char name[64];
-    long cur, max;
+    long level = readBrightness();
 
-    if (!readBrightness(name, sizeof name, &cur, &max)) return -1;
-    return (int)((cur * 100 + max / 2) / max);
+    return level < 0 ? -1 : (int)((level + 5) / 10);
 }
 
 static void setBrightnessPct(int pct)
 {
-    char name[64];
-    long cur, max;
-
-    if (readBrightness(name, sizeof name, &cur, &max))
-	setBrightness(name, (max * pct + 50) / 100, max);
+    if (readBrightness() >= 0) setBrightness(pct * 10L);
 }
 
 static void setScreenOff(int minutes)
@@ -4408,7 +4647,9 @@ static void barEvent(XEvent *e)
     switch (e->type) {
     case Expose:
 	if (e->xexpose.window == bar && e->xexpose.count == 0)
-	    XCopyArea(dpy, barBack, bar, gc, 0, 0, scrW, barH, 0, 0);
+	    XCopyArea(dpy, barBack, bar, gc, 0, 0, barW, barH, 0, 0);
+	else if (e->xexpose.count == 0 && mirrorOf(e->xexpose.window) >= 0)
+	    showMirror(mirrorOf(e->xexpose.window));
 	break;
     case KeyPress: {
 	KeyCode k = e->xkey.keycode;
@@ -4427,9 +4668,10 @@ static void barEvent(XEvent *e)
 	}
 	break;
     }
-    case ButtonPress:
-	if (e->xbutton.window != bar) break;
-	h = hitAt(e->xbutton.x);
+    case ButtonPress: {
+	int x = onBar(e->xbutton.window, e->xbutton.x);
+	if (x < 0) break;
+	h = hitAt(x);
 	if (e->xbutton.button == Button4 || e->xbutton.button == Button5) {
 	    if (h && h->kind == H_DESKTOP)
 		switchDesktop(curDesktop + (e->xbutton.button == Button4 ? -1 : 1));
@@ -4449,9 +4691,11 @@ static void barEvent(XEvent *e)
 	    else if (h->kind == H_IME) openImeMenu(h->x1);
 	}
 	break;
-    case MotionNotify:
-	if (e->xmotion.window == bar) {
-	    h = hitAt(e->xmotion.x);
+    }
+    case MotionNotify: {
+	int x = onBar(e->xmotion.window, e->xmotion.x);
+	if (x >= 0) {
+	    h = hitAt(x);
 	    int k = h ? h->kind : H_NONE, a = h ? h->arg : -1;
 	    if (k != hoverKind || a != hoverArg) {
 		hoverKind = k; hoverArg = a;
@@ -4459,8 +4703,10 @@ static void barEvent(XEvent *e)
 	    }
 	}
 	break;
+    }
     case LeaveNotify:
-	if (e->xcrossing.window == bar && hoverKind != H_NONE) {
+	if ((e->xcrossing.window == bar || mirrorOf(e->xcrossing.window) >= 0) &&
+	    hoverKind != H_NONE) {
 	    hoverKind = H_NONE; hoverArg = -1;
 	    drawBar();
 	}
@@ -4489,15 +4735,12 @@ static void barEvent(XEvent *e)
 	}
 	break;
     case ConfigureNotify:
-	if (e->xconfigure.window == root &&
-	    (e->xconfigure.width != scrW || e->xconfigure.height != scrH)) {
-	    scrW = e->xconfigure.width;
-	    scrH = e->xconfigure.height;
-	    XResizeWindow(dpy, bar, scrW, barH);
-	    setStruts();
-	    makeBarBuffers();
-	    shapeBar();
-	    drawBar();
+	if (e->xconfigure.window == root) relayoutBar();
+	break;
+    default:		/* monitors moved, or the primary changed, without a new root size */
+	if (rrBase >= 0 && e->type == rrBase + RRScreenChangeNotify) {
+	    XRRUpdateConfiguration(e);
+	    relayoutBar();
 	}
 	break;
     }
@@ -4661,6 +4904,13 @@ int main(int argc, char **argv)
     sigaction(SIGCHLD, &sa, 0);
 
     XSetErrorHandler(ignoreXError);
+    {
+	int ev, err;
+	if (XRRQueryExtension(dpy, &ev, &err)) {
+	    rrBase = ev;
+	    XRRSelectInput(dpy, root, RRScreenChangeNotifyMask);
+	}
+    }
     createBar();
     XSetSelectionOwner(dpy, aSelection, bar, CurrentTime);
     XSelectInput(dpy, root, PropertyChangeMask | StructureNotifyMask);

@@ -131,13 +131,22 @@ HandleLidSwitchExternalPower=suspend
 
 反映は `sudo systemctl kill -s HUP systemd-logind`。xfce4-power-manager が動いていると、そちらが電源ボタンと明るさキーを横取りするので止めておく。スリープ前の画面ロックはスクリーンセーバー (xfce4-screensaver など) の役目。電池が切れそうなときの動作は UPower (`/etc/UPower/UPower.conf` の `CriticalPowerAction`)。
 
+## 複数の画面
+
+設定の `monitors` でバーを出す画面を選ぶ: `primary` (既定)・`all`・画面の名前 (`xrandr --listmonitors` で見える `eDP-1` など)。
+
+- トレイの付いた本体のバーはプライマリの画面 (選んだ中に無ければ最初の画面) に置く。ほかに選んだ画面には写しを出す。写しでもクリック・ホバー・メニューは本体と同じに動き、メニューはその画面の中に出る。幅が違う画面では左右の端を寄せて見せる
+- 上に画面の無いバーは、自分の列の分だけ場所 (strut) を確保する。EWMH の strut は画面全体の端からしか測れないので、下の画面の上端のバーは確保できない。wm2tj はそれでもその帯を空けるが、ほかの WM では窓が隠れることがある
+- XRandR の変化 (画面のつなぎ外し・回転・ミラー) に追従する。ミラーの画面にはバー 1 本。最大 16 画面
+- 明るさキーとスライダーは、一番よい種類のバックライトを全部同じ割合で変える (パネルが 2 枚なら両方)。`backlight` で名前を書く場合は複数書ける
+
 ## ビルドとインストール
 
 ```
-sudo apt install build-essential pkg-config libx11-dev libxext-dev libxft-dev gettext   # Debian/Ubuntu
-# Fedora: gcc make pkgconf libX11-devel libXext-devel libXft-devel gettext
-# Arch:   base-devel libx11 libxext libxft gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev gettext
-# Void:   base-devel pkg-config libX11-devel libXext-devel libXft-devel gettext
+sudo apt install build-essential pkg-config libx11-dev libxext-dev libxft-dev libxrandr-dev gettext   # Debian/Ubuntu
+# Fedora: gcc make pkgconf libX11-devel libXext-devel libXft-devel libXrandr-devel gettext
+# Arch:   base-devel libx11 libxext libxft libxrandr gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev libxrandr-dev gettext
+# Void:   base-devel pkg-config libX11-devel libXext-devel libXft-devel libXrandr-devel gettext
 # 設定 GUI (任意): python3 + PyGObject + GTK 3 = python3-gi / python3-gobject / python-gobject / py3-gobject3
 # gettext (msgfmt) が無くても make は通る (同梱の .mo をそのまま使う)
 make
@@ -155,7 +164,7 @@ xfce4-panel と同時に使うと上で重なるので、置き換えるとき�
 
 ### 依存するもの
 
-ビルドに要るもの: C コンパイラ、pkg-config、Xlib・Xext・Xft の開発用ファイル、gettext (`msgfmt`、翻訳を作る)。ライブラリの同梱はしない。
+ビルドに要るもの: C コンパイラ、pkg-config、Xlib・Xext・Xft・Xrandr の開発用ファイル、gettext (`msgfmt`、翻訳を作る)。ライブラリの同梱はしない。
 
 実行時は X だけあれば動く。次のものは **あれば使う** (無ければその機能が止まるだけで、理由を一度だけ標準エラーに出す):
 

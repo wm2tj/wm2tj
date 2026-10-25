@@ -1,6 +1,7 @@
 #include <sys/wait.h>
 
 #include "Manager.h"
+#include <X11/extensions/Xrandr.h>
 #include "Client.h"
 
 
@@ -99,7 +100,10 @@ int WindowManager::loop()
 
 	default:
 //	    if (ev.type == m_shapeEvent) eventShapeNotify((XShapeEvent *)&ev);
-	    if (ev.type == m_shapeEvent) {
+	    if (m_rrEvent >= 0 && ev.type == m_rrEvent + RRScreenChangeNotify) {
+		XRRUpdateConfiguration(&ev);
+		updateMonitors();
+	    } else if (ev.type == m_shapeEvent) {
 		fprintf(stderr, "wm2tj: shaped windows are not supported\n");
 	    } else {
 		fprintf(stderr, "wm2tj: unsupported event type %d\n", ev.type);
@@ -122,6 +126,16 @@ int WindowManager::loop()
 	case PropertyNotify:
 	    if (ev.xproperty.atom == Atoms::net_wm_strut ||
 		ev.xproperty.atom == Atoms::net_wm_strut_partial)
+		recomputeStruts();
+	    break;
+	case ConfigureNotify:	// a dock moved or changed size
+	case MapNotify:
+	    if (ev.type == ConfigureNotify && ev.xconfigure.window == m_root) {
+		// also sent for a monitor change without a new mode (xrandr
+		// --setmonitor), which brings no RRScreenChangeNotify
+		XRRUpdateConfiguration(&ev);
+		updateMonitors();
+	    } else if (isDock(ev.type == MapNotify ? ev.xmap.window : ev.xconfigure.window))
 		recomputeStruts();
 	    break;
 	}

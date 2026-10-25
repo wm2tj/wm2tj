@@ -111,7 +111,7 @@ An input method is drawn lit, a plain keyboard layout (and a direct-input mode s
 
 So that no separate power manager (such as xfce4-power-manager) is needed, the bar does the following. Each part can be turned off in the configuration (see [`config.sample`](config.sample)).
 
-- **Brightness keys** (`XF86MonBrightnessUp` / `Down`): `brightness_step` % per press (default 10). The bar calls logind's `SetBrightness` with `busctl`, so no root is needed. It never goes fully dark (1% minimum)
+- **Brightness keys** (`XF86MonBrightnessUp` / `Down`): `brightness_step` % per press (default 10). Every backlight of the best type is set together, so a machine with two panels changes both (`backlight` names them, several allowed). The bar calls logind's `SetBrightness` with `busctl`, so no root is needed. It never goes fully dark (1% minimum)
 - **Power profile**: switches to `profile_on_ac` when the power is plugged in and to `profile_on_battery` when it is unplugged, with `powerprofilesctl` (power-profiles-daemon). Nothing is switched unless these are set
 - **Screen off**: likewise sets the X DPMS off time to `screen_off_on_ac` / `screen_off_on_battery` minutes. DPMS is left alone unless these are set
 - The power source is checked every 5 seconds in `/sys/class/power_supply` (`online` of the `Mains` supply)
@@ -131,13 +131,21 @@ HandleLidSwitchExternalPower=suspend
 
 Apply it with `sudo systemctl kill -s HUP systemd-logind`. Stop xfce4-power-manager if it is running, because it takes over the power button and the brightness keys. Locking the screen before suspend is the screen saver's job (xfce4-screensaver or similar). What happens when the battery is nearly empty is up to UPower (`CriticalPowerAction` in `/etc/UPower/UPower.conf`).
 
+## Several monitors
+
+`monitors` in the configuration chooses where the bar goes: `primary` (the default), `all`, or monitor names as `xrandr --listmonitors` prints them.
+
+- The bar itself, with the system tray, sits on the primary monitor (or the first one chosen). Every other monitor chosen gets a copy: clicks, tips and menus on it act just as on the bar, and menus stay inside that monitor. On a narrower or wider monitor the two ends are kept and the middle is fitted
+- A bar with no monitor above it reserves a strut over its own columns. EWMH measures struts from the edge of the whole screen, so a bar at the top of a lower monitor cannot reserve one; wm2tj keeps that strip free anyway, other window managers may not
+- Changes in XRandR (a monitor plugged in or out, rotated, mirrored) are followed. Mirrored monitors get one bar. Up to 16 monitors
+
 ## Building and installing
 
 ```
-sudo apt install build-essential pkg-config libx11-dev libxext-dev libxft-dev gettext   # Debian/Ubuntu
-# Fedora: gcc make pkgconf libX11-devel libXext-devel libXft-devel gettext
-# Arch:   base-devel libx11 libxext libxft gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev gettext gettext-dev
-# Void:   base-devel pkg-config libX11-devel libXext-devel libXft-devel gettext
+sudo apt install build-essential pkg-config libx11-dev libxext-dev libxft-dev libxrandr-dev gettext   # Debian/Ubuntu
+# Fedora: gcc make pkgconf libX11-devel libXext-devel libXft-devel libXrandr-devel gettext
+# Arch:   base-devel libx11 libxext libxft libxrandr gettext      Alpine: build-base pkgconf libx11-dev libxext-dev libxft-dev libxrandr-dev gettext gettext-dev
+# Void:   base-devel pkg-config libX11-devel libXext-devel libXft-devel libXrandr-devel gettext
 # the settings window (optional): python3 + PyGObject + GTK 3 = python3-gi / python3-gobject / python-gobject / py3-gobject3
 # make works without gettext's msgfmt too (the bundled .mo is used as it is)
 make
@@ -155,7 +163,7 @@ It overlaps xfce4-panel at the top, so remove the xfce4-panel line when switchin
 
 ### Dependencies
 
-To build: a C compiler, pkg-config, the Xlib, Xext and Xft development files, and gettext (`msgfmt`, for the translations). No libraries are bundled.
+To build: a C compiler, pkg-config, the Xlib, Xext, Xft and Xrandr development files, and gettext (`msgfmt`, for the translations). No libraries are bundled.
 
 At run time only X is required. The following are **used when present**. If one is missing, only that feature stops, and the reason is printed once on standard error:
 

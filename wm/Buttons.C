@@ -197,8 +197,10 @@ void WindowManager::releaseGrab(XButtonEvent *e)
 int WindowManager::runMenuLoop(int &anchor_x, int &anchor_y,
                                const char **labels, int n)
 {
-    int mx = DisplayWidth (display(), m_screenNumber) - 1;
-    int my = DisplayHeight(display(), m_screenNumber) - 1;
+    const Monitor &mon = monitorAt(anchor_x, anchor_y);
+    int mx0 = mon.x, my0 = mon.y;
+    int mx = mon.x + mon.w - 1;
+    int my = mon.y + mon.h - 1;
 
     int maxWidth = 10;
     XGlyphInfo gi;
@@ -215,14 +217,14 @@ int WindowManager::runMenuLoop(int &anchor_x, int &anchor_y,
     int y = anchor_y - 2;
     Boolean warp = False;
 
-    if (x < 0) {
-	anchor_x -= x; x = 0; warp = True;
+    if (x < mx0) {
+	anchor_x += mx0 - x; x = mx0; warp = True;
     } else if (x + maxWidth >= mx) {
 	anchor_x -= x + maxWidth - mx; x = mx - maxWidth; warp = True;
     }
 
-    if (y < 0) {
-	anchor_y -= y; y = 0; warp = True;
+    if (y < my0) {
+	anchor_y += my0 - y; y = my0; warp = True;
     } else if (y + totalHeight >= my) {
 	anchor_y -= y + totalHeight - my; y = my - totalHeight; warp = True;
     }
@@ -377,8 +379,9 @@ void WindowManager::menu(XButtonEvent *e)
 	}
     }
 
-    int mx = DisplayWidth (display(), m_screenNumber) - 1;
-    int my = DisplayHeight(display(), m_screenNumber) - 1;
+    const Monitor &mon = monitorAt(e->x, e->y);
+    int mx = mon.x + mon.w - 1;
+    int my = mon.y + mon.h - 1;
     Boolean allowExit = ((e->x > mx-3) && (e->y > my-3));
 
     if (strcmp(CONFIG_SUBMENU_STYLE, "replace")) {
@@ -978,8 +981,10 @@ void WindowManager::highlightMenuRow(MenuLevel &l, int k, int row)
 void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 				int nh, Boolean allowExit)
 {
-    int mx = DisplayWidth (display(), m_screenNumber);
-    int my = DisplayHeight(display(), m_screenNumber);
+    const Monitor &mon = monitorAt(e->x, e->y);	// the menu stays on it
+    int mx0 = mon.x, my0 = mon.y;
+    int mx = mon.x + mon.w;
+    int my = mon.y + mon.h;
     int bw = MENU_BORDER_WIDTH;
     int eh = m_menuFont->ascent + m_menuFont->descent + 4;
     int i;
@@ -1035,8 +1040,8 @@ void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 	int ox = r.x, oy = r.y;
 	if (r.x + r.w + 2 * bw > mx) r.x = mx - r.w - 2 * bw;
 	if (r.y + r.h + 2 * bw > my) r.y = my - r.h - 2 * bw;
-	if (r.x < 0) r.x = 0;
-	if (r.y < 0) r.y = 0;
+	if (r.x < mx0) r.x = mx0;
+	if (r.y < my0) r.y = my0;
 	if (r.x != ox || r.y != oy) {
 	    XWarpPointer(display(), None, root(), None, None, None, None,
 			 e->x + r.x - ox, e->y + r.y - oy);
@@ -1235,7 +1240,7 @@ void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 	    sizeMenuLevel(r);
 	    if (*query && r.n > 1) r.sel = 1;	// Return takes the first hit
 	    if (r.y + r.h + 2 * bw > my) r.y = my - r.h - 2 * bw;
-	    if (r.y < 0) r.y = 0;
+	    if (r.y < my0) r.y = my0;
 	    XMoveResizeWindow(display(), m_menuWindow, r.x, r.y, r.w, r.h);
 	    drawMenuLevel(r, 0);
 	    if (ic) {
@@ -1264,10 +1269,10 @@ void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 		// beside the folder's row, or on the left if it won't fit
 		c.x = p.x + p.w + 2 * bw;
 		if (c.x + c.w + 2 * bw > mx) c.x = p.x - c.w - 2 * bw;
-		if (c.x < 0) c.x = 0;
+		if (c.x < mx0) c.x = mx0;
 		c.y = p.y + toRow * eh;
 		if (c.y + c.h + 2 * bw > my) c.y = my - c.h - 2 * bw;
-		if (c.y < 0) c.y = 0;
+		if (c.y < my0) c.y = my0;
 
 		Window w = menuLevelWindow(depth);
 		XMoveResizeWindow(display(), w, c.x, c.y, c.w, c.h);
@@ -1340,11 +1345,11 @@ void WindowManager::showGeometry(int x, int y)
 		       (FcChar8 *)string, strlen(string), &gi);
     int width = gi.xOff + 8;
     int height = m_menuFont->ascent + m_menuFont->descent + 8;
-    int mx = DisplayWidth (display(), m_screenNumber) - 1;
-    int my = DisplayHeight(display(), m_screenNumber) - 1;
+    const Monitor &mon = pointerMonitor();	// the window being moved is there
 
     XMoveResizeWindow(display(), m_menuWindow,
-		      (mx - width) / 2, (my - height) / 2, width, height);
+		      mon.x + (mon.w - width) / 2, mon.y + (mon.h - height) / 2,
+		      width, height);
     XClearWindow(display(), m_menuWindow);
     XMapRaised(display(), m_menuWindow);
 
@@ -1421,7 +1426,8 @@ Boolean Client::move(XButtonEvent *e)
 	case MotionNotify:
 	    x = event.xbutton.x; y = event.xbutton.y;
 	    // the panel's strip is off limits (minY), the rest is free
-	    if (y + yoff < minY()) y = minY() - yoff;
+	    if (y + yoff < minYAt(x + xoff, y + yoff))
+		y = minYAt(x + xoff, y + yoff) - yoff;
 	    if (x + xoff != m_x || y + yoff != m_y) {
 		windowManager()->showGeometry(x + xoff, y + yoff);
 		m_border->moveTo(x + xoff, y + yoff);
@@ -1433,7 +1439,8 @@ Boolean Client::move(XButtonEvent *e)
 
     windowManager()->removeGeometry();
 
-    if (y >= 0 && y + yoff < minY()) y = minY() - yoff;
+    if (y >= 0 && y + yoff < minYAt(x + xoff, y + yoff))
+	y = minYAt(x + xoff, y + yoff) - yoff;
 
     // a click jitters a pixel or two; don't count that as a move
     Boolean moved = (x >= 0 && doSomething &&
