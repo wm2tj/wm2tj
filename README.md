@@ -8,6 +8,10 @@ been run on Xubuntu and Ubuntu so far (see "Known limitations").
 
 Website (English / Japanese): <https://wm2tj.kaie-net.com/>
 
+**Download:** `.deb` packages for Debian / Ubuntu (amd64) are on the
+[latest release](https://github.com/wm2tj/wm2tj/releases/latest) (see
+"Debian / Ubuntu packages" below). Other distributions build from source.
+
 ![wm2tj desktop: the settings window, a file manager and a terminal, each with a blue vertical tab on its left, under the wm2tj-bar top bar](screenshots/wm2tj.webp)
 
 wm2 (1997) gives every window a vertical tab on its left side and does almost
@@ -79,8 +83,9 @@ does all of the above (including the man pages) in one go.
 
 ### Debian / Ubuntu packages
 
-Prebuilt `.deb` files for the latest tag are on the
-[Releases](https://github.com/wm2tj/wm2tj/releases) page: `wm2tj` (window
+Prebuilt `.deb` files are attached to the
+[latest release](https://github.com/wm2tj/wm2tj/releases/latest) (older ones on
+the [Releases](https://github.com/wm2tj/wm2tj/releases) page): `wm2tj` (window
 manager, session, helpers) and `wm2tj-bar` (the bar, which also works with
 other EWMH window managers). Install both, or just the one you want
 (`wm2tj` only recommends the bar, it does not depend on it):
