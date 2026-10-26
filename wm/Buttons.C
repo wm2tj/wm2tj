@@ -153,6 +153,13 @@ void Client::eventButton(XButtonEvent *e)
 }
 
 
+static long msSince(const struct timeval &t)
+{
+    struct timeval now;
+    gettimeofday(&now, 0);
+    return (now.tv_sec - t.tv_sec) * 1000 + (now.tv_usec - t.tv_usec) / 1000;
+}
+
 static int nobuttons(XButtonEvent *e) // straight outta 9wm
 {
     int state;
@@ -1382,8 +1389,17 @@ Boolean Client::move(XButtonEvent *e)
     XEvent event;
     Boolean found;
     Boolean doSomething = False;
+    int edge = 0;		// -1 / +1 while held on the outer left / right edge
+    struct timeval edgeSince;
 
     while (!done) {
+
+	// held against the outer edge for edge_flip_delay ms: on to the next
+	// desktop, and once more after each further wait while still held
+	if (edge && msSince(edgeSince) >= wm2config.edge_flip_delay) {
+	    if (m_windowManager->flipDesktop(this, edge)) doSomething = True;
+	    gettimeofday(&edgeSince, 0);
+	}
 
 	found = False;
 
@@ -1426,6 +1442,11 @@ Boolean Client::move(XButtonEvent *e)
 
 	case MotionNotify:
 	    x = event.xbutton.x; y = event.xbutton.y;
+	    if (wm2config.edge_flip_delay > 0) {
+		int side = m_windowManager->outerEdge(event.xmotion.x_root,
+						      event.xmotion.y_root);
+		if (side != edge) { edge = side; gettimeofday(&edgeSince, 0); }
+	    }
 	    // the panel's strip is off limits (minY), the rest is free
 	    if (y + yoff < minYAt(x + xoff, y + yoff))
 		y = minYAt(x + xoff, y + yoff) - yoff;

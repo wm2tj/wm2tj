@@ -28,6 +28,13 @@ Raise and focus the window; drag to move it.
 .B Double-click on a tab
 Maximise the window, or restore it.
 .TP
+.B Drag a tab against the outer left or right edge
+Hold it there for half a second and the window goes, with you, to the
+virtual desktop on that side; keep holding to go on.  Only the outer edge of
+the whole picture counts: the edge between two monitors side by side just
+moves the window to the other monitor.  See
+.BR edge_flip_delay .
+.TP
 .B Middle button on a tab
 Minimise (hide) the window.  Minimised windows are listed in the root menu
 and in the top bar.
@@ -101,6 +108,10 @@ Colours of the root menu.
 .TP
 .BI desktops " n"
 Number of virtual desktops.
+.TP
+.BI edge_flip_delay " ms"
+How long a dragged window has to be held against the outer left or right
+edge before it goes to the next desktop (default 500); 0 turns it off.
 .TP
 .BI new_window " command" ", " new_label " text"
 Command run by the "new window" entry of the root menu, and its label.

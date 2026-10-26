@@ -24,6 +24,7 @@ use it every day on a modern laptop:
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop; a changed menu (apps installed, favourites edited) is picked up when the menu next opens, without a restart
 - No polling while moving windows
 - Three-finger touchpad swipe between desktops (`wm2-swipe`, XInput 2.4; no root or `input` group needed)
+- Drag a window against the outer left or right edge to take it to the next desktop (the edge between two monitors is left alone)
 - Several monitors (XRandR): a window maximises or goes fullscreen on its own monitor, new windows open on the monitor the pointer is on, and the menu stays on one monitor. Monitors added or removed while running are followed
 
 Everything is done with the mouse, as in wm2 (there are no key bindings; the

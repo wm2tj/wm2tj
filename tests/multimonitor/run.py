@@ -200,6 +200,69 @@ for name, test in (('B', lambda g: g['x'] >= 1980 and g['y'] >= 34),
 for d in docks: d.kill()
 stop(bar, wm)
 
+# a window dragged against the outer left / right edge of the whole picture
+# goes to the desktop on that side (edge_flip_delay, 500 ms); the seam between
+# two monitors side by side only moves it to the other monitor
+print('== edge flip: two side by side, 3 desktops; a window held at the seam and at the outer edges')
+layout('3840x1080', [('A', 1920, 1080, 0, 0, True), ('B', 1920, 1080, 1920, 0, False)])
+os.makedirs(f'{T}/home', exist_ok=True)
+
+def num(cmd):
+    m = re.search(r'= (\d+)', sh(cmd))
+    return int(m.group(1)) if m else None
+
+def drag(wid, tx, ty, hold):
+    sh(f'xdotool windowmove {wid} 900 400')
+    for _ in range(20):                         # wait until wm2tj has moved it
+        time.sleep(0.1)
+        g = geom(wid)
+        if abs(g['x'] - 900) < 100: break
+    x0, y0 = g['x'] - 12, g['y'] + 30            # on the tab
+    sh(f'xdotool mousemove {x0} {y0} mousedown 1'); time.sleep(0.2)
+    for f in (0.5, 1.0):
+        sh(f'xdotool mousemove {int(x0 + (tx - x0) * f)} {int(y0 + (ty - y0) * f)}')
+        time.sleep(0.05)
+    time.sleep(hold)
+    sh('xdotool mouseup 1'); time.sleep(0.5)
+
+for rc, flips in (('desktops 3', True), ('desktops 3\nedge_flip_delay 0', False),
+                  ('desktops 1\ndynamic_desktops on', 'dynamic')):
+    open(f'{T}/home/.wm2rc', 'w').write(rc + '\n')
+    wm, bar = start('monitors primary')
+    sh('xdotool mousemove 900 500')
+    p, wid = newxlogo()
+    cur = lambda: num('xprop -root _NET_CURRENT_DESKTOP')
+    wdesk = lambda: num(f'xprop -id {wid} _NET_WM_DESKTOP')
+    shown = lambda: wid in sh('xdotool search --onlyvisible --class xlogo').split()
+    if not flips:
+        drag(wid, 3839, 500, 1.0)
+        check(cur() == 0 and wdesk() == 0, f'edge_flip_delay 0: no flip ({cur()}, {wdesk()})')
+    elif flips == 'dynamic':
+        # another window stays behind on desktop 0, so a desktop is added after
+        p2, wid2 = newxlogo()
+        drag(wid, 3839, 500, 0.8)
+        n = num('xprop -root _NET_NUMBER_OF_DESKTOPS')
+        check(cur() == 1 and wdesk() == 1 and shown() and n == 3,
+              f'dynamic_desktops: onto the empty desktop 1, an empty one added ({cur()}, {wdesk()}, {n} desktops)')
+        p2.kill()
+    else:
+        drag(wid, 3839, 500, 0.2)
+        check(cur() == 0 and wdesk() == 0, f'a short touch of the outer edge: no flip ({cur()}, {wdesk()})')
+        drag(wid, 1919, 500, 1.0)
+        check(cur() == 0 and wdesk() == 0 and geom(wid)['x'] >= 1900,
+              f'held at the seam: still desktop 0, on monitor B ({cur()}, {wdesk()}, x {geom(wid)["x"]})')
+        drag(wid, 3839, 500, 0.8)
+        check(cur() == 1 and wdesk() == 1 and shown(), f'outer right edge: window and view on desktop 1 ({cur()}, {wdesk()})')
+        drag(wid, 3839, 500, 1.3)
+        check(cur() == 2 and wdesk() == 2 and shown(), f'held longer: on to desktop 2, the last ({cur()}, {wdesk()})')
+        drag(wid, 0, 500, 0.8)
+        check(cur() == 1 and wdesk() == 1 and shown(), f'outer left edge: back to desktop 1 ({cur()}, {wdesk()})')
+        drag(wid, 0, 500, 1.3)
+        check(cur() == 0 and wdesk() == 0 and shown(), f'held at the left on desktop 0: no wrapping ({cur()}, {wdesk()})')
+    p.kill(); time.sleep(0.3)
+    stop(bar, wm)
+os.remove(f'{T}/home/.wm2rc')
+
 print()
 print('FAILED: %d' % len(fails) if fails else 'ALL PASSED')
 for f in fails: print('  - ' + f)

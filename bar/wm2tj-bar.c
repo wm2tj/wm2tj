@@ -2746,9 +2746,10 @@ static void drawBar(void)
     drawCpu(right);
     addHit(right - 4, right + 13 + 3 + VBAR_W + 4, H_CPU, 0);
 
-    /* virtual desktops, numbered boxes; the current one is lit */
-    right -= gap + 4;
-    for (i = nDesktops - 1; i >= 0; --i) {
+    /* virtual desktops, numbered boxes; the current one is lit.  None with
+       a single desktop: there is nothing to switch to */
+    if (nDesktops > 1) right -= gap + 4;
+    for (i = nDesktops > 1 ? nDesktops - 1 : -1; i >= 0; --i) {
 	char num[16];
 	int tw, w, h = barH - 8, x;
 	snprintf(num, sizeof num, "%d", i + 1);

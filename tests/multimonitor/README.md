@@ -5,7 +5,9 @@ driver) and checks, for several monitor layouts (stacked, side by side,
 L-shaped, 2x2, portrait, mirrored, a monitor added while running, two
 portrait panels turned landscape while running, side panels): where the bars go (`monitors primary` / `monitors all`), that a new
 window opens on the pointer's monitor, and that maximizing stays within the
-monitor and clear of its bar and panels.
+monitor and clear of its bar and panels. With two monitors side by side it
+also drags a window against the seam and the outer edges: only the outer
+left / right edge takes it to the next desktop (`edge_flip_delay`).
 
 Needs `xserver-xorg-video-dummy xdotool x11-apps libxrandr-dev`.
 

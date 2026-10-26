@@ -16,7 +16,7 @@ A standalone top bar for wm2tj, a window manager based on wm2. Written in C with
   - Click to bring one to the front. Clicking the front one minimises it, clicking again restores it
   - With many windows the buttons get narrower (200px at most). Hover to see the full title
   - Windows with `_NET_WM_STATE_SKIP_TASKBAR` are left out
-- **Right side**: virtual desktops (numbered boxes, click or scroll to switch) → CPU → memory → [system tray](#system-tray) → Wi-Fi → input method → Bluetooth → volume → battery → clock
+- **Right side**: virtual desktops (numbered boxes, click or scroll to switch; none with a single desktop) → CPU → memory → [system tray](#system-tray) → Wi-Fi → input method → Bluetooth → volume → battery → clock
   - CPU and memory: an icon and a vertical bar (usage from the bottom, red at 90% or more)
   - Input method: the label of the current one (`あ` for Mozc, `拼` for Pinyin, `jp` / `us` for a keyboard), lit while an input method is on. Works with fcitx5, IBus, or plain XKB layouts. See [Input method](#input-method)
   - Wi-Fi: four signal bars (lit by strength). A network icon when wired, grey bars and a red × when offline. Click for the [Wi-Fi menu](#wi-fi-menu)

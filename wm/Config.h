@@ -49,6 +49,9 @@ struct WM2Config {
 
     int   num_desktops;
     int   dynamic_desktops;      /* GNOME-like: keep one empty desktop at the end */
+    int   edge_flip_delay;       /* ms a dragged window is held against the outer
+                                    left/right edge before it goes to the next
+                                    desktop; 0 = off */
 
     WM2MenuEntry *user_menu;
     int           user_menu_count;

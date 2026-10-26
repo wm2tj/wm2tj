@@ -659,6 +659,29 @@ void WindowManager::updateDynamicDesktops()
 }
 
 
+// A window dragged against the outer left / right edge (Client::move): take
+// it, with its dialogs, to the desktop on that side and go there with it.
+// No wrapping; with dynamic_desktops the empty desktop at the end is there
+// to be moved onto.
+Boolean WindowManager::flipDesktop(Client *c, int dir)
+{
+    int d = m_currentDesktop + dir;
+    if (c->isSticky() || d < 0 || d >= m_numDesktops) return False;
+
+    c->setDesktop(d);
+    for (int i = 0; i < m_clients.count(); ++i) {
+	Client *t = m_clients.item(i);
+	if (t->isTransient() && !t->isOffDesktop() && c->hasWindow(t->transientFor()))
+	    t->setDesktop(d);
+    }
+    switchToDesktop(d);		// hides the rest, leaves these where they are
+    c->mapRaised();		// on top of the windows already there
+    updateDynamicDesktops();
+    updateClientList();
+    return True;
+}
+
+
 void WindowManager::switchToDesktop(int d)
 {
     if (d < 0) d = 0;
@@ -1210,6 +1233,24 @@ int WindowManager::topLimit(int cx, int top)
     if (highest && top < highest->y) return highest->y + highest->top;
     if (!highest && top < 0) return 0;
     return top;
+}
+
+// -1 / +1 when (x, y) is on the left / right edge of its monitor and no
+// monitor lies beyond that edge: the outer edge of the whole picture, not
+// the seam between monitors side by side (crossing that moves the window
+// to the next monitor, as before).
+int WindowManager::outerEdge(int x, int y)
+{
+    const Monitor &m = monitorAt(x, y);
+    int side = x <= m.x ? -1 : x >= m.x + m.w - 1 ? 1 : 0;
+    if (!side) return 0;
+
+    int bx = side < 0 ? m.x - 1 : m.x + m.w;
+    for (int i = 0; i < m_monitorCount; ++i) {
+	const Monitor &o = m_monitors[i];
+	if (bx >= o.x && bx < o.x + o.w && y >= o.y && y < o.y + o.h) return 0;
+    }
+    return side;
 }
 
 Boolean WindowManager::isDock(Window w)

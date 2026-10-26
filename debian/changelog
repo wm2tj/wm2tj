@@ -1,3 +1,20 @@
+wm2tj (0.1.0~beta11) unstable; urgency=medium
+
+  * wm2tj: drag a window against the outer left or right edge and hold it
+    there for half a second (edge_flip_delay, 0 = off) to take it, with
+    its dialogs, to the desktop on that side; keep holding to go on.
+    No wrapping. Only the outer edge of the whole picture counts: the
+    edge between two monitors side by side still just moves the window
+    to the other monitor, and so does a monitor's edge with another
+    monitor beyond it.
+  * wm2tj-bar: no desktop numbers when there is only one desktop
+    ("desktops 1" in ~/.wm2rc), as there is nothing to switch to.
+  * tests/multimonitor: edge flip with two monitors side by side (held at
+    the seam, at both outer edges, a short touch, no wrapping,
+    edge_flip_delay 0, dynamic_desktops).
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Mon, 26 Oct 2026 14:11:29 +0900
+
 wm2tj (0.1.0~beta10) unstable; urgency=medium
 
   * wm2tj-settings: an About tab, opened by "About wm2tj…" in the wm2tj

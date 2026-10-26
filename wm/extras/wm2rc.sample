@@ -12,6 +12,8 @@ menufont "Noto Sans CJK JP-10"
 # new_window tilix --new-process --session="$HOME/.config/tilix/sessions/two-pane.json"
 new_label "Terminal"          # 例: new_label "ターミナル"。none で項目を出さない (none hides it)
 desktops 3            # 仮想デスクトップの数 (virtual desktops; the built-in default is 1)
+#edge_flip_delay 500  # 窓を外周の左右の端に押し付けて隣のデスクトップへ移るまでの ms、0 で無効
+                      # (ms a dragged window is held at the outer left/right edge to go to the next desktop; 0 = off)
 tab_length 220        # タブの長さ(px)。0 でタイトルに合わせて伸縮
 # tab_width 32        # タブの太さ(px)。既定32、0 でフォントの高さ+4
 double_click_time 1300   # タブのダブルクリック(最大化)とみなす間隔(ms)

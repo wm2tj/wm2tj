@@ -63,6 +63,7 @@ static void setDefaults(WM2Config *c)
 
     c->num_desktops = 1;
     c->dynamic_desktops = 0;
+    c->edge_flip_delay = 500;
 
     c->user_menu       = NULL;
     c->user_menu_count = 0;
@@ -308,6 +309,7 @@ static void loadConfig(WM2Config *c, struct stat *st)
         else if (!strcmp(key, "menu_background"))    replaceStr(&c->menu_background, val);
         else if (!strcmp(key, "menu_borders"))       replaceStr(&c->menu_borders, val);
         else if (!strcmp(key, "dynamic_desktops"))   c->dynamic_desktops = parseBool(val);
+        else if (!strcmp(key, "edge_flip_delay"))    c->edge_flip_delay = atoi(val);
         else if (!strcmp(key, "desktops")) {
             int n = atoi(val);
             if (n < 1)  n = 1;

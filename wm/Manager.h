@@ -55,6 +55,7 @@ public:
     void updateNetCurrentDesktop();
     void publishDesktops();
     void updateDynamicDesktops();
+    Boolean flipDesktop(Client *, int dir);	// take a dragged window to the next desktop
 
     // EWMH / panel support
     void updateClientList();
@@ -74,6 +75,7 @@ public:
     const Monitor &monitorAt(int x, int y) { return monitorFor(x, y, 1, 1); }
     const Monitor &pointerMonitor();
     int  topLimit(int cx, int top);	// lowest frame top allowed at x = cx
+    int  outerEdge(int x, int y);	// -1 / +1 on the outer left / right edge, else 0
 
     // shouldn't really be public
     int attemptGrab(Window, Window, int, int);
