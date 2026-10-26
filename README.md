@@ -135,6 +135,14 @@ to date as applications are installed and removed.
 - Volume control needs `wpctl` or `pactl` (plain ALSA is not supported)
 - No WPA-Enterprise in the Wi-Fi menu, no StatusNotifierItem tray, a single
   X screen only (several monitors on it are fine), and no Latin-1 `WM_NAME` from very old applications
+- Monitors driven by a second GPU may stay dark. This is common on laptops
+  with an NVIDIA GPU, whose HDMI port is often wired to it, and on desktops
+  that use both the integrated and a discrete GPU. It is X11 setup rather
+  than wm2tj: connect the second GPU's outputs with
+  `xrandr --setprovideroutputsource` (or the driver's PRIME settings), for
+  example in `~/.xprofile`. The same goes for the monitor layout: the one a Wayland
+  desktop saved is not used in an X11 session, so set it with `xrandr`.
+  wm2tj and the bar follow whatever layout XRandR reports
 - Touchpad swipes need Xorg 21 or later (XInput 2.4 gestures)
 
 ## Resource use
