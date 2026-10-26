@@ -1,3 +1,19 @@
+wm2tj (0.1.0~beta9) unstable; urgency=medium
+
+  * wm2tj-bar: when the bar's monitor grew while it ran (the panels
+    rotated with xrandr, a wider primary), the right end (desktops,
+    status icons, clock) stayed cut off at the old width. The bar asks
+    wm2tj for its new size and set its shape at once, before wm2tj had
+    applied that size, so the shape kept the old width; it is now set
+    again once the new size is in place (ConfigureNotify on the bar and
+    its copies).
+  * tests/multimonitor: a run where two portrait panels side by side
+    turn into two landscape ones stacked, with wm2tj held back while
+    the monitors change; checks that the bar's shape is as wide as the
+    bar.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Mon, 26 Oct 2026 08:30:00 +0900
+
 wm2tj (0.1.0~beta8) unstable; urgency=medium
 
   * wm2tj-bar: monitors chooses where the bar goes: primary (the

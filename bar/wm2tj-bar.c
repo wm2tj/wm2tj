@@ -2847,7 +2847,7 @@ static Window makeDock(int x, int y, int w)
 
     a.background_pixmap = None;
     a.event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
-	PointerMotionMask | LeaveWindowMask;
+	PointerMotionMask | LeaveWindowMask | StructureNotifyMask;
     bar = XCreateWindow(dpy, root, x, y, w, barH, 0, depth, InputOutput,
 			vis, CWBackPixmap | CWEventMask, &a);
 
@@ -4736,6 +4736,10 @@ static void barEvent(XEvent *e)
 	break;
     case ConfigureNotify:
 	if (e->xconfigure.window == root) relayoutBar();
+	/* the window manager has applied a new size: shape the window again,
+	   as a shape made before the resize keeps the old width and cuts off the rest */
+	else if (e->xconfigure.window == bar || mirrorOf(e->xconfigure.window) >= 0)
+	    shapeWindow(e->xconfigure.window);
 	break;
     default:		/* monitors moved, or the primary changed, without a new root size */
 	if (rrBase >= 0 && e->type == rrBase + RRScreenChangeNotify) {

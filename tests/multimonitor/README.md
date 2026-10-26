@@ -2,8 +2,8 @@
 
 Runs wm2tj and wm2tj-bar on a second, invisible X server (the Xorg dummy
 driver) and checks, for several monitor layouts (stacked, side by side,
-L-shaped, 2x2, portrait, mirrored, a monitor added while running, side
-panels): where the bars go (`monitors primary` / `monitors all`), that a new
+L-shaped, 2x2, portrait, mirrored, a monitor added while running, two
+portrait panels turned landscape while running, side panels): where the bars go (`monitors primary` / `monitors all`), that a new
 window opens on the pointer's monitor, and that maximizing stays within the
 monitor and clear of its bar and panels.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Multi-monitor test of wm2tj + wm2tj-bar on a dummy Xorg (DISPLAY=:8).
 # usage: run.py <wm2tj> <wm2tj-bar>
-import os, re, subprocess, sys, time
+import os, re, signal, subprocess, sys, time
 
 WM, BAR = sys.argv[1], sys.argv[2]
 ENV = dict(os.environ, DISPLAY=':8')
@@ -152,6 +152,27 @@ sh("xrandr --setmonitor C 1920/300x1080/200+0+1080 none"); time.sleep(1.5)
 check(sorted((b['x'], b['y']) for b in bars()) == [(0, 0), (0, 1080), (1920, 0)],
       f'three bars after adding C: {[(b["x"], b["y"]) for b in bars()]}')
 windowTests([m for m in monitors() if m['name'] == 'C'], {'C'})
+stop(bar, wm)
+
+# rotated while running: two portrait panels side by side become two
+# landscape ones stacked. wm2tj applies the bar's new width after the bar has
+# asked for it, so the bar's shape must follow too, or the right end (clock,
+# status icons) stays cut off at the old width. On a real machine wm2tj is
+# often that slow; here it is stopped while the monitors change, to be sure.
+print('== rotated: two portrait side by side, then landscape stacked')
+layout('2400x1920', [('R1', 1200, 1920, 0, 0, True), ('R2', 1200, 1920, 1200, 0, False)])
+wm, bar = start('monitors primary')
+wm.send_signal(signal.SIGSTOP)
+layout('1920x2400', [('R1', 1920, 1200, 0, 0, True), ('R2', 1920, 1200, 0, 1200, False)])
+wm.send_signal(signal.SIGCONT)
+time.sleep(1.5)
+bs = bars()
+check([(b['x'], b['y'], b['w']) for b in bs] == [(0, 0, 1920)],
+      f'bar across the rotated primary: {[(b["x"], b["y"], b["w"]) for b in bs]}')
+for b in bs:
+    m = re.search(r'Window shape extents:\s+(\d+)x', sh(f"xwininfo -shape -id {b['id']}"))
+    check(m is not None and int(m.group(1)) == b['w'],
+          f"bar's shape as wide as the bar: {m.group(1) if m else 'none'} of {b['w']}")
 stop(bar, wm)
 
 # side panels: a dock down the left of the middle monitor (no strut can say
