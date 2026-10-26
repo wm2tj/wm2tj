@@ -96,7 +96,8 @@ and run the same command.
 
 If you built and installed from source before, that copy is in
 `/usr/local/bin`, which comes first in `PATH`, so it keeps running after the
-package is installed. Check with `which -a wm2tj wm2tj-bar` and remove the
+package is installed. **About wm2tj…** in the root menu warns about this.
+Check with `which -a wm2tj wm2tj-bar` and remove the
 `/usr/local` copies (`wm2tj`, `wm2tj-bar`, `wm2tj-bar-settings` and the
 other files `make install` put there) before or after installing the
 package.
@@ -116,8 +117,9 @@ SDDM). The session starts the compositor, the bar, the input method and the
 other helpers that are installed, and creates `~/.wm2rc` on the first login
 from `/usr/share/wm2tj/wm2rc.sample` (the settings) plus a root menu
 generated from the installed applications. Right-click the desktop: the
-**wm2tj** folder of the menu has the settings window, the favourites editor
-and the wallpaper chooser; everything else is in `~/.wm2rc` (see `man wm2tj`)
+**wm2tj** folder of the menu has the settings window, the favourites editor,
+the wallpaper chooser and **About wm2tj…** (the versions running and
+installed, and from where); everything else is in `~/.wm2rc` (see `man wm2tj`)
 and `~/.config/wm2tj-bar/config` (see `bar/README.md`). The menu is kept up
 to date as applications are installed and removed.
 

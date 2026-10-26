@@ -499,6 +499,7 @@ void WindowManager::menu(XButtonEvent *e)
 	    if (sc->isOffDesktop() && !sc->isSticky())
 		switchToDesktop(sc->desktop());
 	    if (CONFIG_CLICK_TO_FOCUS) {
+		clients.item(selIdx)->mapRaised();	// switching no longer raises
 		clients.item(selIdx)->activate();
 	    } else {
 		clients.item(selIdx)->mapRaised();

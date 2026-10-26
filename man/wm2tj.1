@@ -3,12 +3,15 @@
 wm2tj \- minimal X11 window manager with vertical tabs, based on wm2
 .SH SYNOPSIS
 .B wm2tj
+.RB [ \-\-version ]
 .SH DESCRIPTION
 .B wm2tj
 is a window manager for the X Window System based on wm2 by Chris Cannam.
 Every window gets a tab on its left edge, drawn bottom to top, with the
-window title and a close button, and a thin frame.  It takes no options and
-is normally started by
+window title and a close button, and a thin frame.  It takes no options
+other than
+.B \-\-version
+(print the version and exit) and is normally started by
 .B wm2-session
 from the "wm2tj" entry of the display manager's session list, which also
 starts the compositor, the top bar and the other helpers that are installed.

@@ -786,7 +786,10 @@ void Client::unhideForDesktop()
     if (!m_offDesktop) return;
     m_offDesktop = False;
     XMapWindow(display(), m_window);
-    mapRaised();
+    // Map without raising: an unmapped frame keeps its place in the stack,
+    // so the desktop comes back as it was left.  mapRaised() here raised
+    // every client in creation order, putting the newest one on top.
+    m_border->map();
 }
 
 

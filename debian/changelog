@@ -1,3 +1,25 @@
+wm2tj (0.1.0~beta10) unstable; urgency=medium
+
+  * wm2tj-settings: an About tab, opened by "About wm2tj…" in the wm2tj
+    folder of the root menu (wm2tj-settings --about). It shows the
+    version of the wm2tj and wm2tj-bar that are running (read from the
+    running programs themselves) and where they run from, warns when a
+    newer copy has been installed since they started or another copy
+    comes first on PATH, and lists the installed packages and the
+    system; "Copy" puts it all on the clipboard for a bug report.
+  * wm2tj --version. The version of every part (wm2tj, wm2tj-bar, the
+    helper scripts) now comes from the top of debian/changelog when built
+    with the top-level Makefile, so a build from source says which beta
+    it is too.
+  * wm2tj: coming back to a desktop put the window opened last on top,
+    whatever was on top when you left (each window was raised in turn
+    as it was shown again). The windows are now shown without raising,
+    so the desktop comes back stacked as it was. A window moved onto
+    the current desktop, or picked from the window list on another
+    desktop, is still raised.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Mon, 26 Oct 2026 16:00:00 +0900
+
 wm2tj (0.1.0~beta9) unstable; urgency=medium
 
   * wm2tj-bar: when the bar's monitor grew while it ran (the panels

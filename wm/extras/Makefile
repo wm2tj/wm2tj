@@ -7,6 +7,7 @@
 PREFIX    ?= /usr/local
 DATADIR   ?= $(PREFIX)/share
 LOCALEDIR ?= $(PREFIX)/share/locale
+VERSION   ?= 0.1.0
 UNITDIR   ?= $(PREFIX)/share/systemd/user
 PKG_CONFIG ?= pkg-config
 CFLAGS    ?= -O2 -Wall -Wextra
@@ -42,7 +43,7 @@ pot:
 
 install: all
 	set -e; for s in $(SCRIPTS); do \
-	    sed 's|@LOCALEDIR@|$(LOCALEDIR)|; s|@DATADIR@|$(DATADIR)|' $$s > $$s.tmp && \
+	    sed 's|@LOCALEDIR@|$(LOCALEDIR)|; s|@DATADIR@|$(DATADIR)|; s|@VERSION@|$(VERSION)|' $$s > $$s.tmp && \
 	    install -D -m755 $$s.tmp $(DESTDIR)$(PREFIX)/bin/$$s && rm -f $$s.tmp; \
 	done
 	set -e; for p in $(PROGRAMS); do \

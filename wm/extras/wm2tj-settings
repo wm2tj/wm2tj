@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # wm2tj-settings - a settings window for wm2tj (~/.wm2rc).
 #
+# The About tab (wm2tj-settings --about, "About wm2tj…" in the root menu) shows
+# which versions of wm2tj and wm2tj-bar are running, from where, and what is
+# installed, so that several machines with different betas can be told apart.
+#
 # "Apply" rewrites only the values of the keys that changed (comments and the
 # other lines stay as they are), adds the missing keys before the marker line
 # of wm2-menu-gen, and restarts wm2tj in place (SIGHUP). Before the first change
@@ -21,6 +25,9 @@ LOCALEDIR = "@LOCALEDIR@"	# filled in by make install
 if LOCALEDIR.startswith("@"):
     LOCALEDIR = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                              "..", "share", "locale")
+VERSION = "@VERSION@"	# of these tools; filled in by make install
+if VERSION.startswith("@"):
+    VERSION = None
 gettext.bindtextdomain(TEXTDOMAIN, LOCALEDIR)
 gettext.textdomain(TEXTDOMAIN)
 _ = gettext.gettext
@@ -276,6 +283,72 @@ class FontField(Gtk.Box):
         return new
 
 
+# ---- versions (the About tab) ---------------------------------------------
+
+def version_of(exe):
+    """The version an executable reports with --version ("wm2tj 0.1.0~beta10"
+    -> "0.1.0~beta10"), or None if it cannot say (wm2tj before beta 10)."""
+    try:
+        r = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=3)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    words = r.stdout.split()
+    return words[-1] if r.returncode == 0 and words else None
+
+
+def running(name):
+    """The copy of `name` running for this user, preferably on this display:
+    (version, path, replaced) or None.  The version comes from the running
+    process's own executable (/proc/PID/exe), so it is right even when a newer
+    one has been installed over it since (then `replaced` is True)."""
+    try:
+        pids = subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", name],
+                              capture_output=True, text=True).stdout.split()
+    except OSError:
+        return None
+    display = os.environ.get("DISPLAY", "")
+
+    def on_this_display(pid):
+        try:
+            with open(f"/proc/{pid}/environ", "rb") as f:
+                return f"DISPLAY={display}".encode() in f.read().split(b"\0")
+        except OSError:
+            return False
+
+    pids.sort(key=lambda p: not on_this_display(p))
+    for pid in pids:
+        try:
+            path = os.readlink(f"/proc/{pid}/exe")
+        except OSError:
+            continue
+        replaced = path.endswith(" (deleted)")
+        if replaced:
+            path = path[:-len(" (deleted)")]
+        return version_of(f"/proc/{pid}/exe"), path, replaced
+    return None
+
+
+def package_version(pkg):
+    """The installed package's version (dpkg only for now), else None."""
+    if not shutil.which("dpkg-query"):
+        return None
+    r = subprocess.run(["dpkg-query", "-W", "-f", "${db:Status-Abbrev} ${Version}", pkg],
+                       capture_output=True, text=True)
+    st, _sep, ver = r.stdout.partition(" ")
+    return ver.strip() if r.returncode == 0 and st.startswith("ii") else None
+
+
+def os_name():
+    try:
+        with open("/etc/os-release", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("PRETTY_NAME="):
+                    return line.split("=", 1)[1].strip().strip('"')
+    except OSError:
+        pass
+    return os.uname().sysname
+
+
 # ---- the window -----------------------------------------------------------
 
 class SettingsWindow(Gtk.Window):
@@ -291,6 +364,7 @@ class SettingsWindow(Gtk.Window):
         self.add(box)
         self.notebook = Gtk.Notebook()
         self.notebook.append_page(self.appearance_page(), Gtk.Label(label=_("Appearance")))
+        self.notebook.append_page(self.about_page(), Gtk.Label(label=_("About")))
         box.pack_start(self.notebook, True, True, 0)
 
         btns = Gtk.Box(spacing=6)
@@ -306,6 +380,8 @@ class SettingsWindow(Gtk.Window):
         btns.pack_start(self.status, True, True, 0)
         btns.pack_end(apply, False, False, 0)
         box.pack_start(btns, False, False, 0)
+        # Revert / Apply are for the settings only, not the About page
+        self.notebook.connect("switch-page", lambda nb, page, n: btns.set_visible(n == 0))
 
         self.load()
 
@@ -385,6 +461,80 @@ class SettingsWindow(Gtk.Window):
 
         return grid
 
+    # the About page: versions running and installed
+    def about_page(self):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, border_width=12)
+        self.about_grid = Gtk.Grid(row_spacing=6, column_spacing=12)
+        box.pack_start(self.about_grid, False, False, 0)
+        btns = Gtk.Box(spacing=6)
+        refresh = Gtk.Button(label=_("Refresh"))
+        refresh.connect("clicked", lambda *a: self.fill_about())
+        copy = Gtk.Button(label=_("Copy"))
+        copy.set_tooltip_text(_("Copy these lines, e.g. for a bug report"))
+        copy.connect("clicked", lambda *a: Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+                     .set_text(self.about_text, -1))
+        btns.pack_start(refresh, False, False, 0)
+        btns.pack_start(copy, False, False, 0)
+        btns.pack_end(Gtk.LinkButton.new_with_label(
+            "https://github.com/wm2tj/wm2tj/releases", _("Releases")), False, False, 0)
+        btns.pack_end(Gtk.LinkButton.new_with_label(
+            "https://wm2tj.kaie-net.com/", _("Website")), False, False, 0)
+        box.pack_start(btns, False, False, 0)
+        self.fill_about()
+        return box
+
+    def fill_about(self):
+        for child in self.about_grid.get_children():
+            self.about_grid.remove(child)
+        lines = []
+        row = 0
+
+        def add(label, value, note=None, warn=False):
+            nonlocal row
+            self.about_grid.attach(Gtk.Label(label=label, xalign=1, yalign=0), 0, row, 1, 1)
+            val = Gtk.Label(xalign=0, selectable=True, wrap=True)
+            text = GLib.markup_escape_text(value)
+            if note:
+                text += "\n<small>%s</small>" % GLib.markup_escape_text(note)
+            val.set_markup(("⚠ " if warn else "") + text)
+            val.set_hexpand(True)
+            self.about_grid.attach(val, 1, row, 1, 1)
+            row += 1
+            lines.append(f"{label}: {value}" + (" (%s)" % note.replace("\n", "; ") if note else ""))
+
+        unknown = _("older than 0.1.0~beta10 (no --version)")
+        for name, restart in (("wm2tj", _("restart wm2tj (root menu) or log in again")),
+                              ("wm2tj-bar", _("restart the bar or log in again"))):
+            run = running(name)
+            onpath = shutil.which(name)
+            if run:
+                ver, path, replaced = run
+                notes = [_("running: %s") % path]
+                warn = False
+                if replaced:
+                    notes.append(_("a newer copy was installed since it started (%s): %s")
+                                 % (version_of(path) or "?", restart))
+                    warn = True
+                elif onpath and os.path.realpath(onpath) != os.path.realpath(path):
+                    notes.append(_("%s comes first on PATH (%s)")
+                                 % (onpath, version_of(onpath) or unknown))
+                    warn = True
+                add(name, ver or unknown, "\n".join(notes), warn)
+            elif onpath:
+                add(name, _("not running"),
+                    _("installed: %s (%s)") % (onpath, version_of(onpath) or unknown))
+            else:
+                add(name, _("not running"))
+
+        add(_("Tools"), VERSION or _("unknown (not installed with make install)"),
+            _("menu, settings: %s") % os.path.abspath(sys.argv[0]))
+        if shutil.which("dpkg-query"):
+            pk = [f"{p} {package_version(p) or _('not installed')}" for p in ("wm2tj", "wm2tj-bar")]
+            add(_("Packages"), ", ".join(pk))
+        add(_("System"), os_name())
+        self.about_text = "\n".join(lines)
+        self.about_grid.show_all()
+
     def update_sensitive(self):
         off = self.gloss_off.get_active()
         self.gloss_color.set_sensitive(not off)
@@ -461,5 +611,8 @@ class SettingsWindow(Gtk.Window):
 
 
 if __name__ == "__main__":
-    SettingsWindow().show_all()
+    win = SettingsWindow()
+    win.show_all()
+    if "--about" in sys.argv[1:]:
+        win.notebook.set_current_page(1)   # also hides Revert / Apply
     Gtk.main()

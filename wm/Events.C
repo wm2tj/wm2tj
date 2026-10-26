@@ -592,6 +592,7 @@ void WindowManager::eventClient(XClientMessageEvent *e)
 		c->setSticky(True);
 		if (c->isNormal() && c->isOffDesktop()) {
 		    c->unhideForDesktop();
+		    c->mapRaised();	// brought here on purpose: show it on top
 		}
 	    } else {
 		if (d >= m_numDesktops) d = m_numDesktops - 1;
@@ -600,6 +601,7 @@ void WindowManager::eventClient(XClientMessageEvent *e)
 		if (c->isNormal()) {
 		    if (d == m_currentDesktop && c->isOffDesktop()) {
 			c->unhideForDesktop();
+			c->mapRaised();
 		    } else if (d != m_currentDesktop && !c->isOffDesktop()) {
 			c->hideForDesktop();
 		    }

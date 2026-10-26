@@ -8,6 +8,7 @@
 PREFIX      ?= /usr/local
 BINDIR      ?= $(PREFIX)/bin
 XSESSIONDIR ?= /usr/share/xsessions
+VERSION     ?= 0.1.0
 PKG_CONFIG  ?= pkg-config
 PKGS         = x11 xext xft xrandr
 CXXFLAGS    ?= -O2 -Wall -Wextra
@@ -25,6 +26,15 @@ OBJECTS = Border.o Buttons.o Client.o Config.o Events.o Main.o Manager.o
 wm2tj:	$(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
+# VERSION is compiled into Main.o (wm2tj --version).  The stamp changes when
+# it does, so a new version rebuilds Main.o.
+BUILDCONF = .build-config
+$(BUILDCONF): FORCE
+	@echo '$(VERSION)' | cmp -s - $@ || echo '$(VERSION)' > $@
+
+Main.o: Main.C $(BUILDCONF)
+	$(CXX) $(CPPFLAGS) -DVERSION='"$(VERSION)"' $(CXXFLAGS) -c Main.C
+
 install: wm2tj
 	install -D -m755 wm2tj $(DESTDIR)$(BINDIR)/wm2tj
 
@@ -33,12 +43,12 @@ install-session: install
 	install -D -m644 wm2tj.desktop $(DESTDIR)$(XSESSIONDIR)/wm2tj.desktop
 
 clean:
-	rm -f *.o core
+	rm -f *.o core $(BUILDCONF)
 
 distclean: clean
 	rm -f wm2tj *~
 
-.PHONY: install install-session clean distclean
+.PHONY: install install-session clean distclean FORCE
 
 # Manual header deps (no auto-depend; missing these caused struct-offset
 # mismatches when Config.h grew a field on 2026-05-27).

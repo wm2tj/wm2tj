@@ -116,6 +116,7 @@ WM2TJ_MENU = [f'    menu "{_("Settings…")}" {SETTINGS}',
               f'    menu "{_("Edit Favourites…")}" {FAV_EDITOR}']
 if os.access(WALLPAPER, os.X_OK):
     WM2TJ_MENU.append(f'    menu "{_("Change Wallpaper…")}" {WALLPAPER} --choose')
+WM2TJ_MENU.append(f'    menu "{_("About wm2tj…")}" {SETTINGS} --about')
 LOGOUT_CMD = tool("session-logout")
 RESTART = f'menu "{_("Restart wm2tj (reload settings)")}" pkill -HUP -x wm2tj'
 LOGOUT = f'menu "{_("Log Out")}" {LOGOUT_CMD}'

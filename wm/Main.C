@@ -11,9 +11,16 @@ int main(int argc, char **argv)
 {
     int i;
 
+#ifndef VERSION
+#define VERSION "0.1.0"
+#endif
     if (argc > 1) {
+	if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-v")) {
+	    printf("wm2tj " VERSION "\n");
+	    return 0;
+	}
 	for (i = strlen(argv[0])-1; i > 0 && argv[0][i] != '/'; --i);
-	fprintf(stderr, "usage: %s\n", argv[0] + (i > 0) + i);
+	fprintf(stderr, "usage: %s [--version]\n", argv[0] + (i > 0) + i);
 	exit(2);
     }
 
