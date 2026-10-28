@@ -7,7 +7,7 @@
  *
  *   wm2-swipe [-f fingers] [-t threshold] [-r] [-w]
  *     -f N   fingers of the swipe (default 3)
- *     -t N   minimum horizontal travel, in unaccelerated motion units (default 60)
+ *     -t N   minimum horizontal travel, in unaccelerated motion units (default 40)
  *     -r     reverse: swipe left = next desktop (GNOME/macOS "natural" direction).
  *            By default swipe right = next, swipe left = previous
  *     -w     wrap around at the first and last desktop (default: stop)
@@ -34,7 +34,7 @@ static long rootCard(Display *d, Window r, Atom a, long dflt)
 static void usage(int status)
 {
     fputs("usage: wm2-swipe [-f fingers] [-t threshold] [-r] [-w]\n"
-          "  -f N  fingers (default 3)   -t N  minimum travel (default 60)\n"
+          "  -f N  fingers (default 3)   -t N  minimum travel (default 40)\n"
           "  -r    swipe left = next desktop (default: swipe right = next)\n"
           "  -w    wrap around at the ends\n", status ? stderr : stdout);
     exit(status);
@@ -43,7 +43,7 @@ static void usage(int status)
 int main(int argc, char **argv)
 {
     int fingers_wanted = 3, reverse = 0, wrap = 0, opt;
-    double threshold = 60.0;
+    double threshold = 40.0;
     while ((opt = getopt(argc, argv, "f:t:rwh")) != -1) {
         switch (opt) {
         case 'f': fingers_wanted = atoi(optarg); break;
