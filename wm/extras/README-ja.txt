@@ -50,6 +50,7 @@ extras/
                                --hup: メニューが変わったときだけ wm2tj に反映させる。今の wm2tj は次にメニューを開いたとき自分で読み直すので
                                （ルート窓の _WM2TJ_MENU_RELOAD で判定）何もしない。古い wm2tj にだけ HUP。同じ内容なら ~/.wm2rc を書き直さない
   wm2tj-settings            -> ~/.local/bin/  wm2tj の設定 GUI（GTK3/Python、.wm2rc の見た目を変えて HUP）。メニュー wm2tj → 設定…
+                               上に色のテーマ（青・シルバー・グラファイト・藍・抹茶・臙脂・カッパー、どれも光沢）、個別の色は「色を個別に変える」の中
   wm2tj-favorites           -> ~/.local/bin/  お気に入りの編集 GUI（~/.config/wm2tj/favorites）。メニュー wm2tj → お気に入りの編集…
                                ファイルが無い間は wm2-menu-gen と同じ順（wm2tj-bar → Whisker Menu）で一覧を出し、最初の変更で作る
                                「適用」で wm2-menu-gen --hup を走らせる（右クリックメニューは次に開いたときに追従。再起動しない）。

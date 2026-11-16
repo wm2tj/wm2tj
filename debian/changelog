@@ -1,3 +1,16 @@
+wm2tj (0.1.0~beta12) unstable; urgency=medium
+
+  * wm2tj-settings: colour themes at the top of the Appearance tab, shown
+    as small windows: Blue (the built-in look), Silver, Graphite, Indigo,
+    Matcha, Crimson and Copper, all glossy. A theme writes the colour keys
+    of the tab, frame and root menu together, so the bar follows too. The
+    single colours moved one step down, under "Change the colours one by
+    one"; the page shows "Custom" when they match no theme.
+  * wm2-swipe: the default threshold is 40 px instead of 60, as quick
+    swipes were often too short.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Mon, 16 Nov 2026 17:32:27 +0900
+
 wm2tj (0.1.0~beta11) unstable; urgency=medium
 
   * wm2tj: drag a window against the outer left or right edge and hold it

@@ -11,12 +11,13 @@
 # .wm2rc is copied once to ~/.wm2rc.bak-wm2tj-settings.
 #
 # Needs python3, PyGObject and GTK 3. Text domain "wm2tj".
-import gettext, os, re, shutil, subprocess, sys
+import gettext, math, os, re, shutil, subprocess, sys
 try:
     import gi
     gi.require_version("Gtk", "3.0")
     gi.require_version("Gdk", "3.0")
-    from gi.repository import Gtk, Gdk, GLib
+    gi.require_version("GdkPixbuf", "2.0")
+    from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 except (ImportError, ValueError) as e:
     sys.exit(f"{sys.argv[0]}: needs PyGObject with GTK 3 (python3-gi, python-gobject, py3-gobject3): {e}")
 
@@ -55,6 +56,46 @@ DEFAULTS = {
     "menu_borders": "auto",   # auto = the tab colour (as the left line)
     "submenu_prefix": "",
 }
+
+# Colour themes: each sets these keys of ~/.wm2rc together (the bar takes
+# the tab colours from there too).  All are glossy; "blue" is the built-in
+# look.  A theme is not stored as such: the page shows the theme whose
+# colours match, else "Custom".
+THEME_KEYS = ("tab_gloss", "tab_foreground", "button_background", "frame_background",
+              "borders", "left_line", "menu_background", "menu_foreground", "menu_borders")
+N_ = lambda s: s     # marked for translation, translated when shown
+THEMES = [
+    ("blue", N_("Blue"), dict(
+        tab_gloss="#2a7de1", tab_foreground="white", button_background="#1a4f9c",
+        frame_background="gray95", borders="black", left_line="auto",
+        menu_background="gray80", menu_foreground="black", menu_borders="auto")),
+    ("silver", N_("Silver"), dict(
+        tab_gloss="#8f969f", tab_foreground="white", button_background="#4b5159",
+        frame_background="#e9ebee", borders="#2c3036", left_line="auto",
+        menu_background="#e4e7eb", menu_foreground="#1d2024", menu_borders="auto")),
+    # the menu frame is set apart: the strip colour would be a light grey
+    # highlight behind the light menu text
+    ("graphite", N_("Graphite"), dict(
+        tab_gloss="#4a4f58", tab_foreground="#f2f2f2", button_background="#1f2226",
+        frame_background="#2c2f34", borders="black", left_line="auto",
+        menu_background="#2b2e33", menu_foreground="#e6e6e6", menu_borders="#5a606a")),
+    ("indigo", N_("Indigo"), dict(
+        tab_gloss="#1d5a8a", tab_foreground="white", button_background="#0f3352",
+        frame_background="#eef1f4", borders="black", left_line="auto",
+        menu_background="#dde3ea", menu_foreground="#14202c", menu_borders="auto")),
+    ("matcha", N_("Matcha"), dict(
+        tab_gloss="#5f8a46", tab_foreground="white", button_background="#3a5a2a",
+        frame_background="#f1f3ec", borders="#1e2a18", left_line="auto",
+        menu_background="#e3e8da", menu_foreground="#1e2a18", menu_borders="auto")),
+    ("crimson", N_("Crimson"), dict(
+        tab_gloss="#a3343f", tab_foreground="white", button_background="#681c25",
+        frame_background="#f5f0ef", borders="#2a0d11", left_line="auto",
+        menu_background="#ebe1df", menu_foreground="#2a1215", menu_borders="auto")),
+    ("copper", N_("Copper"), dict(
+        tab_gloss="#b4703c", tab_foreground="white", button_background="#6e3f1d",
+        frame_background="#f4f0eb", borders="#2a1a0e", left_line="auto",
+        menu_background="#ebe3da", menu_foreground="#2a1a0e", menu_borders="auto")),
+]
 
 
 # ---- reading and writing ~/.wm2rc ----------------------------------------------
@@ -190,8 +231,98 @@ def to_hex(rgba):
     return "#%02x%02x%02x" % tuple(round(c * 255) for c in (rgba.red, rgba.green, rgba.blue))
 
 
+def same_colour(a, b):
+    """'gray95' and '#f2f2f2' are the same; 'auto' / 'none' only equal themselves."""
+    if a == b:
+        return True
+    words = ("auto", "none")
+    if a in words or b in words:
+        return False
+    return to_hex(to_rgba(a)) == to_hex(to_rgba(b))
+
+
+# ---- theme previews (a small window: the glossy tab, frame and menu) -----
+
+def _mix(c, r, g, b, t):
+    t = min(1.0, max(0.0, t))
+    return [c[0] + (r - c[0]) * t, c[1] + (g - c[1]) * t, c[2] + (b - c[2]) * t]
+
+
+def gloss_colour(base, s, t):
+    """Border::glossColour in wm2tj: s across the tab (0 deep .. 1 light), t along it."""
+    c = _mix(list(base), 0, 0.02, 0.15, 0.50 * (1 - s) ** 1.4)
+    c = _mix(c, 1, 1, 1, 0.45 * s * s)
+    g = (s - 0.72) / 0.10
+    c = _mix(c, 1, 1, 1, 0.45 * math.exp(-g * g))
+    if t < 0.3:
+        c = _mix(c, 1, 1, 1, 0.25 * (1 - t / 0.3))
+    return _mix(c, 0, 0, 0.1, 0.20 * t)
+
+
+def theme_preview(colours, w=84, h=56):
+    """A GdkPixbuf of a window in these colours (no cairo needed)."""
+    rgb = lambda name: (lambda r: (r.red, r.green, r.blue))(to_rgba(name))
+    desk = (0.36, 0.39, 0.44)
+    pix = [[desk] * w for _ in range(h)]
+    base = rgb(colours["tab_gloss"])
+    bd = None if colours["borders"] == "none" else rgb(colours["borders"])
+    TW, TX, TY, TL = 12, 5, 5, h - 10         # the tab
+    FX, FY, FW, FH = TX + TW, TY, w - TX - TW - 5, h - 16   # the frame
+    for y in range(TL):
+        for x in range(TW):
+            pix[TY + y][TX + x] = gloss_colour(base, x / (TW - 1), y / (TL - 1))
+    strip = gloss_colour(base, 0.5, 0.0)
+    frame = rgb(colours["frame_background"])
+    for y in range(FH):
+        for x in range(FW):
+            pix[FY + y][FX + x] = frame
+    for x in range(FW):
+        pix[FY][FX + x] = pix[FY + 1][FX + x] = strip      # the line along the top
+    if colours["left_line"] != "none":
+        left = strip if colours["left_line"] == "auto" else rgb(colours["left_line"])
+        for y in range(FH):
+            pix[FY + y][FX] = left
+    for y in range(FY + 4, FY + FH - 3):                  # the window's contents
+        for x in range(FX + 4, FX + FW - 3):
+            pix[y][x] = (1, 1, 1)
+    btn = rgb(colours["button_background"])               # the close button
+    for y in range(TY + 2, TY + 8):
+        for x in range(TX + 3, TX + 9):
+            pix[y][x] = btn
+    if bd:
+        for x in range(TX, FX + FW):
+            pix[TY][x] = bd
+        for x in range(TX, TX + TW):
+            pix[TY + TL - 1][x] = bd
+        for x in range(FX, FX + FW):
+            pix[FY + FH - 1][x] = bd
+        for y in range(TY, TY + TL):
+            pix[y][TX] = bd
+        for y in range(FY + FH, TY + TL):
+            pix[y][FX] = bd
+        for y in range(FY, FY + FH):
+            pix[y][FX + FW - 1] = bd
+    # a bit of the root menu, overlapping the lower right
+    mbg, mfg = rgb(colours["menu_background"]), rgb(colours["menu_foreground"])
+    mb = colours["menu_borders"]
+    mframe = strip if mb == "auto" else rgb(mb if mb != "none" else colours["menu_background"])
+    MX, MY, MW, MH = w - 30, h - 24, 26, 21
+    for y in range(MH):
+        for x in range(MW):
+            edge = x in (0, MW - 1) or y in (0, MH - 1)
+            pix[MY + y][MX + x] = mframe if edge else mbg
+    for i, ln in enumerate((14, 10, 16)):                 # three menu entries
+        for x in range(MX + 4, MX + 4 + ln):
+            pix[MY + 5 + i * 5][x] = mfg
+    data = bytes(int(min(1, max(0, v)) * 255 + 0.5) for row in pix for c in row for v in c)
+    return GdkPixbuf.Pixbuf.new_from_bytes(GLib.Bytes.new(data), GdkPixbuf.Colorspace.RGB,
+                                           False, 8, w, h, w * 3)
+
+
 class ColorField(Gtk.Box):
     """Colour button + the value as text (white, #2a7de1...); kept as written unless changed."""
+    changed = None   # called after the user picks a colour (the page sets it)
+
     def __init__(self, text):
         super().__init__(spacing=8)
         self.button = Gtk.ColorButton.new_with_rgba(to_rgba(text))
@@ -210,6 +341,8 @@ class ColorField(Gtk.Box):
     def on_set(self, *a):
         self.text = to_hex(self.button.get_rgba())
         self.label.set_text(self.text)
+        if ColorField.changed:
+            ColorField.changed()
 
     def get_text(self):
         return self.text
@@ -359,11 +492,19 @@ class SettingsWindow(Gtk.Window):
         self.connect("destroy", Gtk.main_quit)
         self.rc = Wm2rc(RC)
         self.fields = {}
+        self.loaded = {}
+        self.syncing = False   # True while the page sets fields itself
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.add(box)
         self.notebook = Gtk.Notebook()
-        self.notebook.append_page(self.appearance_page(), Gtk.Label(label=_("Appearance")))
+        # scrolls when the colours below the themes are opened on a low screen
+        self.scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+        geo = Gdk.Display.get_default().get_monitor(0).get_workarea()
+        self.max_page_h = max(300, geo.height - 160)
+        self.page = self.appearance_page()
+        self.scroll.add(self.page)
+        self.notebook.append_page(self.scroll, Gtk.Label(label=_("Appearance")))
         self.notebook.append_page(self.about_page(), Gtk.Label(label=_("About")))
         box.pack_start(self.notebook, True, True, 0)
 
@@ -391,8 +532,15 @@ class SettingsWindow(Gtk.Window):
 
     # the Appearance page
     def appearance_page(self):
-        grid = Gtk.Grid(row_spacing=8, column_spacing=12, border_width=12)
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, border_width=12)
+        grid = None
         self.row = 0
+
+        def new_grid():
+            nonlocal grid
+            grid = Gtk.Grid(row_spacing=8, column_spacing=12)
+            self.row = 0
+            return grid
 
         def heading(text):
             lab = Gtk.Label(xalign=0)
@@ -410,6 +558,50 @@ class SettingsWindow(Gtk.Window):
                 self.fields[key] = widget
             self.row += 1
 
+        # the themes: a row of small windows to pick from
+        lab = Gtk.Label(xalign=0)
+        lab.set_markup("<b>%s</b>" % GLib.markup_escape_text(_("Theme")))
+        page.pack_start(lab, False, False, 0)
+        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True,
+                           max_children_per_line=4, min_children_per_line=4,
+                           column_spacing=6, row_spacing=6)
+        self.theme_custom = Gtk.RadioButton()   # active when no theme matches; not shown
+        self.theme_buttons = {}
+        for name, title, colours in THEMES:
+            b = Gtk.RadioButton.new_from_widget(self.theme_custom)
+            b.set_mode(False)                   # a toggle button, no round indicator
+            b.set_relief(Gtk.ReliefStyle.NONE)
+            inner = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            inner.pack_start(Gtk.Image.new_from_pixbuf(theme_preview(colours)), False, False, 0)
+            inner.pack_start(Gtk.Label(label=_(title)), False, False, 0)
+            b.add(inner)
+            b.connect("toggled", self.on_theme, name)
+            self.theme_buttons[name] = b
+            flow.add(b)
+        page.pack_start(flow, False, False, 0)
+        self.theme_note = Gtk.Label(xalign=0, wrap=True)
+        self.theme_note.get_style_context().add_class("dim-label")
+        self.theme_note.set_no_show_all(True)
+        page.pack_start(self.theme_note, False, False, 0)
+
+        page.pack_start(new_grid(), False, False, 0)
+        heading(_("Fonts"))
+        add(_("Window tab"), FontField(DEFAULTS["font"]), "font")
+        add(_("Root menu"), FontField(DEFAULTS["menufont"]), "menufont")
+        prefix = Gtk.Entry(width_chars=6, hexpand=False)
+        prefix.set_tooltip_text(_("Mark put before folder names (e.g. ▶ ). If empty, a > follows the name"))
+        add(_("Folder mark"), prefix, "submenu_prefix")
+
+        # each colour on its own, one step down
+        self.colours_expander = Gtk.Expander(label=_("Change the colours one by one"))
+        self.colours_expander.set_margin_top(8)
+        self.colours_expander.connect("notify::expanded",
+                                      lambda *a: GLib.idle_add(self.fit_height))
+        page.pack_start(self.colours_expander, False, False, 0)
+        self.colours_expander.add(new_grid())
+        grid.set_margin_top(8)
+        grid.set_margin_start(12)
+
         heading(_("Window tab"))
         gloss = Gtk.Box(spacing=12)
         self.gloss_color = ColorField(DEFAULTS["tab_gloss"])
@@ -422,7 +614,6 @@ class SettingsWindow(Gtk.Window):
         add(_("Flat colour"), self.flat_color, "tab_background")
         add(_("Text colour"), ColorField(DEFAULTS["tab_foreground"]), "tab_foreground")
         add(_("Close button"), ColorField(DEFAULTS["button_background"]), "button_background")
-        add(_("Font"), FontField(DEFAULTS["font"]), "font")
 
         heading(_("Frame"))
         add(_("Frame colour"), ColorField(DEFAULTS["frame_background"]), "frame_background")
@@ -454,12 +645,72 @@ class SettingsWindow(Gtk.Window):
         mb.pack_start(self.mb_color, False, False, 0)
         mb.pack_start(self.mb_auto, False, False, 0)
         add(_("Border colour"), mb)
-        add(_("Font"), FontField(DEFAULTS["menufont"]), "menufont")
-        prefix = Gtk.Entry(width_chars=6, hexpand=False)
-        prefix.set_tooltip_text(_("Mark put before folder names (e.g. ▶ ). If empty, a > follows the name"))
-        add(_("Folder mark"), prefix, "submenu_prefix")
 
-        return grid
+        # any change of a colour: show which theme it now matches
+        ColorField.changed = self.sync_theme
+        for w in (self.gloss_off, self.bd_none, self.left_auto, self.left_none,
+                  self.left_custom, self.mb_auto):
+            w.connect("toggled", lambda *a: self.sync_theme())
+        return page
+
+    # the page as tall as its contents, up to the screen; then it scrolls
+    def fit_height(self):
+        self.page.show_all()
+        h = min(self.page.get_preferred_height()[1], self.max_page_h)
+        self.scroll.set_min_content_height(h)
+        self.resize(self.get_size()[0], 1)   # shrink again when the colours close
+        return False
+
+    # the theme picked: put its colours into the fields (saved by Apply)
+    def on_theme(self, button, name):
+        if not button.get_active() or self.syncing:
+            return
+        colours = dict(THEMES[[t[0] for t in THEMES].index(name)][2])
+        self.syncing = True
+        self.gloss_off.set_active(False)
+        self.gloss_color.set_text(colours["tab_gloss"])
+        for key in ("tab_foreground", "button_background", "frame_background",
+                    "menu_background", "menu_foreground"):
+            self.fields[key].set_text(colours[key])
+        self.bd_none.set_active(colours["borders"] == "none")
+        if colours["borders"] != "none":
+            self.bd_color.set_text(colours["borders"])
+        ll = colours["left_line"]
+        (self.left_auto if ll == "auto" else self.left_none if ll == "none"
+         else self.left_custom).set_active(True)
+        if ll not in ("auto", "none"):
+            self.left_color.set_text(ll)
+        self.mb_auto.set_active(colours["menu_borders"] == "auto")
+        if colours["menu_borders"] != "auto":
+            self.mb_color.set_text(colours["menu_borders"])
+        self.syncing = False
+        self.update_sensitive()
+        self.sync_theme()
+
+    def matching_theme(self, vals):
+        for name, _title, colours in THEMES:
+            if all(same_colour(vals[k], colours[k]) for k in THEME_KEYS):
+                return name
+        return None
+
+    # select the theme the colours in the fields match, else "Custom"
+    def sync_theme(self):
+        if self.syncing:
+            return
+        name = self.matching_theme(self.collect())
+        self.syncing = True
+        (self.theme_buttons[name] if name else self.theme_custom).set_active(True)
+        self.syncing = False
+        if name:
+            self.theme_note.set_text("")
+            self.theme_note.hide()
+        else:
+            self.theme_note.set_text(_("Custom colours (not one of the themes). "
+                                       "Pick a theme to replace them."))
+            self.theme_note.show()
+        if self.loaded:
+            changed = any(v != self.loaded.get(k) for k, v in self.collect().items())
+            self.status.set_text(_("Press Apply to use it") if changed else "")
 
     # the About page: versions running and installed
     def about_page(self):
@@ -546,6 +797,7 @@ class SettingsWindow(Gtk.Window):
     def load(self):
         self.rc.reload()
         self.loaded = {}
+        self.syncing = True
         for key, w in self.fields.items():
             v = self.value(key)
             self.loaded[key] = v
@@ -572,7 +824,9 @@ class SettingsWindow(Gtk.Window):
         self.mb_auto.set_active(mb == "auto")
         self.mb_color.set_text((self.value("menu_background") if bd == "none" else bd)
                                if mb == "auto" else mb)
+        self.syncing = False
         self.update_sensitive()
+        self.sync_theme()
         self.status.set_text("")
 
     def collect(self):
@@ -613,6 +867,7 @@ class SettingsWindow(Gtk.Window):
 if __name__ == "__main__":
     win = SettingsWindow()
     win.show_all()
+    win.fit_height()
     if "--about" in sys.argv[1:]:
         win.notebook.set_current_page(1)   # also hides Revert / Apply
     Gtk.main()

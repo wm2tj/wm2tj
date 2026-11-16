@@ -24,6 +24,8 @@ submenu_prefix "▶ "       # フォルダの頭の印 (mark before a folder nam
 # search_label "Search..." # 先頭の検索欄の文字 (text in the search row; none hides the row)
 
 # 色（色名 or "#RRGGBB"）。`#` 始まりは "" で囲む。反映は pkill -HUP -x wm2tj
+# 設定画面 (wm2tj-settings) のテーマ (青・シルバー・グラファイト・藍・抹茶・臙脂・カッパー) は下の色をまとめて書く
+#   The themes of wm2tj-settings write the colour keys below together.
 # 既定＝青い光沢タブ＋白文字＋黒い細枠（下の値）。灰色の元の見た目は
 #   tab_gloss none / tab_foreground black / button_background gray95 / borders black
 # tab_gloss         "#2a7de1"  # 光沢グラデーションの基調色（none で単色 tab_background）

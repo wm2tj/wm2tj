@@ -23,7 +23,9 @@ use it every day on a modern laptop:
 - Window titles rendered with Xft and UTF-8 (Japanese and other non-Latin titles work)
 - Maximise / restore (double-click the tab) and minimise (middle-click the tab)
 - EWMH support: panels, taskbars, pagers, virtual desktops, struts, fullscreen
-- Configurable look in `~/.wm2rc`: tab width and length, gloss colour, borders, fonts
+- Configurable look in `~/.wm2rc`: tab width and length, gloss colour, borders, fonts.
+  The settings window has colour themes (Blue, Silver, Graphite, Indigo, Matcha, Crimson,
+  Copper) for the tabs, frames, menus and the bar together
 - A root menu with cascading folders and a search box (finds apps and open windows; works with an input method)
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop; a changed menu (apps installed, favourites edited) is picked up when the menu next opens, without a restart
 - No polling while moving windows
