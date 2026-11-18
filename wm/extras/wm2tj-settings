@@ -99,7 +99,7 @@ THEMES = [
         menu_background="#ebe3da", menu_foreground="#2a1a0e", menu_borders="auto")),
     ("purple", N_("Purple"), dict(
         tab_gloss="#7a4cb0", tab_foreground="white", button_background="#4a2a75",
-        frame_background="#f3f0f7", borders="#1e1430", left_line="auto",
+        frame_background="black", borders="#1e1430", left_line="auto",
         menu_background="#e6e0ef", menu_foreground="#1e1430", menu_borders="auto")),
     # solid (flat) tabs; "classic" is the look of the original wm2
     ("classic", N_("Classic"), dict(
