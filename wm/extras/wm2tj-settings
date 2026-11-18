@@ -97,40 +97,44 @@ THEMES = [
         tab_gloss="#b4703c", tab_foreground="white", button_background="#6e3f1d",
         frame_background="#f4f0eb", borders="#2a1a0e", left_line="auto",
         menu_background="#ebe3da", menu_foreground="#2a1a0e", menu_borders="auto")),
+    ("purple", N_("Purple"), dict(
+        tab_gloss="#7a4cb0", tab_foreground="white", button_background="#4a2a75",
+        frame_background="#f3f0f7", borders="#1e1430", left_line="auto",
+        menu_background="#e6e0ef", menu_foreground="#1e1430", menu_borders="auto")),
     # solid (flat) tabs; "classic" is the look of the original wm2
     ("classic", N_("Classic"), dict(
         tab_gloss="none", tab_background="gray80", tab_foreground="black",
-        button_background="gray95", frame_background="gray95", borders="black",
-        left_line="none", menu_background="gray80", menu_foreground="black",
+        button_background="gray95", frame_background="black", borders="black",
+        left_line="gray80", menu_background="gray80", menu_foreground="black",
         menu_borders="auto")),
     ("ink", N_("Ink"), dict(
         tab_gloss="none", tab_background="#2b2b2b", tab_foreground="#f0f0f0",
-        button_background="#8a8a8a", frame_background="#1e1e1e", borders="black",
+        button_background="#8a8a8a", frame_background="black", borders="black",
         left_line="#2b2b2b", menu_background="#262626", menu_foreground="#e8e8e8",
         menu_borders="#555555")),
     ("navy", N_("Navy"), dict(
         tab_gloss="none", tab_background="#223a5e", tab_foreground="white",
-        button_background="#7d93b5", frame_background="#eef1f5", borders="black",
+        button_background="#7d93b5", frame_background="black", borders="black",
         left_line="#223a5e", menu_background="#dfe5ee", menu_foreground="#14202c",
         menu_borders="auto")),
     ("teal", N_("Teal"), dict(
         tab_gloss="none", tab_background="#2a7470", tab_foreground="white",
-        button_background="#8fc2be", frame_background="#eef4f3", borders="#10302e",
+        button_background="#8fc2be", frame_background="black", borders="#10302e",
         left_line="#2a7470", menu_background="#dbe9e7", menu_foreground="#10302e",
         menu_borders="auto")),
     ("vermilion", N_("Vermilion"), dict(
         tab_gloss="none", tab_background="#c0442b", tab_foreground="white",
-        button_background="#eaa08f", frame_background="#f7f1ef", borders="#3a120a",
+        button_background="#eaa08f", frame_background="black", borders="#3a120a",
         left_line="#c0442b", menu_background="#efe2de", menu_foreground="#3a120a",
         menu_borders="auto")),
     ("amber", N_("Amber"), dict(
         tab_gloss="none", tab_background="#e8a23a", tab_foreground="#2a1a00",
-        button_background="#8f5c10", frame_background="#f8f3ea", borders="#2a1a00",
+        button_background="#8f5c10", frame_background="black", borders="#2a1a00",
         left_line="#e8a23a", menu_background="#f0e6d4", menu_foreground="#2a1a00",
         menu_borders="auto")),
     ("wisteria", N_("Wisteria"), dict(
         tab_gloss="none", tab_background="#6c5a9c", tab_foreground="white",
-        button_background="#b3a6d6", frame_background="#f3f1f7", borders="#1f1830",
+        button_background="#b3a6d6", frame_background="black", borders="#1f1830",
         left_line="#6c5a9c", menu_background="#e4e0ee", menu_foreground="#1f1830",
         menu_borders="auto")),
 ]

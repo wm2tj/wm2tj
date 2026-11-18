@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wm2tj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 16:01+0900\n"
+"POT-Creation-Date: 2026-11-18 16:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,7 +90,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: wm2-menu-gen:228 wm2tj-settings:844
+#: wm2-menu-gen:228 wm2tj-settings:848
 msgid "System"
 msgstr ""
 
@@ -130,245 +130,249 @@ msgstr ""
 msgid "Copper"
 msgstr ""
 
-#: wm2tj-settings:101
+#: wm2tj-settings:100
+msgid "Purple"
+msgstr ""
+
+#: wm2tj-settings:105
 msgid "Classic"
 msgstr ""
 
-#: wm2tj-settings:106
+#: wm2tj-settings:110
 msgid "Ink"
 msgstr ""
 
-#: wm2tj-settings:111
+#: wm2tj-settings:115
 msgid "Navy"
 msgstr ""
 
-#: wm2tj-settings:116
+#: wm2tj-settings:120
 msgid "Teal"
 msgstr ""
 
-#: wm2tj-settings:121
+#: wm2tj-settings:125
 msgid "Vermilion"
 msgstr ""
 
-#: wm2tj-settings:126
+#: wm2tj-settings:130
 msgid "Amber"
 msgstr ""
 
-#: wm2tj-settings:131
+#: wm2tj-settings:135
 msgid "Wisteria"
 msgstr ""
 
-#: wm2tj-settings:535
+#: wm2tj-settings:539
 msgid "wm2tj Settings"
 msgstr ""
 
-#: wm2tj-settings:553
+#: wm2tj-settings:557
 msgid "Appearance"
 msgstr ""
 
-#: wm2tj-settings:554
+#: wm2tj-settings:558
 msgid "About"
 msgstr ""
 
-#: wm2tj-settings:558 wm2tj-favorites:345
+#: wm2tj-settings:562 wm2tj-favorites:345
 msgid "Revert"
 msgstr ""
 
-#: wm2tj-settings:559
+#: wm2tj-settings:563
 msgid "Discard the changes not applied yet and reread ~/.wm2rc"
 msgstr ""
 
-#: wm2tj-settings:561 wm2tj-favorites:348 wm2tj-favorites:542
+#: wm2tj-settings:565 wm2tj-favorites:348 wm2tj-favorites:542
 msgid "Apply"
 msgstr ""
 
-#: wm2tj-settings:609
+#: wm2tj-settings:613
 msgid "Theme"
 msgstr ""
 
-#: wm2tj-settings:614
+#: wm2tj-settings:618
 msgid "Glossy"
 msgstr ""
 
-#: wm2tj-settings:614
+#: wm2tj-settings:618
 msgid "Solid"
 msgstr ""
 
-#: wm2tj-settings:641
+#: wm2tj-settings:645
 msgid "Fonts"
 msgstr ""
 
-#: wm2tj-settings:642 wm2tj-settings:658
+#: wm2tj-settings:646 wm2tj-settings:662
 msgid "Window tab"
 msgstr ""
 
-#: wm2tj-settings:643 wm2tj-settings:691
+#: wm2tj-settings:647 wm2tj-settings:695
 msgid "Root menu"
 msgstr ""
 
-#: wm2tj-settings:645
+#: wm2tj-settings:649
 msgid "Mark put before folder names (e.g. ▶ ). If empty, a > follows the name"
 msgstr ""
 
-#: wm2tj-settings:646
+#: wm2tj-settings:650
 msgid "Folder mark"
 msgstr ""
 
-#: wm2tj-settings:649
+#: wm2tj-settings:653
 msgid "Change the colours one by one"
 msgstr ""
 
-#: wm2tj-settings:661
+#: wm2tj-settings:665
 msgid "No gloss (flat)"
 msgstr ""
 
-#: wm2tj-settings:665
+#: wm2tj-settings:669
 msgid "Gloss colour"
 msgstr ""
 
-#: wm2tj-settings:667
+#: wm2tj-settings:671
 msgid "Flat colour"
 msgstr ""
 
-#: wm2tj-settings:668 wm2tj-settings:693
+#: wm2tj-settings:672 wm2tj-settings:697
 msgid "Text colour"
 msgstr ""
 
-#: wm2tj-settings:669
+#: wm2tj-settings:673
 msgid "Close button"
 msgstr ""
 
-#: wm2tj-settings:671
+#: wm2tj-settings:675
 msgid "Frame"
 msgstr ""
 
-#: wm2tj-settings:672
+#: wm2tj-settings:676
 msgid "Frame colour"
 msgstr ""
 
-#: wm2tj-settings:675 wm2tj-settings:682
+#: wm2tj-settings:679 wm2tj-settings:686
 msgid "None"
 msgstr ""
 
-#: wm2tj-settings:679 wm2tj-settings:700
+#: wm2tj-settings:683 wm2tj-settings:704
 msgid "Border colour"
 msgstr ""
 
-#: wm2tj-settings:681
+#: wm2tj-settings:685
 msgid "Same as the top line"
 msgstr ""
 
-#: wm2tj-settings:683
+#: wm2tj-settings:687
 msgid "Colour:"
 msgstr ""
 
-#: wm2tj-settings:689
+#: wm2tj-settings:693
 msgid "Left line"
 msgstr ""
 
-#: wm2tj-settings:692
+#: wm2tj-settings:696
 msgid "Background colour"
 msgstr ""
 
-#: wm2tj-settings:696
+#: wm2tj-settings:700
 msgid "Same as the tab colour"
 msgstr ""
 
-#: wm2tj-settings:767
+#: wm2tj-settings:771
 msgid "Custom colours (not one of the themes). Pick a theme to replace them."
 msgstr ""
 
-#: wm2tj-settings:772
+#: wm2tj-settings:776
 msgid "Press Apply to use it"
 msgstr ""
 
-#: wm2tj-settings:780
+#: wm2tj-settings:784
 msgid "Refresh"
 msgstr ""
 
-#: wm2tj-settings:782
+#: wm2tj-settings:786
 msgid "Copy"
 msgstr ""
 
-#: wm2tj-settings:783
+#: wm2tj-settings:787
 msgid "Copy these lines, e.g. for a bug report"
 msgstr ""
 
-#: wm2tj-settings:789
+#: wm2tj-settings:793
 msgid "Releases"
 msgstr ""
 
-#: wm2tj-settings:791
+#: wm2tj-settings:795
 msgid "Website"
 msgstr ""
 
-#: wm2tj-settings:815
+#: wm2tj-settings:819
 msgid "older than 0.1.0~beta10 (no --version)"
 msgstr ""
 
-#: wm2tj-settings:816
+#: wm2tj-settings:820
 msgid "restart wm2tj (root menu) or log in again"
 msgstr ""
 
-#: wm2tj-settings:817
+#: wm2tj-settings:821
 msgid "restart the bar or log in again"
 msgstr ""
 
-#: wm2tj-settings:822
+#: wm2tj-settings:826
 #, python-format
 msgid "running: %s"
 msgstr ""
 
-#: wm2tj-settings:825
+#: wm2tj-settings:829
 #, python-format
 msgid "a newer copy was installed since it started (%s): %s"
 msgstr ""
 
-#: wm2tj-settings:829
+#: wm2tj-settings:833
 #, python-format
 msgid "%s comes first on PATH (%s)"
 msgstr ""
 
-#: wm2tj-settings:834 wm2tj-settings:837
+#: wm2tj-settings:838 wm2tj-settings:841
 msgid "not running"
 msgstr ""
 
-#: wm2tj-settings:835
+#: wm2tj-settings:839
 #, python-format
 msgid "installed: %s (%s)"
 msgstr ""
 
-#: wm2tj-settings:839
+#: wm2tj-settings:843
 msgid "Tools"
 msgstr ""
 
-#: wm2tj-settings:839
+#: wm2tj-settings:843
 msgid "unknown (not installed with make install)"
 msgstr ""
 
-#: wm2tj-settings:840
+#: wm2tj-settings:844
 #, python-format
 msgid "menu, settings: %s"
 msgstr ""
 
-#: wm2tj-settings:842
+#: wm2tj-settings:846
 msgid "not installed"
 msgstr ""
 
-#: wm2tj-settings:843
+#: wm2tj-settings:847
 msgid "Packages"
 msgstr ""
 
-#: wm2tj-settings:908 wm2tj-favorites:491
+#: wm2tj-settings:912 wm2tj-favorites:491
 msgid "Nothing changed"
 msgstr ""
 
-#: wm2tj-settings:916
+#: wm2tj-settings:920
 #, python-format
 msgid "Cannot save: %s"
 msgstr ""
 
-#: wm2tj-settings:921
+#: wm2tj-settings:925
 #, python-format
 msgid "Saved %d setting; wm2tj has reloaded"
 msgid_plural "Saved %d settings; wm2tj has reloaded"

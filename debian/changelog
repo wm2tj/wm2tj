@@ -1,3 +1,13 @@
+wm2tj (0.1.0~beta14) unstable; urgency=medium
+
+  * wm2tj-settings: a glossy Purple theme.
+  * wm2tj-settings: the solid colour themes now set a black
+    frame_background (the band between the outer border and the window)
+    instead of a light one. Classic also gets a grey left line, the colour
+    of its tab.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Wed, 18 Nov 2026 16:57:26 +0900
+
 wm2tj (0.1.0~beta13) unstable; urgency=medium
 
   * wm2tj-settings: solid colour themes in a second row under the glossy

@@ -25,7 +25,7 @@ use it every day on a modern laptop:
 - EWMH support: panels, taskbars, pagers, virtual desktops, struts, fullscreen
 - Configurable look in `~/.wm2rc`: tab width and length, gloss colour, borders, fonts.
   The settings window has colour themes for the tabs, frames, menus and the bar together:
-  glossy (Blue, Silver, Graphite, Indigo, Matcha, Crimson, Copper) and solid (Classic,
+  glossy (Blue, Silver, Graphite, Indigo, Matcha, Crimson, Copper, Purple) and solid (Classic,
   the grey of the original wm2; Ink, Navy, Teal, Vermilion, Amber, Wisteria)
 - A root menu with cascading folders and a search box (finds apps and open windows; works with an input method)
 - Reload the configuration in place with `pkill -HUP -x wm2tj`, keeping the current desktop; a changed menu (apps installed, favourites edited) is picked up when the menu next opens, without a restart
