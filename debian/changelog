@@ -1,3 +1,12 @@
+wm2tj (0.1.0~beta13) unstable; urgency=medium
+
+  * wm2tj-settings: solid colour themes in a second row under the glossy
+    ones: Classic (the grey of the original wm2), Ink, Navy, Teal,
+    Vermilion, Amber and Wisteria. They write "tab_gloss none" with the
+    tab_background, and give the left line the tab colour.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Wed, 18 Nov 2026 16:03:46 +0900
+
 wm2tj (0.1.0~beta12) unstable; urgency=medium
 
   * wm2tj-settings: colour themes at the top of the Appearance tab, shown

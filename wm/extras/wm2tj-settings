@@ -58,8 +58,10 @@ DEFAULTS = {
 }
 
 # Colour themes: each sets these keys of ~/.wm2rc together (the bar takes
-# the tab colours from there too).  All are glossy; "blue" is the built-in
-# look.  A theme is not stored as such: the page shows the theme whose
+# the tab colours from there too).  The first ones are glossy ("blue" is the
+# built-in look); the solid ones ("tab_gloss none") also set tab_background,
+# and give the left line its colour by hand, as "auto" follows only a glossy
+# tab.  A theme is not stored as such: the page shows the theme whose
 # colours match, else "Custom".
 THEME_KEYS = ("tab_gloss", "tab_foreground", "button_background", "frame_background",
               "borders", "left_line", "menu_background", "menu_foreground", "menu_borders")
@@ -95,6 +97,42 @@ THEMES = [
         tab_gloss="#b4703c", tab_foreground="white", button_background="#6e3f1d",
         frame_background="#f4f0eb", borders="#2a1a0e", left_line="auto",
         menu_background="#ebe3da", menu_foreground="#2a1a0e", menu_borders="auto")),
+    # solid (flat) tabs; "classic" is the look of the original wm2
+    ("classic", N_("Classic"), dict(
+        tab_gloss="none", tab_background="gray80", tab_foreground="black",
+        button_background="gray95", frame_background="gray95", borders="black",
+        left_line="none", menu_background="gray80", menu_foreground="black",
+        menu_borders="auto")),
+    ("ink", N_("Ink"), dict(
+        tab_gloss="none", tab_background="#2b2b2b", tab_foreground="#f0f0f0",
+        button_background="#8a8a8a", frame_background="#1e1e1e", borders="black",
+        left_line="#2b2b2b", menu_background="#262626", menu_foreground="#e8e8e8",
+        menu_borders="#555555")),
+    ("navy", N_("Navy"), dict(
+        tab_gloss="none", tab_background="#223a5e", tab_foreground="white",
+        button_background="#7d93b5", frame_background="#eef1f5", borders="black",
+        left_line="#223a5e", menu_background="#dfe5ee", menu_foreground="#14202c",
+        menu_borders="auto")),
+    ("teal", N_("Teal"), dict(
+        tab_gloss="none", tab_background="#2a7470", tab_foreground="white",
+        button_background="#8fc2be", frame_background="#eef4f3", borders="#10302e",
+        left_line="#2a7470", menu_background="#dbe9e7", menu_foreground="#10302e",
+        menu_borders="auto")),
+    ("vermilion", N_("Vermilion"), dict(
+        tab_gloss="none", tab_background="#c0442b", tab_foreground="white",
+        button_background="#eaa08f", frame_background="#f7f1ef", borders="#3a120a",
+        left_line="#c0442b", menu_background="#efe2de", menu_foreground="#3a120a",
+        menu_borders="auto")),
+    ("amber", N_("Amber"), dict(
+        tab_gloss="none", tab_background="#e8a23a", tab_foreground="#2a1a00",
+        button_background="#8f5c10", frame_background="#f8f3ea", borders="#2a1a00",
+        left_line="#e8a23a", menu_background="#f0e6d4", menu_foreground="#2a1a00",
+        menu_borders="auto")),
+    ("wisteria", N_("Wisteria"), dict(
+        tab_gloss="none", tab_background="#6c5a9c", tab_foreground="white",
+        button_background="#b3a6d6", frame_background="#f3f1f7", borders="#1f1830",
+        left_line="#6c5a9c", menu_background="#e4e0ee", menu_foreground="#1f1830",
+        menu_borders="auto")),
 ]
 
 
@@ -264,21 +302,23 @@ def theme_preview(colours, w=84, h=56):
     rgb = lambda name: (lambda r: (r.red, r.green, r.blue))(to_rgba(name))
     desk = (0.36, 0.39, 0.44)
     pix = [[desk] * w for _ in range(h)]
-    base = rgb(colours["tab_gloss"])
+    flat = colours["tab_gloss"] == "none"
+    base = rgb(colours["tab_background"] if flat else colours["tab_gloss"])
+    tab = (lambda s, t: base) if flat else (lambda s, t: gloss_colour(base, s, t))
     bd = None if colours["borders"] == "none" else rgb(colours["borders"])
     TW, TX, TY, TL = 12, 5, 5, h - 10         # the tab
     FX, FY, FW, FH = TX + TW, TY, w - TX - TW - 5, h - 16   # the frame
     for y in range(TL):
         for x in range(TW):
-            pix[TY + y][TX + x] = gloss_colour(base, x / (TW - 1), y / (TL - 1))
-    strip = gloss_colour(base, 0.5, 0.0)
+            pix[TY + y][TX + x] = tab(x / (TW - 1), y / (TL - 1))
+    strip = tab(0.5, 0.0)
     frame = rgb(colours["frame_background"])
     for y in range(FH):
         for x in range(FW):
             pix[FY + y][FX + x] = frame
     for x in range(FW):
         pix[FY][FX + x] = pix[FY + 1][FX + x] = strip      # the line along the top
-    if colours["left_line"] != "none":
+    if colours["left_line"] != "none" and not (flat and colours["left_line"] == "auto"):
         left = strip if colours["left_line"] == "auto" else rgb(colours["left_line"])
         for y in range(FH):
             pix[FY + y][FX] = left
@@ -305,6 +345,12 @@ def theme_preview(colours, w=84, h=56):
     # a bit of the root menu, overlapping the lower right
     mbg, mfg = rgb(colours["menu_background"]), rgb(colours["menu_foreground"])
     mb = colours["menu_borders"]
+    edge = colours["left_line"]
+    if mb == "auto":     # the left line's colour, else the window borders (Buttons.C)
+        if edge == "none" or (flat and edge == "auto"):
+            mb = colours["borders"]
+        elif edge != "auto":
+            mb = edge
     mframe = strip if mb == "auto" else rgb(mb if mb != "none" else colours["menu_background"])
     MX, MY, MW, MH = w - 30, h - 24, 26, 21
     for y in range(MH):
@@ -562,12 +608,20 @@ class SettingsWindow(Gtk.Window):
         lab = Gtk.Label(xalign=0)
         lab.set_markup("<b>%s</b>" % GLib.markup_escape_text(_("Theme")))
         page.pack_start(lab, False, False, 0)
-        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True,
-                           max_children_per_line=4, min_children_per_line=4,
-                           column_spacing=6, row_spacing=6)
         self.theme_custom = Gtk.RadioButton()   # active when no theme matches; not shown
         self.theme_buttons = {}
+        flows = {}
+        for solid, label in ((False, _("Glossy")), (True, _("Solid"))):
+            sub = Gtk.Label(label=label, xalign=0)
+            sub.get_style_context().add_class("dim-label")
+            page.pack_start(sub, False, False, 0)
+            flows[solid] = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE,
+                                       homogeneous=True, max_children_per_line=4,
+                                       min_children_per_line=4,
+                                       column_spacing=6, row_spacing=6)
+            page.pack_start(flows[solid], False, False, 0)
         for name, title, colours in THEMES:
+            flow = flows[colours["tab_gloss"] == "none"]
             b = Gtk.RadioButton.new_from_widget(self.theme_custom)
             b.set_mode(False)                   # a toggle button, no round indicator
             b.set_relief(Gtk.ReliefStyle.NONE)
@@ -578,7 +632,6 @@ class SettingsWindow(Gtk.Window):
             b.connect("toggled", self.on_theme, name)
             self.theme_buttons[name] = b
             flow.add(b)
-        page.pack_start(flow, False, False, 0)
         self.theme_note = Gtk.Label(xalign=0, wrap=True)
         self.theme_note.get_style_context().add_class("dim-label")
         self.theme_note.set_no_show_all(True)
@@ -667,8 +720,12 @@ class SettingsWindow(Gtk.Window):
             return
         colours = dict(THEMES[[t[0] for t in THEMES].index(name)][2])
         self.syncing = True
-        self.gloss_off.set_active(False)
-        self.gloss_color.set_text(colours["tab_gloss"])
+        flat = colours["tab_gloss"] == "none"
+        self.gloss_off.set_active(flat)
+        if flat:
+            self.flat_color.set_text(colours["tab_background"])
+        else:
+            self.gloss_color.set_text(colours["tab_gloss"])
         for key in ("tab_foreground", "button_background", "frame_background",
                     "menu_background", "menu_foreground"):
             self.fields[key].set_text(colours[key])
@@ -689,7 +746,9 @@ class SettingsWindow(Gtk.Window):
 
     def matching_theme(self, vals):
         for name, _title, colours in THEMES:
-            if all(same_colour(vals[k], colours[k]) for k in THEME_KEYS):
+            # a glossy theme leaves tab_background as it is
+            if all(same_colour(vals[k], colours[k]) for k in THEME_KEYS + ("tab_background",)
+                   if k in colours):
                 return name
         return None
 
