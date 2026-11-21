@@ -1,3 +1,14 @@
+wm2tj (0.1.0~beta15) unstable; urgency=medium
+
+  * wm2-session: start picom with the xrender backend where OpenGL is
+    software-rendered (llvmpipe in a virtual machine, or no GPU driver).
+    With the glx backend there, the menus showed no highlight under the
+    pointer or came up all white, the bar vanished while its menu was
+    open, and Chrome's window stayed blank. A real GPU still gets glx.
+    WM2TJ_PICOM_BACKEND=glx|xrender overrides the choice.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 21 Nov 2026 11:58:46 +0900
+
 wm2tj (0.1.0~beta14) unstable; urgency=medium
 
   * wm2tj-settings: a glossy Purple theme, with a black frame.

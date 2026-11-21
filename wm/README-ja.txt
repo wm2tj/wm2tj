@@ -46,6 +46,8 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
     polkit エージェント（mate/gnome/xfce/lxpolkit/kde のどれか。WM2TJ_POLKIT_AGENT= で指定可）・通知デーモン・
     wm2tj-bar。wm2tj-bar が無いときだけ xfce4-panel・nm-applet・blueman-applet・xfce4-power-manager
     （バーが Wi-Fi/Bluetooth/輝度キー/電源プロファイルを持つので、あるとトレイが二重になり電源キーを取り合う）。
+    picom のバックエンドは、GPU があれば glx、OpenGL がソフトウェア描画（llvmpipe。仮想マシンや GPU ドライバなし）なら
+    xrender を選ぶ（glx のままだとメニューの反転が出ない・真っ白になる・Chrome が透明になる）。WM2TJ_PICOM_BACKEND=glx|xrender で指定も可。
     ~/.wm2rc が無ければ（初回ログイン）先に wm2-menu-gen を走らせて wm2rc.sample の設定 + メニューを作る。
     XDG_DATA_DIRS/XDG_CONFIG_DIRS はログインマネージャーの値を残し、Xfce/Xubuntu・Flatpak・snap のディレクトリがあれば足す。
     XDG_CURRENT_DESKTOP=wm2tj:XFCE（Xfce の設定ツールをメニューに出すため）

@@ -6,6 +6,8 @@
 #   WM2TJ=<path>               the window manager binary (default: wm2tj on PATH)
 #   WM2TJ_POLKIT_AGENT=<path>  the polkit agent to start
 #   WM2TJ_NOTIFYD=<command>    the notification daemon to start
+#   WM2TJ_PICOM_BACKEND=glx|xrender  picom's backend (default: glx on a real GPU,
+#                              xrender with software OpenGL or in a virtual machine)
 have() { command -v "$1" >/dev/null 2>&1; }
 # wm2tj and the helpers are installed next to this script
 case $0 in */*) PATH="${0%/*}:$PATH"; export PATH ;; esac
@@ -42,8 +44,29 @@ fi
 if have wm2-swipe; then wm2-swipe &
 elif have libinput-gestures; then libinput-gestures &
 fi
-# compositor: wm2tj draws ARGB tabs, which need one. glx first, then the default backend
-if have picom; then picom --backend glx -b || picom -b; fi   # no --vsync: lower latency, may tear
+# compositor: wm2tj draws ARGB tabs, which need one. picom's glx backend is
+# the smooth one on a real GPU, but with software OpenGL (llvmpipe: a virtual
+# machine, or no GPU driver) it leaves the menus and some windows unpainted
+# (no highlight under the pointer, an all-white menu, a see-through browser),
+# so xrender is used there.
+picom_backend() {
+    [ -n "$WM2TJ_PICOM_BACKEND" ] && { echo "$WM2TJ_PICOM_BACKEND"; return; }
+    if have glxinfo; then	# the renderer itself, when mesa-utils is installed
+	case $(glxinfo -B 2>/dev/null | sed -n 's/^OpenGL renderer string: *//p') in
+	    *llvmpipe*|*softpipe*|*swrast*|*"Software Rasterizer"*) echo xrender; return ;;
+	    ?*) echo glx; return ;;
+	esac
+    fi
+    # no render node: no GPU driver is bound (simpledrm, vesa)
+    ls /dev/dri/renderD* >/dev/null 2>&1 || { echo xrender; return; }
+    # a virtual machine: x86 sets the "hypervisor" CPU flag in every guest
+    if grep -qw hypervisor /proc/cpuinfo 2>/dev/null ||
+	{ have systemd-detect-virt && systemd-detect-virt -q --vm; }; then
+	echo xrender; return
+    fi
+    echo glx
+}
+if have picom; then picom --backend "$(picom_backend)" -b || picom -b; fi   # no --vsync: lower latency, may tear
 # wallpaper: the one chosen with "wm2-wallpaper --choose", else GNOME's
 # (needs feh, xwallpaper or hsetroot; quiet when nothing is chosen yet)
 have wm2-wallpaper && wm2-wallpaper >/dev/null 2>&1 &
