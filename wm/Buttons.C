@@ -1007,17 +1007,35 @@ void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 	XSetWindowBorder(display(), menuLevelWindow(k), frame);
     }
 
-    // the highlight is the frame colour, with white text if that's dark
+    // the highlight is the frame colour, with white text if that's dark.
+    // A frame too close to the menu background (the "classic" theme: both
+    // gray80) would not show, so the row is inverted instead: the menu's
+    // foreground behind, its background for the text.
     Visual *vis = DefaultVisual(display(), m_screenNumber);
-    XColor fc;
+    XColor fc, bc;
+    unsigned long hl = frame;
     fc.pixel = frame;
     XQueryColor(display(), m_defaultColormap, &fc);
-    Boolean dark = (fc.red * 3 + fc.green * 6 + fc.blue) / 10 < 0x8000;
-    if (!dark) s_hlText = m_menuXftColor;
-    else XftColorAllocName(display(), vis, m_defaultColormap, "white", &s_hlText);
+    bc.pixel = m_menuBackgroundPixel;
+    XQueryColor(display(), m_defaultColormap, &bc);
+    int lumF = (fc.red * 3 + fc.green * 6 + fc.blue) / 10;
+    int lumB = (bc.red * 3 + bc.green * 6 + bc.blue) / 10;
+    Boolean dark = lumF < 0x8000;
+    Boolean ownText = True;	// s_hlText is ours to free
+    if (abs((int)fc.red - (int)bc.red) + abs((int)fc.green - (int)bc.green) +
+	abs((int)fc.blue - (int)bc.blue) < 0x6000 && abs(lumF - lumB) < 0x3000) {
+	hl = m_menuForegroundPixel;
+	XftColorAllocName(display(), vis, m_defaultColormap,
+			  CONFIG_MENU_BACKGROUND, &s_hlText);
+    } else if (dark) {
+	XftColorAllocName(display(), vis, m_defaultColormap, "white", &s_hlText);
+    } else {
+	s_hlText = m_menuXftColor;
+	ownText = False;
+    }
     XftColorAllocName(display(), vis, m_defaultColormap, "gray45", &s_dimText);
     XGCValues gv;
-    gv.foreground = frame;
+    gv.foreground = hl;
     s_hlGC = XCreateGC(display(), root(), GCForeground, &gv);
     gv.foreground = m_menuBackgroundPixel;
     s_bgGC = XCreateGC(display(), root(), GCForeground, &gv);
@@ -1337,7 +1355,7 @@ void WindowManager::cascadeMenu(XButtonEvent *e, ClientList &clients,
 
  out:
     for (i = 0; i < depth; ++i) freeMenuLevel(lv[i]);
-    if (dark) XftColorFree(display(), vis, m_defaultColormap, &s_hlText);
+    if (ownText) XftColorFree(display(), vis, m_defaultColormap, &s_hlText);
     XftColorFree(display(), vis, m_defaultColormap, &s_dimText);
     XFreeGC(display(), s_hlGC);
     XFreeGC(display(), s_bgGC);

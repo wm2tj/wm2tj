@@ -1,3 +1,13 @@
+wm2tj (0.1.0~beta16) unstable; urgency=medium
+
+  * Root menu: with the "Classic" theme the row under the pointer showed
+    no highlight, as the highlight (the left line colour, gray80) was the
+    menu background. When the two are that close the row is now inverted
+    (menu foreground behind, menu background for the text). Broken since
+    beta14, which gave that theme its grey left line.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 21 Nov 2026 15:19:35 +0900
+
 wm2tj (0.1.0~beta15) unstable; urgency=medium
 
   * wm2-session: start picom with the xrender backend where OpenGL is
