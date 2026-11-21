@@ -44,7 +44,7 @@ extras/
                                （~/.config/wm2tj-bar/favorites）→ Whisker Menu のお気に入り の順に写して作る
                                お気に入りの後に submenu "wm2tj"（設定…・お気に入りの編集…・壁紙を変更）を出す
                                壁紙の項目は wm2-wallpaper があるときだけ
-                               末尾の「ログアウト」「再起動」「シャットダウン」は session-logout を呼ぶ
+                               末尾の「ログアウト」「サスペンド」「再起動」「シャットダウン」は session-logout を呼ぶ
                                （PATH に無ければ ~/.local/bin/session-logout）
                                --settle N: アプリのフォルダとお気に入りが N 秒動かなくなるまで待ってから作る（最大 60 秒）
                                --hup: メニューが変わったときだけ wm2tj に反映させる。今の wm2tj は次にメニューを開いたとき自分で読み直すので

@@ -974,9 +974,13 @@ static void loadDesktopFile(const char *path, const char *id)
 	catList[512] = "", type[64] = "", tryExec[512] = "",
 	onlyShow[256] = "", notShow[256] = "", domain[128] = "";
     int inEntry = 0, noDisplay = 0, terminal = 0;
-    FILE *f = fopen(path, "r");
+    FILE *f;
     App *a;
 
+    /* the compositor: the session starts it, and a second one from the
+       menu only finds the first and exits, so the entry looks dead */
+    if (!strcmp(id, "picom.desktop") || !strcmp(id, "compton.desktop")) return;
+    f = fopen(path, "r");
     if (!f) return;
     while (fgets(line, sizeof line, f)) {
 	char *k = line, *v, *p;

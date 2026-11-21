@@ -66,7 +66,7 @@ extras/
   wm2rc.sample              -> $(PREFIX)/share/wm2tj/  ~/.wm2rc が無いとき wm2-menu-gen がこれを設定部分にして作る
                                （手で ~/.wm2rc にコピーしてもよい。メニューは wm2-menu-gen で追記）
   wm2-menu-gen              -> ~/.local/bin/  Whisker Menu と同じメニュー（お気に入り→カテゴリ）を ~/.wm2rc に生成
-                               末尾の「ログアウト」等は session-logout（PATH、無ければ ~/.local/bin）を呼ぶ
+                               末尾の「ログアウト」「サスペンド」等は session-logout（PATH、無ければ ~/.local/bin）を呼ぶ
   session-logout            -> ~/.local/bin/  Xfce なら xfce4-session-logout、wm2tj なら wm2tj を終了。
                                --halt/--reboot/--suspend/--hibernate は systemctl へ。Whisker の電源ボタンもこれに向ける:
                                xfconf の /plugins/plugin-<id>/command-shutdown 等（パネル停止中に書く）

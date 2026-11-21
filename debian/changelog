@@ -1,3 +1,16 @@
+wm2tj (0.1.0~beta17) unstable; urgency=medium
+
+  * Root menu: "Suspend" between "Log Out" and "Restart" (wm2-menu-gen;
+    it does not ask first, as in the bar's Session menu).
+  * The compositor's own menu entry (picom, compton) is left out of the
+    root menu and of the bar's Applications: the session already runs it,
+    so choosing the entry did nothing.
+  * wm2-menu-gen: a new ~/.wm2rc takes its settings from
+    /etc/xdg/wm2tj/wm2rc when that exists (a distribution's or the
+    administrator's defaults), else from wm2rc.sample as before.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sat, 21 Nov 2026 15:44:02 +0900
+
 wm2tj (0.1.0~beta16) unstable; urgency=medium
 
   * Root menu: with the "Classic" theme the row under the pointer showed

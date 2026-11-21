@@ -89,7 +89,10 @@ BAR_FAVORITES = HOME / ".config/wm2tj-bar/favorites"
 FAV_HEADER = ("# wm2tj favourites (edited with wm2tj-favorites; shown top to bottom)\n"
               "# format: foo.desktop  or  \"name\" command\n")
 # xfce4-panel is replaced by wm2tj-bar; its preferences would start the panel
-EXCLUDE = {"panel-preferences.desktop", "panel-desktop-handler.desktop"}
+EXCLUDE = {"panel-preferences.desktop", "panel-desktop-handler.desktop",
+           # the compositor: wm2-session starts it; a second one from the
+           # menu only finds the first and exits, so the entry looks dead
+           "picom.desktop", "compton.desktop"}
 # xfce4-terminal is not installed on this machine
 # Terminal=true entries: $TERMINAL, else the first terminal found
 for _t, _flag in ([(os.environ["TERMINAL"], "-e")] if os.environ.get("TERMINAL") else []) + [
@@ -120,8 +123,10 @@ WM2TJ_MENU.append(f'    menu "{_("About wm2tj…")}" {SETTINGS} --about')
 LOGOUT_CMD = tool("session-logout")
 RESTART = f'menu "{_("Restart wm2tj (reload settings)")}" pkill -HUP -x wm2tj'
 LOGOUT = f'menu "{_("Log Out")}" {LOGOUT_CMD}'
-# Power entries ask first (session-logout --ask), so a stray click is harmless.
-POWER = [f'menu "{_("Restart")}" {LOGOUT_CMD} --ask --reboot',
+# Restart and Shut Down ask first (session-logout --ask), so a stray click is
+# harmless; Suspend does not (as in the bar's menu: a key press brings it back).
+POWER = [f'menu "{_("Suspend")}" {LOGOUT_CMD} --suspend',
+         f'menu "{_("Restart")}" {LOGOUT_CMD} --ask --reboot',
          f'menu "{_("Shut Down")}" {LOGOUT_CMD} --ask --halt']
 
 
@@ -435,9 +440,16 @@ def wm_rereads_menu():
 
 
 def sample_settings():
-    try:
-        text = Path(SAMPLE).read_text(encoding="utf-8")
-    except OSError:
+    # a distribution's or the administrator's own first-login settings
+    # (wm2tj/wm2rc under $XDG_CONFIG_DIRS, i.e. /etc/xdg) come before ours
+    text = None
+    for p in [Path(d) / "wm2tj" / "wm2rc" for d in CONFIG_DIRS] + [Path(SAMPLE)]:
+        try:
+            text = p.read_text(encoding="utf-8")
+            break
+        except OSError:
+            pass
+    if text is None:
         return ""
     label = _("Terminal")
     if label != "Terminal":
