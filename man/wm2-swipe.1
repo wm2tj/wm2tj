@@ -25,7 +25,9 @@ and with any other EWMH window manager.
 By default a swipe to the right goes to the next desktop and a swipe to the
 left to the previous one, and nothing happens at the first or last desktop.
 .B wm2-session
-starts it when it is installed.
+starts it when it is installed, unless you have your own
+.I ~/.config/libinput-gestures.conf
+and libinput-gestures is installed: then that runs instead.
 .SH OPTIONS
 .TP
 .BI \-f " fingers"

@@ -167,6 +167,32 @@ administrator's defaults (tab size, desktops, colours).
 .I ~/.config/wm2tj/favorites
 Favourites of the root menu, shared with
 .BR wm2tj-bar (1).
+.TP
+.I ~/.config/wm2tj/session
+If present,
+.B wm2-session
+runs it with
+.BR sh (1)
+in the background just before it starts wm2tj, after the bar and the other
+helpers: one command per line for your own tray icons and daemons, each
+ending with
+.B &
+if it keeps running.  Environment variables for the session (such as
+.BR WM2TJ_PICOM_BACKEND )
+go in
+.I ~/.xsessionrc
+(Debian, Ubuntu) or
+.I ~/.xprofile
+(most other distributions) instead, which are read before the session starts.
+.TP
+.I ~/.config/libinput-gestures.conf
+If present and
+.B libinput-gestures
+is installed,
+.B wm2-session
+starts it instead of
+.BR wm2-swipe (1),
+so your own gestures are not doubled by the built-in three-finger swipe.
 .SH SEE ALSO
 .BR wm2tj-bar (1),
 .BR wm2-swipe (1),

@@ -40,8 +40,11 @@ if have fcitx5; then fcitx5 -r -d &
 elif have ibus-daemon; then pgrep -u "$(id -u)" -x ibus-daemon >/dev/null || ibus-daemon -drx
 fi
 # touchpad: three-finger swipe between desktops (wm2-swipe, XInput 2.4), else
-# libinput-gestures if the user set it up
-if have wm2-swipe; then wm2-swipe &
+# libinput-gestures. A user who wrote ~/.config/libinput-gestures.conf wants
+# their own gestures, so it goes first then (both at once would switch twice).
+cfg=${XDG_CONFIG_HOME:-$HOME/.config}
+if have libinput-gestures && [ -f "$cfg/libinput-gestures.conf" ]; then libinput-gestures &
+elif have wm2-swipe; then wm2-swipe &
 elif have libinput-gestures; then libinput-gestures &
 fi
 # compositor: wm2tj draws ARGB tabs, which need one. picom's glx backend is
@@ -113,4 +116,9 @@ else
 	have "$a" && "$a" &
     done
 fi
+# the user's own additions (tray icons, daemons): ~/.config/wm2tj/session, run
+# with sh in the background so a command without "&" cannot hold up the login.
+# Environment variables (WM2TJ_PICOM_BACKEND...) belong in ~/.xsessionrc
+# (Debian, Ubuntu) or ~/.xprofile, read before the session starts.
+[ -f "$cfg/wm2tj/session" ] && sh "$cfg/wm2tj/session" &
 exec "${WM2TJ:-wm2tj}"

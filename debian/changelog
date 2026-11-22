@@ -1,3 +1,15 @@
+wm2tj (0.1.0~beta20) unstable; urgency=medium
+
+  * wm2-session runs ~/.config/wm2tj/session, if there is one, with sh in
+    the background just before it starts wm2tj: a place for your own tray
+    icons and daemons that survives package updates.  A command in it
+    without "&" cannot hold up the login.
+  * wm2-session starts libinput-gestures instead of wm2-swipe when you
+    have your own ~/.config/libinput-gestures.conf, so a three-finger
+    swipe there no longer switches two desktops at once.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 22 Nov 2026 19:41:06 +0900
+
 wm2tj (0.1.0~beta19) unstable; urgency=medium
 
   * The frame (frame_background, the band between the outer border and

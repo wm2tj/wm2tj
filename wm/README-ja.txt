@@ -42,7 +42,8 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
   make && sudo make install              # /usr/local/bin/wm2tj
   sudo make install-session              # wm2-session → /usr/local/bin、wm2tj.desktop → /usr/share/xsessions
   ※ wm2-session は入っているものだけを起動する: fcitx5（無ければ ibus。ibus は im-config 等が先に起動していれば
-    二重に起動しない）・wm2-swipe（無ければ libinput-gestures）・picom・wm2-wallpaper（壁紙）・xfsettingsd（無ければ xsettingsd）・
+    二重に起動しない）・wm2-swipe（無ければ libinput-gestures。~/.config/libinput-gestures.conf を
+    自分で書いていれば libinput-gestures を優先し wm2-swipe は起動しない: 両方だとスワイプが 2 重になる）・picom・wm2-wallpaper（壁紙）・xfsettingsd（無ければ xsettingsd）・
     polkit エージェント（mate/gnome/xfce/lxpolkit/kde のどれか。WM2TJ_POLKIT_AGENT= で指定可）・通知デーモン・
     wm2tj-bar。wm2tj-bar が無いときだけ xfce4-panel・nm-applet・blueman-applet・xfce4-power-manager
     （バーが Wi-Fi/Bluetooth/輝度キー/電源プロファイルを持つので、あるとトレイが二重になり電源キーを取り合う）。
@@ -51,6 +52,9 @@ wm2 をもとにした改造版のウィンドウマネージャー。2026-10 �
     ~/.wm2rc が無ければ（初回ログイン）先に wm2-menu-gen を走らせて wm2rc.sample の設定 + メニューを作る。
     XDG_DATA_DIRS/XDG_CONFIG_DIRS はログインマネージャーの値を残し、Xfce/Xubuntu・Flatpak・snap のディレクトリがあれば足す。
     XDG_CURRENT_DESKTOP=wm2tj:XFCE（Xfce の設定ツールをメニューに出すため）
+    自分で足したい常駐物（トレイアイコン等）は ~/.config/wm2tj/session に 1 行ずつ書く（続けて動くものは末尾に &）。
+    バー等を起動した後、wm2tj の直前に sh で裏で実行するので、& を忘れてもログインは止まらない。
+    環境変数（WM2TJ_PICOM_BACKEND など）はこのファイルではなく ~/.xsessionrc に書く（ログインマネージャーが先に読む）
   ※ .desktop の Exec に sh -c '...' を書くと Xsession が引用符を無視して起動しない。起動処理は wm2-session に書く。
   ※ 通知（org.freedesktop.Notifications）は wm2tj も wm2tj-bar も出さない。通知デーモンが要る。
     wm2-session は、通知デーモンが動いていなければ dunst → xfce4-notifyd → mate-notification-daemon →
