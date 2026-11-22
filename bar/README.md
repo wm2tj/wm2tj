@@ -193,7 +193,7 @@ The messages are written in English and translated with gettext. Japanese is inc
 
 ## Configuration
 
-The bar reads `tab_width` `tab_length` `tab_gloss` `tab_foreground` `borders` `button_background` `font` from `~/.wm2rc` so that it looks like the wm2tj tabs. To change something for the bar only, use `~/.config/wm2tj-bar/config` (same format as `~/.wm2rc`). The keys are listed in [`config.sample`](config.sample).
+The bar reads `tab_width` `tab_length` `tab_gloss` `tab_gloss_shade` `tab_foreground` `borders` `button_background` `font` from `~/.wm2rc` so that it looks like the wm2tj tabs. To change something for the bar only, use `~/.config/wm2tj-bar/config` (same format as `~/.wm2rc`). The keys are listed in [`config.sample`](config.sample).
 
 - Reload: `pkill -HUP -x wm2tj-bar` (reads the configuration again and restarts)
 - A second instance exits with "already running" (one per screen)

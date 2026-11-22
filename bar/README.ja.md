@@ -194,7 +194,7 @@ xfce4-panel と同時に使うと上で重なるので、置き換えるとき�
 
 ## 設定
 
-`~/.wm2rc` の `tab_width` `tab_length` `tab_gloss` `tab_foreground` `borders` `button_background` `font` を読んで、wm2tj のタブと同じ見た目にする。個別に変えたいときは `~/.config/wm2tj-bar/config` (書式は `~/.wm2rc` と同じ)。項目は [`config.sample`](config.sample)。
+`~/.wm2rc` の `tab_width` `tab_length` `tab_gloss` `tab_gloss_shade` `tab_foreground` `borders` `button_background` `font` を読んで、wm2tj のタブと同じ見た目にする。個別に変えたいときは `~/.config/wm2tj-bar/config` (書式は `~/.wm2rc` と同じ)。項目は [`config.sample`](config.sample)。
 
 - 反映: `pkill -HUP -x wm2tj-bar` (設定を読み直して起動し直す)
 - 2 つ目を起動しても「already running」で終わる (画面ごとに 1 つ)

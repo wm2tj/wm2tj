@@ -112,6 +112,8 @@ private:
     int        m_glossPixH;
     static int m_gloss;		// tab_gloss set and usable
     static double m_glossBase[3], m_glossFg[3];
+    static int m_glossShade;	// tab_gloss_shade: 0 none, 1 auto, 2 a colour
+    static double m_glossShadeTo[3];
     static unsigned long m_glossStripPixel;
     static int textWidth(const char *);
     static GC m_drawGC;

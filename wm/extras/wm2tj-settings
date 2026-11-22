@@ -45,6 +45,7 @@ DEFAULTS = {
     "font": "Noto Sans CJK JP:style=Bold:pixelsize=13",
     "menufont": "Hack-11",
     "tab_gloss": "#2a7de1",
+    "tab_gloss_shade": "auto",   # auto = the built-in deep blue
     "tab_background": "gray80",
     "tab_foreground": "white",
     "button_background": "#1a4f9c",
@@ -62,7 +63,8 @@ DEFAULTS = {
 # built-in look); the solid ones ("tab_gloss none") also set tab_background,
 # and give the left line its colour by hand, as "auto" follows only a glossy
 # tab.  A theme is not stored as such: the page shows the theme whose
-# colours match, else "Custom".
+# colours match, else "Custom".  tab_gloss_shade (the deep side of a glossy
+# tab) is "auto" unless the theme says otherwise; a flat theme leaves it.
 THEME_KEYS = ("tab_gloss", "tab_foreground", "button_background", "frame_background",
               "borders", "left_line", "menu_background", "menu_foreground", "menu_borders")
 N_ = lambda s: s     # marked for translation, translated when shown
@@ -103,7 +105,8 @@ THEMES = [
         menu_background="#e6e0ef", menu_foreground="#1e1430", menu_borders="auto")),
     # the yellow of the BeOS window tab (255, 203, 0), with its black title
     ("yellow", N_("Yellow"), dict(
-        tab_gloss="#ffcb00", tab_foreground="black", button_background="#9c7a00",
+        tab_gloss="#ffcb00", tab_gloss_shade="none",   # no olive on the deep side
+        tab_foreground="black", button_background="#9c7a00",
         frame_background="#f5f2e6", borders="#2a2200", left_line="auto",
         menu_background="#ece6d0", menu_foreground="#2a2200", menu_borders="auto")),
     # solid (flat) tabs; "classic" is the look of the original wm2
@@ -144,10 +147,13 @@ THEMES = [
         menu_borders="auto")),
     ("yellow_solid", N_("Yellow"), dict(
         tab_gloss="none", tab_background="#ffcb00", tab_foreground="black",
-        button_background="#9c7a00", frame_background="black", borders="black",
+        button_background="#fff0a8", frame_background="black", borders="black",
         left_line="#ffcb00", menu_background="#ece6d0", menu_foreground="#2a2200",
         menu_borders="auto")),
 ]
+for _name, _title, _colours in THEMES:
+    if _colours["tab_gloss"] != "none":
+        _colours.setdefault("tab_gloss_shade", "auto")
 
 
 # ---- reading and writing ~/.wm2rc ----------------------------------------------
@@ -300,15 +306,24 @@ def _mix(c, r, g, b, t):
     return [c[0] + (r - c[0]) * t, c[1] + (g - c[1]) * t, c[2] + (b - c[2]) * t]
 
 
-def gloss_colour(base, s, t):
-    """Border::glossColour in wm2tj: s across the tab (0 deep .. 1 light), t along it."""
-    c = _mix(list(base), 0, 0.02, 0.15, 0.50 * (1 - s) ** 1.4)
+def gloss_colour(base, s, t, shade="auto"):
+    """Border::glossColour in wm2tj: s across the tab (0 deep .. 1 light), t along it.
+    shade is tab_gloss_shade: "auto", None (no shade) or an (r, g, b)."""
+    c = list(base)
+    if shade == "auto":
+        c = _mix(c, 0, 0.02, 0.15, 0.50 * (1 - s) ** 1.4)
+    elif shade:
+        c = _mix(c, shade[0], shade[1], shade[2], 0.50 * (1 - s) ** 1.4)
     c = _mix(c, 1, 1, 1, 0.45 * s * s)
     g = (s - 0.72) / 0.10
     c = _mix(c, 1, 1, 1, 0.45 * math.exp(-g * g))
     if t < 0.3:
         c = _mix(c, 1, 1, 1, 0.25 * (1 - t / 0.3))
-    return _mix(c, 0, 0, 0.1, 0.20 * t)
+    if shade == "auto":
+        c = _mix(c, 0, 0, 0.1, 0.20 * t)
+    elif shade:
+        c = _mix(c, shade[0], shade[1], shade[2], 0.20 * t)
+    return c
 
 
 def theme_preview(colours, w=84, h=56):
@@ -318,7 +333,9 @@ def theme_preview(colours, w=84, h=56):
     pix = [[desk] * w for _ in range(h)]
     flat = colours["tab_gloss"] == "none"
     base = rgb(colours["tab_background"] if flat else colours["tab_gloss"])
-    tab = (lambda s, t: base) if flat else (lambda s, t: gloss_colour(base, s, t))
+    sh = colours.get("tab_gloss_shade", "auto")
+    shade = "auto" if sh == "auto" else None if sh == "none" else rgb(sh)
+    tab = (lambda s, t: base) if flat else (lambda s, t: gloss_colour(base, s, t, shade))
     bd = None if colours["borders"] == "none" else rgb(colours["borders"])
     TW, TX, TY, TL = 12, 5, 5, h - 10         # the tab
     FX, FY, FW, FH = TX + TW, TY, w - TX - TW - 5, h - 16   # the frame
@@ -677,6 +694,17 @@ class SettingsWindow(Gtk.Window):
         gloss.pack_start(self.gloss_color, False, False, 0)
         gloss.pack_start(self.gloss_off, False, False, 0)
         add(_("Gloss colour"), gloss)
+        shade = Gtk.Box(spacing=12)
+        self.shade_auto = Gtk.RadioButton.new_with_label(None, _("Standard"))
+        self.shade_none = Gtk.RadioButton.new_with_label_from_widget(self.shade_auto, _("None"))
+        self.shade_custom = Gtk.RadioButton.new_with_label_from_widget(self.shade_auto, _("Colour:"))
+        self.shade_color = ColorField("#001a40")
+        for w in (self.shade_auto, self.shade_none, self.shade_custom):
+            w.connect("toggled", lambda *a: self.update_sensitive())
+            shade.pack_start(w, False, False, 0)
+        shade.pack_start(self.shade_color, False, False, 0)
+        # TRANSLATORS: the dark side of a glossy tab ("None" keeps the tab's own colour there)
+        add(_("Gloss shade"), shade)
         self.flat_color = ColorField(DEFAULTS["tab_background"])
         add(_("Flat colour"), self.flat_color, "tab_background")
         add(_("Text colour"), ColorField(DEFAULTS["tab_foreground"]), "tab_foreground")
@@ -716,7 +744,8 @@ class SettingsWindow(Gtk.Window):
         # any change of a colour: show which theme it now matches
         ColorField.changed = self.sync_theme
         for w in (self.gloss_off, self.bd_none, self.left_auto, self.left_none,
-                  self.left_custom, self.mb_auto):
+                  self.left_custom, self.mb_auto, self.shade_auto, self.shade_none,
+                  self.shade_custom):
             w.connect("toggled", lambda *a: self.sync_theme())
         return page
 
@@ -740,6 +769,11 @@ class SettingsWindow(Gtk.Window):
             self.flat_color.set_text(colours["tab_background"])
         else:
             self.gloss_color.set_text(colours["tab_gloss"])
+            sh = colours["tab_gloss_shade"]
+            (self.shade_auto if sh == "auto" else self.shade_none if sh == "none"
+             else self.shade_custom).set_active(True)
+            if sh not in ("auto", "none"):
+                self.shade_color.set_text(sh)
         for key in ("tab_foreground", "button_background", "frame_background",
                     "menu_background", "menu_foreground"):
             self.fields[key].set_text(colours[key])
@@ -760,8 +794,9 @@ class SettingsWindow(Gtk.Window):
 
     def matching_theme(self, vals):
         for name, _title, colours in THEMES:
-            # a glossy theme leaves tab_background as it is
-            if all(same_colour(vals[k], colours[k]) for k in THEME_KEYS + ("tab_background",)
+            # a glossy theme leaves tab_background as it is, a flat one tab_gloss_shade
+            if all(same_colour(vals[k], colours[k])
+                   for k in THEME_KEYS + ("tab_background", "tab_gloss_shade")
                    if k in colours):
                 return name
         return None
@@ -862,6 +897,9 @@ class SettingsWindow(Gtk.Window):
     def update_sensitive(self):
         off = self.gloss_off.get_active()
         self.gloss_color.set_sensitive(not off)
+        for w in (self.shade_auto, self.shade_none, self.shade_custom):
+            w.set_sensitive(not off)
+        self.shade_color.set_sensitive(not off and self.shade_custom.get_active())
         self.flat_color.set_sensitive(off)
         self.bd_color.set_sensitive(not self.bd_none.get_active())
         self.left_color.set_sensitive(self.left_custom.get_active())
@@ -879,6 +917,15 @@ class SettingsWindow(Gtk.Window):
         self.loaded["tab_gloss"] = gloss
         self.gloss_off.set_active(gloss == "none")
         self.gloss_color.set_text(DEFAULTS["tab_gloss"] if gloss == "none" else gloss)
+        sh = self.value("tab_gloss_shade")
+        self.loaded["tab_gloss_shade"] = sh
+        if sh == "auto":
+            self.shade_auto.set_active(True)
+        elif sh == "none":
+            self.shade_none.set_active(True)
+        else:
+            self.shade_custom.set_active(True)
+            self.shade_color.set_text(sh)
         bd = self.value("borders")
         self.loaded["borders"] = bd
         self.bd_none.set_active(bd == "none")
@@ -906,6 +953,12 @@ class SettingsWindow(Gtk.Window):
         vals = {key: w.get_text() for key, w in self.fields.items()}
         vals["tab_gloss"] = "none" if self.gloss_off.get_active() else self.gloss_color.get_text()
         vals["borders"] = "none" if self.bd_none.get_active() else self.bd_color.get_text()
+        if self.shade_auto.get_active():
+            vals["tab_gloss_shade"] = "auto"
+        elif self.shade_none.get_active():
+            vals["tab_gloss_shade"] = "none"
+        else:
+            vals["tab_gloss_shade"] = self.shade_color.get_text()
         if self.left_auto.get_active():
             vals["left_line"] = "auto"
         elif self.left_none.get_active():

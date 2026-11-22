@@ -36,6 +36,7 @@ struct WM2Config {
     char *borders;
     char *tab_gloss;             /* base colour of a glossy tab, NULL = flat */
     char *left_line;             /* line down the left frame: auto, none or a colour */
+    char *tab_gloss_shade;       /* deep side of a glossy tab: auto, none or a colour */
 
     char *menu_foreground;
     char *menu_background;
@@ -89,6 +90,7 @@ int  wm2ReloadMenu(void);	// at menu open: 1 if ~/.wm2rc changed and the menu wa
 #define CONFIG_BORDERS                (wm2config.borders)
 #define CONFIG_TAB_GLOSS              (wm2config.tab_gloss)
 #define CONFIG_LEFT_LINE              (wm2config.left_line)
+#define CONFIG_TAB_GLOSS_SHADE        (wm2config.tab_gloss_shade)
 
 #define CONFIG_MENU_FOREGROUND        (wm2config.menu_foreground)
 #define CONFIG_MENU_BACKGROUND        (wm2config.menu_background)

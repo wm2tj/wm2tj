@@ -102,6 +102,7 @@ static struct {
     char font[256];
     char menuFont[256];
     char gloss[64];		/* "none": flat background */
+    char glossShade[64];	/* deep side of the gloss: auto, none or a colour */
     char background[64];	/* used when gloss is none */
     char foreground[64];
     char clockFormat[64];
@@ -189,6 +190,7 @@ static void readWm2rc(void)
 	if      (!strcmp(k, "tab_width"))      cfg.tabWidth = atoi(v);
 	else if (!strcmp(k, "font"))           SET(font, v);
 	else if (!strcmp(k, "tab_gloss"))      SET(gloss, v);
+	else if (!strcmp(k, "tab_gloss_shade")) SET(glossShade, v);
 	else if (!strcmp(k, "tab_background")) SET(background, v);
 	else if (!strcmp(k, "tab_foreground")) SET(foreground, v);
 	else if (!strcmp(k, "borders"))        SET(borders, v);
@@ -210,6 +212,7 @@ static void readConfig(void)
 	else if (!strcmp(k, "font"))             SET(font, v);
 	else if (!strcmp(k, "menu_font"))        SET(menuFont, v);
 	else if (!strcmp(k, "gloss"))            SET(gloss, v);
+	else if (!strcmp(k, "gloss_shade"))      SET(glossShade, v);
 	else if (!strcmp(k, "background"))       SET(background, v);
 	else if (!strcmp(k, "foreground"))       SET(foreground, v);
 	else if (!strcmp(k, "tab_length"))       cfg.tabLength = atoi(v);
@@ -273,6 +276,7 @@ static void loadConfig(void)
     SET(font, "Noto Sans CJK JP:style=Bold:pixelsize=13");
     SET(menuFont, "Noto Sans CJK JP:pixelsize=14");
     SET(gloss, "#2a7de1");
+    SET(glossShade, "auto");
     SET(background, "gray80");
     SET(foreground, "white");
     SET(clockFormat, "%H:%M");
@@ -318,6 +322,11 @@ static XftFont *barFont, *menuFont;
 static int barH;
 static int glossOn;
 static double glossBase[3], taskBase[3];
+/* tab_gloss_shade, as Border.C: 0 none, 1 auto (the built-in deep blue),
+   2 a colour. It goes with the theme colour: the active window's button
+   takes it only when that has the theme colour too (task_gloss theme). */
+static int glossShade = 1, taskShade = 1;
+static double glossShadeTo[3];
 
 static XftColor cFg, cShadow, cHover, cDeskCur, cDeskLine, cWarn;
 static XftColor cMenuBg, cMenuFg, cMenuDim, cMenuLine, cBorder, cMenuBorder, cFlatBg,
@@ -359,13 +368,21 @@ static void glossColour(double *c, const double *base, double s, double t)
 {
     double g;
 
+    int shade = base == taskBase ? taskShade : glossShade;
+
     c[0] = base[0]; c[1] = base[1]; c[2] = base[2];
-    mix(c, 0, 0.02, 0.15, 0.50 * pow(1 - s, 1.4));
+    if (shade == 2)
+	mix(c, glossShadeTo[0], glossShadeTo[1], glossShadeTo[2], 0.50 * pow(1 - s, 1.4));
+    else if (shade)
+	mix(c, 0, 0.02, 0.15, 0.50 * pow(1 - s, 1.4));
     mix(c, 1, 1, 1, 0.45 * s * s);
     g = (s - 0.72) / 0.10;
     mix(c, 1, 1, 1, 0.45 * exp(-g * g));
     if (t < 0.3) mix(c, 1, 1, 1, 0.25 * (1 - t / 0.3));
-    mix(c, 0, 0, 0.1, 0.20 * t);
+    if (shade == 2)
+	mix(c, glossShadeTo[0], glossShadeTo[1], glossShadeTo[2], 0.20 * t);
+    else if (shade)
+	mix(c, 0, 0, 0.1, 0.20 * t);
 }
 
 static int maskShift(unsigned long m, int *bits)
@@ -4801,11 +4818,23 @@ static void setupColours(void)
 	glossBase[2] = x.blue / 65535.0;
 	/* the active window's button: the same gloss on its own colour, so
 	   that it does not run into the tab at the left end */
+	glossShade = 1;
+	if (!strcasecmp(cfg.glossShade, "none")) {
+	    glossShade = 0;
+	} else if (strcasecmp(cfg.glossShade, "auto") &&
+		   XParseColor(dpy, cmap, cfg.glossShade, &x)) {
+	    glossShade = 2;
+	    glossShadeTo[0] = x.red / 65535.0;
+	    glossShadeTo[1] = x.green / 65535.0;
+	    glossShadeTo[2] = x.blue / 65535.0;
+	}
 	memcpy(taskBase, glossBase, sizeof taskBase);
+	taskShade = glossShade;
 	if (strcmp(cfg.taskGloss, "theme") && XParseColor(dpy, cmap, cfg.taskGloss, &x)) {
 	    taskBase[0] = x.red / 65535.0;
 	    taskBase[1] = x.green / 65535.0;
 	    taskBase[2] = x.blue / 65535.0;
+	    taskShade = 1;
 	}
     } else if (!strcmp(cfg.foreground, "white")) {
 	SET(foreground, "black");	/* the plain grey wm2 tab */

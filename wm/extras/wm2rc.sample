@@ -30,6 +30,7 @@ submenu_prefix "▶ "       # フォルダの頭の印 (mark before a folder nam
 # 既定＝青い光沢タブ＋白文字＋黒い細枠（下の値）。灰色の元の見た目は
 #   tab_gloss none / tab_foreground black / button_background gray95 / borders black
 # tab_gloss         "#2a7de1"  # 光沢グラデーションの基調色（none で単色 tab_background）
+# tab_gloss_shade   auto       # 光沢の濃い側（左）の色。auto＝紺、none＝タブの色のまま（黄など明るいタブ向け）、または色
 # tab_foreground    white      # タブの文字
 # button_background "#1a4f9c"  # タブの閉じるボタン
 # borders           black      # 枠線（none で線なし）

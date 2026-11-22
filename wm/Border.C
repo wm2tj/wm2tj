@@ -24,6 +24,8 @@ int Border::m_gloss = 0;
 int Border::m_edgeOn = 0;
 unsigned long Border::m_edgePixel;
 double Border::m_glossBase[3], Border::m_glossFg[3];
+int Border::m_glossShade = 1;
+double Border::m_glossShadeTo[3];
 unsigned long Border::m_glossStripPixel;
 
 static int borderCounter = 0;
@@ -139,6 +141,22 @@ void Border::initStatics(WindowManager *wm)
 	m_glossFg[0] = f.red / 65535.0;
 	m_glossFg[1] = f.green / 65535.0;
 	m_glossFg[2] = f.blue / 65535.0;
+	// tab_gloss_shade: what the deep side of the tab runs to. "auto"
+	// is the built-in deep blue, right for a dark tab with a light
+	// title; "none" keeps the tab's own colour there (a light tab,
+	// like a yellow one, would turn olive); else a colour
+	char *sh = CONFIG_TAB_GLOSS_SHADE;
+	XColor sc;
+	m_glossShade = 1;
+	if (sh && !strcasecmp(sh, "none")) {
+	    m_glossShade = 0;
+	} else if (sh && strcasecmp(sh, "auto") &&
+		   XParseColor(wm->display(), cmap, sh, &sc)) {
+	    m_glossShade = 2;
+	    m_glossShadeTo[0] = sc.red / 65535.0;
+	    m_glossShadeTo[1] = sc.green / 65535.0;
+	    m_glossShadeTo[2] = sc.blue / 65535.0;
+	}
 	double c[3];
 	glossColour(c, m_tabWidth / 2, 1, m_tabWidth + 2, 300);
 	m_glossStripPixel = packPixel(vis, c);
@@ -250,7 +268,12 @@ void Border::glossColour(double *c, int x, int y, int w, int h)
     // across: deep on the left, light on the right, with a narrow
     // specular streak near the right edge
     double s = (double)x / (w > 1 ? w - 1 : 1);
-    mix(c, 0, 0.02, 0.15, 0.50 * pow(1 - s, 1.4));
+    if (m_glossShade == 2) {
+	mix(c, m_glossShadeTo[0], m_glossShadeTo[1], m_glossShadeTo[2],
+	    0.50 * pow(1 - s, 1.4));
+    } else if (m_glossShade) {
+	mix(c, 0, 0.02, 0.15, 0.50 * pow(1 - s, 1.4));
+    }
     mix(c, 1, 1, 1, 0.45 * s * s);
     double g = (s - 0.72) / 0.10;
     mix(c, 1, 1, 1, 0.45 * exp(-g * g));
@@ -258,7 +281,11 @@ void Border::glossColour(double *c, int x, int y, int w, int h)
     // along: a little brighter at the top, a little deeper at the bottom
     double t = (double)y / (h > 1 ? h - 1 : 1);
     if (t < 0.3) mix(c, 1, 1, 1, 0.25 * (1 - t / 0.3));
-    mix(c, 0, 0, 0.1, 0.20 * t);
+    if (m_glossShade == 2) {
+	mix(c, m_glossShadeTo[0], m_glossShadeTo[1], m_glossShadeTo[2], 0.20 * t);
+    } else if (m_glossShade) {
+	mix(c, 0, 0, 0.1, 0.20 * t);
+    }
 }
 
 static int maskShift(unsigned long m, int *bits)

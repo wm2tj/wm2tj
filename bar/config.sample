@@ -11,6 +11,7 @@
 # font            "Noto Sans CJK JP:style=Bold:pixelsize=13"
 # menu_font       "Noto Sans CJK JP:pixelsize=14"
 # gloss           "#2a7de1"   # none で光沢なしの単色 (background の色)
+# gloss_shade     auto        # 光沢の濃い側の色。none でタブの色のまま (~/.wm2rc の tab_gloss_shade)
 # bar_background  black       # タブより右の地の色
 # text            white       # 右側の文字の色
 # 前面のアプリのボタン。既定はグレーの単色に、タブの色の細い線で囲む

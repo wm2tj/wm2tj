@@ -8,8 +8,12 @@ wm2tj (0.1.0~beta18) unstable; urgency=medium
     it, so a quick drag could hold the bar up for a while.
   * wm2tj-settings: a Yellow theme, glossy and solid: the yellow of the
     BeOS window tab (#ffcb00) with a black title.
+  * tab_gloss_shade (auto, none or a colour): what the deep side of a
+    glossy tab runs to. "none" keeps the tab's own colour there, so that
+    a light tab such as the yellow one does not turn olive. The bar
+    follows it (gloss_shade in its own configuration).
 
- -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 22 Nov 2026 13:55:00 +0900
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 22 Nov 2026 14:09:01 +0900
 
 wm2tj (0.1.0~beta17) unstable; urgency=medium
 

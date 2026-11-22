@@ -50,6 +50,7 @@ static void setDefaults(WM2Config *c)
     c->borders           = xstrdup("black");
     c->tab_gloss         = xstrdup("#2a7de1");
     c->left_line         = xstrdup("auto");  // auto = same as the strip on top of the tab
+    c->tab_gloss_shade   = xstrdup("auto");  // auto = the built-in deep blue; none = no shade
 
     c->menu_foreground = xstrdup("black");
     c->menu_background = xstrdup("gray80");
@@ -305,6 +306,7 @@ static void loadConfig(WM2Config *c, struct stat *st)
         else if (!strcmp(key, "borders"))            replaceStr(&c->borders, val);
         else if (!strcmp(key, "tab_gloss"))          replaceStr(&c->tab_gloss, val);
         else if (!strcmp(key, "left_line"))          replaceStr(&c->left_line, val);
+        else if (!strcmp(key, "tab_gloss_shade"))    replaceStr(&c->tab_gloss_shade, val);
         else if (!strcmp(key, "menu_foreground"))    replaceStr(&c->menu_foreground, val);
         else if (!strcmp(key, "menu_background"))    replaceStr(&c->menu_background, val);
         else if (!strcmp(key, "menu_borders"))       replaceStr(&c->menu_borders, val);
@@ -404,6 +406,7 @@ int wm2ReloadMenu(void)
 	&c.nice_font, &c.nice_menu_font, &c.nasty_font,
 	&c.tab_foreground, &c.tab_background, &c.frame_background,
 	&c.button_background, &c.borders, &c.tab_gloss, &c.left_line,
+	&c.tab_gloss_shade,
 	&c.menu_foreground, &c.menu_background, &c.menu_borders,
     };
     for (unsigned i = 0; i < sizeof(rest) / sizeof(rest[0]); ++i) free(*rest[i]);

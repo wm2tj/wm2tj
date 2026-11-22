@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wm2tj\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 13:51+0900\n"
+"POT-Creation-Date: 2026-11-22 14:07+0900\n"
 "PO-Revision-Date: 2026-10-21 20:00+0900\n"
 "Last-Translator: tetsu\n"
 "Language-Team: Japanese\n"
@@ -91,7 +91,7 @@ msgstr "科学"
 msgid "Settings"
 msgstr "設定"
 
-#: wm2-menu-gen:233 wm2tj-settings:858
+#: wm2-menu-gen:233 wm2tj-settings:893
 msgid "System"
 msgstr "システム"
 
@@ -103,282 +103,291 @@ msgstr "その他"
 msgid "Terminal"
 msgstr "ターミナル"
 
-#: wm2tj-settings:70
+#: wm2tj-settings:72
 msgid "Blue"
 msgstr "青"
 
-#: wm2tj-settings:74
+#: wm2tj-settings:76
 msgid "Silver"
 msgstr "シルバー"
 
-#: wm2tj-settings:80
+#: wm2tj-settings:82
 msgid "Graphite"
 msgstr "グラファイト"
 
-#: wm2tj-settings:84
+#: wm2tj-settings:86
 msgid "Indigo"
 msgstr "藍"
 
-#: wm2tj-settings:88
+#: wm2tj-settings:90
 msgid "Matcha"
 msgstr "抹茶"
 
-#: wm2tj-settings:92
+#: wm2tj-settings:94
 msgid "Crimson"
 msgstr "臙脂"
 
-#: wm2tj-settings:96
+#: wm2tj-settings:98
 msgid "Copper"
 msgstr "カッパー"
 
-#: wm2tj-settings:100
+#: wm2tj-settings:102
 msgid "Purple"
 msgstr "紫"
 
-#: wm2tj-settings:105 wm2tj-settings:145
+#: wm2tj-settings:107 wm2tj-settings:148
 msgid "Yellow"
 msgstr "黄"
 
-#: wm2tj-settings:110
+#: wm2tj-settings:113
 msgid "Classic"
 msgstr "クラシック"
 
-#: wm2tj-settings:115
+#: wm2tj-settings:118
 msgid "Ink"
 msgstr "墨"
 
-#: wm2tj-settings:120
+#: wm2tj-settings:123
 msgid "Navy"
 msgstr "紺"
 
-#: wm2tj-settings:125
+#: wm2tj-settings:128
 msgid "Teal"
 msgstr "青緑"
 
-#: wm2tj-settings:130
+#: wm2tj-settings:133
 msgid "Vermilion"
 msgstr "朱"
 
-#: wm2tj-settings:135
+#: wm2tj-settings:138
 msgid "Amber"
 msgstr "山吹"
 
-#: wm2tj-settings:140
+#: wm2tj-settings:143
 msgid "Wisteria"
 msgstr "藤"
 
-#: wm2tj-settings:549
+#: wm2tj-settings:566
 msgid "wm2tj Settings"
 msgstr "wm2tj の設定"
 
-#: wm2tj-settings:567
+#: wm2tj-settings:584
 msgid "Appearance"
 msgstr "見た目"
 
-#: wm2tj-settings:568
+#: wm2tj-settings:585
 msgid "About"
 msgstr "情報"
 
-#: wm2tj-settings:572 wm2tj-favorites:345
+#: wm2tj-settings:589 wm2tj-favorites:345
 msgid "Revert"
 msgstr "元に戻す"
 
-#: wm2tj-settings:573
+#: wm2tj-settings:590
 msgid "Discard the changes not applied yet and reread ~/.wm2rc"
 msgstr "適用していない変更を捨てて ~/.wm2rc を読み直す"
 
-#: wm2tj-settings:575 wm2tj-favorites:348 wm2tj-favorites:542
+#: wm2tj-settings:592 wm2tj-favorites:348 wm2tj-favorites:542
 msgid "Apply"
 msgstr "適用"
 
-#: wm2tj-settings:623
+#: wm2tj-settings:640
 msgid "Theme"
 msgstr "テーマ"
 
-#: wm2tj-settings:628
+#: wm2tj-settings:645
 msgid "Glossy"
 msgstr "光沢"
 
-#: wm2tj-settings:628
+#: wm2tj-settings:645
 msgid "Solid"
 msgstr "単色"
 
-#: wm2tj-settings:655
+#: wm2tj-settings:672
 msgid "Fonts"
 msgstr "フォント"
 
-#: wm2tj-settings:656 wm2tj-settings:672
+#: wm2tj-settings:673 wm2tj-settings:689
 msgid "Window tab"
 msgstr "ウィンドウのタブ"
 
-#: wm2tj-settings:657 wm2tj-settings:705
+#: wm2tj-settings:674 wm2tj-settings:733
 msgid "Root menu"
 msgstr "右クリックメニュー"
 
-#: wm2tj-settings:659
+#: wm2tj-settings:676
 msgid "Mark put before folder names (e.g. ▶ ). If empty, a > follows the name"
 msgstr "フォルダ名の前に付ける印（例: ▶ ）。空にすると後ろに > が付く"
 
-#: wm2tj-settings:660
+#: wm2tj-settings:677
 msgid "Folder mark"
 msgstr "フォルダの印"
 
-#: wm2tj-settings:663
+#: wm2tj-settings:680
 msgid "Change the colours one by one"
 msgstr "色を個別に変える"
 
-#: wm2tj-settings:675
+#: wm2tj-settings:692
 msgid "No gloss (flat)"
 msgstr "光沢なし（単色）"
 
-#: wm2tj-settings:679
+#: wm2tj-settings:696
 msgid "Gloss colour"
 msgstr "光沢の色"
 
-#: wm2tj-settings:681
-msgid "Flat colour"
-msgstr "単色のときの色"
+#: wm2tj-settings:698
+msgid "Standard"
+msgstr "標準"
 
-#: wm2tj-settings:682 wm2tj-settings:707
-msgid "Text colour"
-msgstr "文字の色"
-
-#: wm2tj-settings:683
-msgid "Close button"
-msgstr "閉じるボタン"
-
-#: wm2tj-settings:685
-msgid "Frame"
-msgstr "枠"
-
-#: wm2tj-settings:686
-msgid "Frame colour"
-msgstr "枠の色"
-
-#: wm2tj-settings:689 wm2tj-settings:696
+#: wm2tj-settings:699 wm2tj-settings:717 wm2tj-settings:724
 msgid "None"
 msgstr "なし"
 
-#: wm2tj-settings:693 wm2tj-settings:714
-msgid "Border colour"
-msgstr "枠線の色"
-
-#: wm2tj-settings:695
-msgid "Same as the top line"
-msgstr "上の線と同じ"
-
-#: wm2tj-settings:697
+#: wm2tj-settings:700 wm2tj-settings:725
 msgid "Colour:"
 msgstr "色:"
 
-#: wm2tj-settings:703
+#. TRANSLATORS: the dark side of a glossy tab ("None" keeps the tab's own colour there)
+#: wm2tj-settings:707
+msgid "Gloss shade"
+msgstr "光沢の影"
+
+#: wm2tj-settings:709
+msgid "Flat colour"
+msgstr "単色のときの色"
+
+#: wm2tj-settings:710 wm2tj-settings:735
+msgid "Text colour"
+msgstr "文字の色"
+
+#: wm2tj-settings:711
+msgid "Close button"
+msgstr "閉じるボタン"
+
+#: wm2tj-settings:713
+msgid "Frame"
+msgstr "枠"
+
+#: wm2tj-settings:714
+msgid "Frame colour"
+msgstr "枠の色"
+
+#: wm2tj-settings:721 wm2tj-settings:742
+msgid "Border colour"
+msgstr "枠線の色"
+
+#: wm2tj-settings:723
+msgid "Same as the top line"
+msgstr "上の線と同じ"
+
+#: wm2tj-settings:731
 msgid "Left line"
 msgstr "左の細線"
 
-#: wm2tj-settings:706
+#: wm2tj-settings:734
 msgid "Background colour"
 msgstr "背景の色"
 
-#: wm2tj-settings:710
+#: wm2tj-settings:738
 msgid "Same as the tab colour"
 msgstr "タブの色と同じ"
 
-#: wm2tj-settings:781
+#: wm2tj-settings:816
 msgid "Custom colours (not one of the themes). Pick a theme to replace them."
 msgstr ""
 "個別に変えた色です (どのテーマとも違います)。テーマを選ぶと置き換わります。"
 
-#: wm2tj-settings:786
+#: wm2tj-settings:821
 msgid "Press Apply to use it"
 msgstr "「適用」で反映します"
 
-#: wm2tj-settings:794
+#: wm2tj-settings:829
 msgid "Refresh"
 msgstr "更新"
 
-#: wm2tj-settings:796
+#: wm2tj-settings:831
 msgid "Copy"
 msgstr "コピー"
 
-#: wm2tj-settings:797
+#: wm2tj-settings:832
 msgid "Copy these lines, e.g. for a bug report"
 msgstr "この内容をコピー（不具合の報告などに）"
 
-#: wm2tj-settings:803
+#: wm2tj-settings:838
 msgid "Releases"
 msgstr "リリース"
 
-#: wm2tj-settings:805
+#: wm2tj-settings:840
 msgid "Website"
 msgstr "ホームページ"
 
-#: wm2tj-settings:829
+#: wm2tj-settings:864
 msgid "older than 0.1.0~beta10 (no --version)"
 msgstr "0.1.0~beta10 より前（--version なし）"
 
-#: wm2tj-settings:830
+#: wm2tj-settings:865
 msgid "restart wm2tj (root menu) or log in again"
 msgstr "wm2tj を再起動（ルートメニュー）するか、ログインし直してください"
 
-#: wm2tj-settings:831
+#: wm2tj-settings:866
 msgid "restart the bar or log in again"
 msgstr "バーを再起動するか、ログインし直してください"
 
-#: wm2tj-settings:836
+#: wm2tj-settings:871
 #, python-format
 msgid "running: %s"
 msgstr "実行中: %s"
 
-#: wm2tj-settings:839
+#: wm2tj-settings:874
 #, python-format
 msgid "a newer copy was installed since it started (%s): %s"
 msgstr "起動後に別の版 (%s) が入りました。%s"
 
-#: wm2tj-settings:843
+#: wm2tj-settings:878
 #, python-format
 msgid "%s comes first on PATH (%s)"
 msgstr "PATH では %s (%s) が先に見つかります"
 
-#: wm2tj-settings:848 wm2tj-settings:851
+#: wm2tj-settings:883 wm2tj-settings:886
 msgid "not running"
 msgstr "実行されていません"
 
-#: wm2tj-settings:849
+#: wm2tj-settings:884
 #, python-format
 msgid "installed: %s (%s)"
 msgstr "入っているもの: %s (%s)"
 
-#: wm2tj-settings:853
+#: wm2tj-settings:888
 msgid "Tools"
 msgstr "補助ツール"
 
-#: wm2tj-settings:853
+#: wm2tj-settings:888
 msgid "unknown (not installed with make install)"
 msgstr "不明（make install で入れたものではありません）"
 
-#: wm2tj-settings:854
+#: wm2tj-settings:889
 #, python-format
 msgid "menu, settings: %s"
 msgstr "メニュー生成・設定画面: %s"
 
-#: wm2tj-settings:856
+#: wm2tj-settings:891
 msgid "not installed"
 msgstr "未インストール"
 
-#: wm2tj-settings:857
+#: wm2tj-settings:892
 msgid "Packages"
 msgstr "パッケージ"
 
-#: wm2tj-settings:922 wm2tj-favorites:491
+#: wm2tj-settings:975 wm2tj-favorites:491
 msgid "Nothing changed"
 msgstr "変更はありません"
 
-#: wm2tj-settings:930
+#: wm2tj-settings:983
 #, python-format
 msgid "Cannot save: %s"
 msgstr "保存できません: %s"
 
-#: wm2tj-settings:935
+#: wm2tj-settings:988
 #, python-format
 msgid "Saved %d setting; wm2tj has reloaded"
 msgid_plural "Saved %d settings; wm2tj has reloaded"
