@@ -21,6 +21,8 @@
 # 時計 (strftime の書式)
 # clock_format    "%H:%M"
 # clock_format    "%m/%d(%a) %H:%M"
+# 時計をクリックしたときに開くもの (既定: gsimplecal・orage・gnome-calendar・zenity・yad のうち入っているもの。none で何もしない)
+# clock_command   gsimplecal
 
 # セッションメニューのコマンド
 # lock_command      xsecurelock

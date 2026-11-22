@@ -1,3 +1,16 @@
+wm2tj (0.1.0~beta18) unstable; urgency=medium
+
+  * wm2tj-bar: a click on the clock opens a calendar: clock_command in
+    the configuration, else the first found of gsimplecal, orage,
+    gnome-calendar, zenity and yad ("none" turns it off).
+  * wm2tj-bar: dragging the volume slider follows the pointer instead of
+    replaying every motion; each step runs wpctl or pactl and waits for
+    it, so a quick drag could hold the bar up for a while.
+  * wm2tj-settings: a Yellow theme, glossy and solid: the yellow of the
+    BeOS window tab (#ffcb00) with a black title.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 22 Nov 2026 13:55:00 +0900
+
 wm2tj (0.1.0~beta17) unstable; urgency=medium
 
   * Root menu: "Suspend" between "Log Out" and "Restart" (wm2-menu-gen;

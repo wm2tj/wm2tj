@@ -101,6 +101,11 @@ THEMES = [
         tab_gloss="#7a4cb0", tab_foreground="white", button_background="#4a2a75",
         frame_background="black", borders="#1e1430", left_line="auto",
         menu_background="#e6e0ef", menu_foreground="#1e1430", menu_borders="auto")),
+    # the yellow of the BeOS window tab (255, 203, 0), with its black title
+    ("yellow", N_("Yellow"), dict(
+        tab_gloss="#ffcb00", tab_foreground="black", button_background="#9c7a00",
+        frame_background="#f5f2e6", borders="#2a2200", left_line="auto",
+        menu_background="#ece6d0", menu_foreground="#2a2200", menu_borders="auto")),
     # solid (flat) tabs; "classic" is the look of the original wm2
     ("classic", N_("Classic"), dict(
         tab_gloss="none", tab_background="gray80", tab_foreground="black",
@@ -136,6 +141,11 @@ THEMES = [
         tab_gloss="none", tab_background="#6c5a9c", tab_foreground="white",
         button_background="#b3a6d6", frame_background="black", borders="#1f1830",
         left_line="#6c5a9c", menu_background="#e4e0ee", menu_foreground="#1f1830",
+        menu_borders="auto")),
+    ("yellow_solid", N_("Yellow"), dict(
+        tab_gloss="none", tab_background="#ffcb00", tab_foreground="black",
+        button_background="#9c7a00", frame_background="black", borders="black",
+        left_line="#ffcb00", menu_background="#ece6d0", menu_foreground="#2a2200",
         menu_borders="auto")),
 ]
 

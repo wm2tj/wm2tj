@@ -108,6 +108,7 @@ static struct {
     char lockCmd[512];
     char logoutCmd[512];
     char suspendCmd[256];
+    char clockCmd[256];
     char rebootCmd[256];
     char poweroffCmd[256];
     char terminal[256];
@@ -223,6 +224,7 @@ static void readConfig(void)
 	else if (!strcmp(k, "lock_command"))     SET(lockCmd, v);
 	else if (!strcmp(k, "logout_command"))   SET(logoutCmd, v);
 	else if (!strcmp(k, "suspend_command"))  SET(suspendCmd, v);
+	else if (!strcmp(k, "clock_command"))    SET(clockCmd, v);
 	else if (!strcmp(k, "reboot_command"))   SET(rebootCmd, v);
 	else if (!strcmp(k, "poweroff_command")) SET(poweroffCmd, v);
 	else if (!strcmp(k, "terminal"))         SET(terminal, v);
@@ -274,6 +276,7 @@ static void loadConfig(void)
     SET(background, "gray80");
     SET(foreground, "white");
     SET(clockFormat, "%H:%M");
+    SET(clockCmd, "");		/* "": the first calendar found (openClock) */
     SET(lockCmd, "xsecurelock");
     SET(logoutCmd, "pkill -TERM -x wm2tj");
     /* systemd, else elogind (Void, Alpine, Gentoo/OpenRC...): its loginctl has these verbs */
@@ -1854,6 +1857,23 @@ static void selectIme(const Ime *m)
 	XSync(dpy, False);
     }
     readIme();
+}
+
+/* a click on the clock: clock_command, else a calendar that is installed
+   ("none" for nothing) */
+static void openClock(void)
+{
+    static const char *const cals[] = { "gsimplecal", "orage", "gnome-calendar",
+					"zenity --calendar", "yad --calendar" };
+    size_t i;
+
+    if (!strcmp(cfg.clockCmd, "none")) return;
+    if (cfg.clockCmd[0]) { spawn(cfg.clockCmd); return; }
+    for (i = 0; i < sizeof cals / sizeof *cals; ++i) {
+	char prog[32];
+	snprintf(prog, sizeof prog, "%.*s", (int)strcspn(cals[i], " "), cals[i]);
+	if (inPath(prog)) { spawn(cals[i]); return; }
+    }
 }
 
 /* fcitx5 has no menu: a click switches, like its own key */
@@ -4367,7 +4387,14 @@ static int menuEvent(XEvent *e)
 	menuKey(&e->xkey);
 	return 1;
     case MotionNotify:
-	if (dragMenu) sliderSet(dragMenu, dragItem, e->xmotion.x_root);
+	if (dragMenu) {
+	    /* only where the pointer is by now: each step of the volume runs
+	       wpctl/pactl and waits for it, and a quick drag queues dozens of
+	       motions that hold the bar up until all of them have been played */
+	    XEvent n;
+	    while (XCheckTypedEvent(dpy, MotionNotify, &n)) *e = n;
+	    sliderSet(dragMenu, dragItem, e->xmotion.x_root);
+	}
 	else if ((m = menuOf(e->xmotion.window)))
 	    menuMotion(m, e->xmotion.x, e->xmotion.y);
 	return 1;
@@ -4692,6 +4719,7 @@ static void barEvent(XEvent *e)
 	    else if (h->kind == H_BT) openBtMenu(h->x1);
 	    else if (h->kind == H_VOL) openSoundMenu(h->x1);
 	    else if (h->kind == H_BAT) openBatteryMenu(h->x1);
+	    else if (h->kind == H_CLOCK) openClock();
 	    else if (h->kind == H_IME && imKind == IM_FCITX5) { toggleIme(); drawBar(); }
 	    else if (h->kind == H_IME) openImeMenu(h->x1);
 	}
