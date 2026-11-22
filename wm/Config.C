@@ -45,7 +45,7 @@ static void setDefaults(WM2Config *c)
     // ("tab_gloss none" in ~/.wm2rc gives the flat tab_background)
     c->tab_foreground    = xstrdup("white");
     c->tab_background    = xstrdup("gray80");
-    c->frame_background  = xstrdup("gray95");
+    c->frame_background  = xstrdup("black");
     c->button_background = xstrdup("#1a4f9c");
     c->borders           = xstrdup("black");
     c->tab_gloss         = xstrdup("#2a7de1");

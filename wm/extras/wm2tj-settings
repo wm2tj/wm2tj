@@ -49,7 +49,7 @@ DEFAULTS = {
     "tab_background": "gray80",
     "tab_foreground": "white",
     "button_background": "#1a4f9c",
-    "frame_background": "gray95",
+    "frame_background": "black",
     "borders": "black",
     "left_line": "auto",
     "menu_background": "gray80",
@@ -71,33 +71,33 @@ N_ = lambda s: s     # marked for translation, translated when shown
 THEMES = [
     ("blue", N_("Blue"), dict(
         tab_gloss="#2a7de1", tab_foreground="white", button_background="#1a4f9c",
-        frame_background="gray95", borders="black", left_line="auto",
+        frame_background="black", borders="black", left_line="auto",
         menu_background="gray80", menu_foreground="black", menu_borders="auto")),
     ("silver", N_("Silver"), dict(
         tab_gloss="#8f969f", tab_foreground="white", button_background="#4b5159",
-        frame_background="#e9ebee", borders="#2c3036", left_line="auto",
+        frame_background="black", borders="#2c3036", left_line="auto",
         menu_background="#e4e7eb", menu_foreground="#1d2024", menu_borders="auto")),
     # the menu frame is set apart: the strip colour would be a light grey
     # highlight behind the light menu text
     ("graphite", N_("Graphite"), dict(
         tab_gloss="#4a4f58", tab_foreground="#f2f2f2", button_background="#1f2226",
-        frame_background="#2c2f34", borders="black", left_line="auto",
+        frame_background="black", borders="black", left_line="auto",
         menu_background="#2b2e33", menu_foreground="#e6e6e6", menu_borders="#5a606a")),
     ("indigo", N_("Indigo"), dict(
         tab_gloss="#1d5a8a", tab_foreground="white", button_background="#0f3352",
-        frame_background="#eef1f4", borders="black", left_line="auto",
+        frame_background="black", borders="black", left_line="auto",
         menu_background="#dde3ea", menu_foreground="#14202c", menu_borders="auto")),
     ("matcha", N_("Matcha"), dict(
         tab_gloss="#5f8a46", tab_foreground="white", button_background="#3a5a2a",
-        frame_background="#f1f3ec", borders="#1e2a18", left_line="auto",
+        frame_background="black", borders="#1e2a18", left_line="auto",
         menu_background="#e3e8da", menu_foreground="#1e2a18", menu_borders="auto")),
     ("crimson", N_("Crimson"), dict(
         tab_gloss="#a3343f", tab_foreground="white", button_background="#681c25",
-        frame_background="#f5f0ef", borders="#2a0d11", left_line="auto",
+        frame_background="black", borders="#2a0d11", left_line="auto",
         menu_background="#ebe1df", menu_foreground="#2a1215", menu_borders="auto")),
     ("copper", N_("Copper"), dict(
         tab_gloss="#b4703c", tab_foreground="white", button_background="#6e3f1d",
-        frame_background="#f4f0eb", borders="#2a1a0e", left_line="auto",
+        frame_background="black", borders="#2a1a0e", left_line="auto",
         menu_background="#ebe3da", menu_foreground="#2a1a0e", menu_borders="auto")),
     ("purple", N_("Purple"), dict(
         tab_gloss="#7a4cb0", tab_foreground="white", button_background="#4a2a75",
@@ -107,7 +107,7 @@ THEMES = [
     ("yellow", N_("Yellow"), dict(
         tab_gloss="#ffcb00", tab_gloss_shade="none",   # no olive on the deep side
         tab_foreground="black", button_background="#9c7a00",
-        frame_background="#f5f2e6", borders="#2a2200", left_line="auto",
+        frame_background="black", borders="#2a2200", left_line="auto",
         menu_background="#ece6d0", menu_foreground="#2a2200", menu_borders="auto")),
     # solid (flat) tabs; "classic" is the look of the original wm2
     ("classic", N_("Classic"), dict(

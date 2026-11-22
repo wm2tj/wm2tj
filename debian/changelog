@@ -1,3 +1,13 @@
+wm2tj (0.1.0~beta19) unstable; urgency=medium
+
+  * The frame (frame_background, the band between the outer border and
+    the window) is black by default and in every theme of wm2tj-settings;
+    the glossy themes had light frames, which showed as a white band
+    inside the dark border.  A theme chosen before shows as "Custom"
+    until it is chosen again.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Sun, 22 Nov 2026 14:35:57 +0900
+
 wm2tj (0.1.0~beta18) unstable; urgency=medium
 
   * wm2tj-bar: a click on the clock opens a calendar: clock_command in
