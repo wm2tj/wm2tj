@@ -1,3 +1,14 @@
+wm2tj (0.1.0~beta21) unstable; urgency=medium
+
+  * A tray icon could be taken out of the tray and shown as an ordinary
+    framed window on the desktop (and in the bar's window list): when
+    wm2tj was busy, as just after login, it handled the icon's creation
+    only after the tray had already embedded it, saw it mapped and framed
+    it.  wm2tj now adopts a new window only while it is still a child of
+    the root window.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Thu, 26 Nov 2026 13:03:05 +0900
+
 wm2tj (0.1.0~beta20) unstable; urgency=medium
 
   * wm2-session runs ~/.config/wm2tj/session, if there is one, with sh in

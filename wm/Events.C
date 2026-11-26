@@ -517,6 +517,11 @@ void Client::eventUnmap(XUnmapEvent *e)
 void WindowManager::eventCreate(XCreateWindowEvent *e)
 {
     if (e->override_redirect) return;
+    // By the time we get round to this event the window may already have
+    // been reparented elsewhere -- typically a tray icon that the panel
+    // embedded straight after its creation.  Framing it then would steal
+    // it from the tray, so only adopt windows still sitting on the root.
+    if (!windowToClient(e->window) && !isRootChild(e->window)) return;
     (void)windowToClient(e->window, True);
 }
 
@@ -710,6 +715,10 @@ void Client::eventProperty(XPropertyEvent *e)
 void WindowManager::eventReparent(XReparentEvent *e)
 {
     if (e->override_redirect) return;
+    // a window moved into someone else's window (a tray embedding an
+    // icon) is not ours; adopt it only if it comes back to the root
+    if (!windowToClient(e->window) &&
+	(e->parent != m_root || !isRootChild(e->window))) return;
     (void)windowToClient(e->window, True); // create if absent
 
     // odd screen complications, omitted

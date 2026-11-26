@@ -811,6 +811,16 @@ void WindowManager::scanInitialWindows()
     updateClientList();
 }
 
+// True if w (still) exists and its parent is the root window.
+Boolean WindowManager::isRootChild(Window w)
+{
+    Window root, parent, *kids = 0;
+    unsigned int n = 0;
+    if (!XQueryTree(m_display, w, &root, &parent, &kids, &n)) return False;
+    if (kids) XFree((void *)kids);
+    return parent == m_root;
+}
+
 Client *WindowManager::windowToClient(Window w, Boolean create)
 {
     if (w == 0) return 0;

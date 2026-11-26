@@ -63,6 +63,7 @@ public:
     Boolean isUnmanagedType(Window, Boolean *isDock);
     void mapUnmanaged(Window, Boolean isDock);
     void forgetDock(Window);
+    Boolean isRootChild(Window);
     void raiseDocks();
     int  strutTop()    { return m_strutTop; }
     int  strutBottom() { return m_strutBottom; }
