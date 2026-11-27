@@ -1,3 +1,16 @@
+wm2tj (0.1.0~beta22) unstable; urgency=medium
+
+  * Every click could stop working (the pointer still moved) until the
+    session was ended: when wm2tj lost its pointer grab while waiting for
+    a button to come up -- on a tab's close button, or at the end of a
+    move or resize -- a click on a window froze the pointer through
+    wm2tj's click-to-raise grab, and the release it waited for never
+    came.  wm2tj now lets such a click through to the application, stops
+    waiting once no button is held, and never closes a window on a
+    release it did not see.
+
+ -- tetsu <wm2tj@biz.kaie-net.com>  Fri, 27 Nov 2026 20:27:50 +0900
+
 wm2tj (0.1.0~beta21) unstable; urgency=medium
 
   * A tray icon could be taken out of the tray and shown as an ordinary

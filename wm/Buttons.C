@@ -79,6 +79,12 @@ void WindowManager::eventButton(XButtonEvent *e)
 	c->eventButton(e);
 	return;
     }
+
+    // Not ours (the client's window went away between the press and now,
+    // or a stray grab): a sync grab on a client window leaves the pointer
+    // frozen until we answer, so hand the click on instead of dropping it.
+    // Ignored by the server when the pointer isn't frozen.
+    XAllowEvents(display(), ReplayPointer, e->time);
 }
 
 
@@ -178,20 +184,51 @@ int WindowManager::attemptGrab(Window w, Window constrain, int mask, int t)
 }
 
 
+Boolean WindowManager::buttonsHeld()
+{
+    Window r, ch;
+    int rx, ry, wx, wy;
+    unsigned int mask = 0;
+    if (!XQueryPointer(display(), root(), &r, &ch, &rx, &ry, &wx, &wy, &mask))
+	return False;
+    return (mask & AllButtonMask) ? True : False;
+}
+
+
 void WindowManager::releaseGrab(XButtonEvent *e)
 {
     XEvent ev;
+    Time t = e->time;
     if (!nobuttons(e)) {
+	// Wait for the last button to come up -- but never block on it: a
+	// press here can come from the sync grab on a client window (our own
+	// grab gone), which freezes the pointer until we allow events, and
+	// then the release we wait for never arrives (the cursor moves but
+	// every click is dead until the session ends).
 	for (;;) {
-	    XMaskEvent(display(), ButtonMask | ButtonMotionMask, &ev);
-	    if (ev.type == MotionNotify) continue;
-	    e = &ev.xbutton;
-	    if (nobuttons(e)) break;
+	    if (XCheckMaskEvent(display(), ButtonMask | ButtonMotionMask, &ev)) {
+		if (ev.type == MotionNotify) continue;
+		t = ev.xbutton.time;
+		if (ev.type == ButtonPress) {
+		    XAllowEvents(display(), AsyncPointer, CurrentTime);
+		    continue;
+		}
+		if (nobuttons(&ev.xbutton)) break;
+		continue;
+	    }
+	    if (!buttonsHeld()) {
+		// the release may have been queued while we asked
+		if (XCheckMaskEvent(display(), ButtonReleaseMask, &ev))
+		    t = ev.xbutton.time;
+		else t = CurrentTime;
+		break;
+	    }
+	    waitForX(display(), 50000);
 	}
     }
 
-    XUngrabPointer(display(), e->time);
-    m_currentTime = e->time;
+    XUngrabPointer(display(), t);
+    if (t != CurrentTime) m_currentTime = t;
 }
 
 
@@ -1426,6 +1463,18 @@ Boolean Client::move(XButtonEvent *e)
 	    if (event.type != MotionNotify) break;
 	}
 
+	// The button is up but no release reached us (our grab was lost):
+	// finish here rather than wait for a release that will never come.
+	if (!found && !m_windowManager->buttonsHeld()) {
+	    if (XCheckMaskEvent(display(), ButtonReleaseMask, &event)) {
+		found = True;	// it came in while we asked
+	    } else {
+		XUngrabPointer(display(), CurrentTime);
+		done = True;
+		continue;
+	    }
+	}
+
 	if (!found) {
 	    waitForX(display(), 50000);
 	    continue;
@@ -1565,6 +1614,18 @@ void Client::resize(XButtonEvent *e, Boolean horizontal, Boolean vertical)
 	while (XCheckMaskEvent(display(), DragMask | ExposureMask, &event)) {
 	    found = True;
 	    if (event.type != MotionNotify) break;
+	}
+
+	// The button is up but no release reached us (our grab was lost):
+	// finish here rather than wait for a release that will never come.
+	if (!found && !m_windowManager->buttonsHeld()) {
+	    if (XCheckMaskEvent(display(), ButtonReleaseMask, &event)) {
+		found = True;	// it came in while we asked
+	    } else {
+		XUngrabPointer(display(), CurrentTime);
+		done = True;
+		continue;
+	    }
 	}
 
 	if (!found) {
@@ -1750,6 +1811,19 @@ void Border::eventButton(XButtonEvent *e)
 	    if (event.type != MotionNotify) break;
 	}
 
+	// button up without a release to us: our grab is gone, so cancel
+	// (never close the window on a guess)
+	if (!found && !windowManager()->buttonsHeld()) {
+	    if (XCheckMaskEvent(display(), ButtonReleaseMask, &event)) {
+		found = True;
+	    } else {
+		XUngrabPointer(display(), CurrentTime);
+		action = 0;
+		done = True;
+		continue;
+	    }
+	}
+
 	if (!found) {
 	    tdiff += waitForX(display(), 50000);
 	    continue;
@@ -1766,6 +1840,18 @@ void Border::eventButton(XButtonEvent *e)
 	    break;
 
 	case ButtonPress:
+	    // While our grab holds, every press is reported on m_button.  A
+	    // press anywhere else means the grab is gone and this one came
+	    // through the sync grab on a client window: the pointer stays
+	    // frozen until we answer, and the release we wait for never
+	    // comes (cursor moving, clicks dead).  Pass the
+	    // click on to the app and cancel the close.
+	    if (event.xbutton.window != m_button) {
+		XAllowEvents(display(), ReplayPointer, CurrentTime);
+		XUngrabPointer(display(), CurrentTime);
+		action = 0;
+		done = True;
+	    }
 	    break;
 
 	case ButtonRelease:

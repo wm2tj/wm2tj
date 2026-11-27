@@ -81,6 +81,7 @@ public:
     // shouldn't really be public
     int attemptGrab(Window, Window, int, int);
     void releaseGrab(XButtonEvent *);
+    Boolean buttonsHeld();	// any mouse button down right now (XQueryPointer)
     void eventExposure(XExposeEvent *);	// for exposures during client grab
     void showGeometry(int, int);
     void removeGeometry();
